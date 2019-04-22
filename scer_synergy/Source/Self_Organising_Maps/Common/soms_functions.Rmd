@@ -1,0 +1,291 @@
+---
+  title: "Running Self-Organizing Maps"
+  output: html_document
+---
+
+### Copyright
+
+Copyright 2016, Chi Nam Ignatius Pang
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    
+### Acknowledgement
+
+I thank the members of the Wilkins lab for feedback and comments regarding the SOMs analysis codes.    
+
+# Introduction
+
+We used self-organizing maps (SOMs) to cluster genes based on their profiles of expression across all the samples. This enabled us to identify groups of genes which are likely to be co-regulated via the same mechanism. For the genes that are significantly differentially expressed in 'AMB only' treatment and 'AMB+LF' treatment, two separate SOMs were used to identify genes with correlated expression patterns.
+
+### Global Parameters, Libraries
+Author:               Ignatius Pang
+Date:                 18 April 2016
+```{r run1, echo=TRUE, message=FALSE, warning=FALSE}
+
+library(edgeR)
+library(kohonen)
+library(genefilter)
+library(gplots)
+
+
+# Load results from EdgeR computation
+#load( paste(results_directory, "edgeR_scer_compare.Rdata", sep="") )
+
+# Seed for random number generator used in Self-organizing map (SOM)
+my_som_random_number_seed <- 7
+
+# Set parameters for heatmap of the codebook vector
+my_colour_palette <- colorRampPalette(c("#2166ac","#f7f7f7","#b2182b"))(75) 
+margins_size_factor <- 5
+texts_size_factor_col <- 10
+texts_size_factor_row <- 30
+heatmap_column_labels <-  c( "CA1", "CA2", "CA3", "A1", "A2", "A3", "CAL1", "CAL2", "CAL3", "AL1", "AL2", "AL3" ) 
+
+```
+
+ [R Help manuals for the kohonen package](http://en.wikibooks.org/wiki/Data_Mining_Algorithms_In_R/Clustering/Self-Organizing_Maps_(SOM))
+
+```{r run2, echo=TRUE, message=FALSE, warning=FALSE}
+library(kohonen)
+library(lattice)
+```
+
+
+### Self-organizing maps functions
+
+#### convert_to_format_for_lattice
+You need to use this function to convert it into a data.frame that is used for lattice plot. Convert into a format useful for lattice xyplot. Record the cluster for which each gene is assigned into.
+
+Example of how this function transforms the data matrix are shown below. 
+
+**The parameter values** 
+
+* som = output from the 'som' function from the kohonen library
+* input_matrix = The input data matrix with the gene expression data series for each gene (see input table below). The row names uses the Ordered Locus Name (OLN).
+
+|    rown names    | Expression Value 1 (Y1) | Expression Value 2 (Y2) | Expression Value 3 (Y3) | 
+|:----------------:|------------------------:|------------------------:|------------------------:|
+|  Gene1           |     0.41                |        0.52             |          0.64           | 
+|  Gene2           |     1.00                |        1.50             |          2.00           |  
+
+
+* The variables 'id\_a' and 'id\_b' are each a list of character strings with the ID for each row. The length of the two vectors must be equal, and the length of the vector is used to initialize the output data frame.
+* 'id\_a' is a vector of gene names (character strings) e.g. AFT1, ZAP1
+* 'id_\b' is a vector of ordered locus names (character strings) e.g. YOR481C, YIR281W
+* ncol = the X dimension size of the SOM grid
+* nrow = the Y dimension size of the SOM grid
+
+**Output table**
+
+| Gene Name (id_a) |    OLN (id_b)  |    X    |    Y    | cluster |
+|:---------:|:--------:|--------:|--------:|-------:|
+|   Gene1	|  YOR481C |      1  |	0.41   |   1    |
+|   Gene1	|  YOR481C |      2	 |	0.52   |   1    |
+|   Gene1	|  YOR481C |	  3	 |	0.64   |   1    | 
+|   Gene2	|  YIR281W |	  1	 |	1.00   |   2    | 
+|   Gene2	|  YIR281W |	  2	 |	1.50   |   2    |
+|   Gene2	|  YIR281W |	  3	 |	2.00   |   2    |
+```{r run3, echo=TRUE, message=FALSE, warning=FALSE}
+
+convert_to_format_for_lattice <- function (  som, input_matrix, id_a, id_b, ncol, nrow) {
+
+        # Check number of empty SOMs clusters
+        num_empty_som_clusters <- 0
+        for ( i in 1:(ncol*nrow) )  {   
+
+                temp_num_genes  <- length(which(som$unit.classif == i))
+
+                if ( temp_num_genes == 0 ) {  
+                	
+                        num_empty_som_clusters <- num_empty_som_clusters + 1
+                }
+        }
+
+        data.dimension <- dim( input_matrix)
+
+        # dimension 1 is the number of genes
+        # dimension 2 is the number of time points
+        data.total_length <- (data.dimension[1] + num_empty_som_clusters) * data.dimension[2]
+        data.num_id_a <- data.dimension[1]
+
+        som_data_pivot <- data.frame(  id_a= rep(0, data.total_length),  id_b= rep(0, data.total_length), 
+                                       x = rep(0, data.total_length), y= rep(0, data.total_length), cluster=rep(0, data.total_length) )
+
+        row_count <- 1
+        for ( i in 1:(ncol*nrow) ) {    
+        	
+                temp_input_matrix_data  <- input_matrix[ som$unit.classif == i, ]
+                temp_id_a     		    <- id_a[ som$unit.classif == i] 
+                temp_id_b     		    <- id_b[ som$unit.classif == i] 
+                temp_num_genes  		<- length(which(som$unit.classif == i ) )
+
+                if ( temp_num_genes  > 0 ) {     
+                        for ( j in 1:temp_num_genes ) {
+                        	
+                                my_k_length <- 0
+                                
+                                if ( temp_num_genes > 1 ) {
+                                      my_k_length <- length(temp_input_matrix_data[1,])
+                                } else {
+                                      my_k_length <- length(temp_input_matrix_data)
+                                }       
+
+                                for ( k in 1:my_k_length ) {
+                                      som_data_pivot[row_count,"id_a"] <- as.character(temp_id_a[j])
+                                      som_data_pivot[row_count,"id_b"] <- as.character(temp_id_b[j])
+                                      som_data_pivot[row_count,"x"]    <- k 
+
+                                      som_data_pivot[row_count,"cluster"] <- i 
+                                
+                                      if ( temp_num_genes > 1 ) {
+                                         som_data_pivot[row_count,"y"] <- temp_input_matrix_data[j, k] 
+                                      } else if( temp_num_genes == 1 ) {
+                                         som_data_pivot[row_count,"y"] <- temp_input_matrix_data[k] 
+                                      }  
+                                                                
+                                      row_count <- row_count + 1
+                                }
+                        }
+                } else {
+
+                    # treat empty clusters                  
+                    som_data_pivot <-  som_data_pivot 
+    
+                   for ( num_time_points in 1:data.dimension[2] ) {     
+                        # I am trying to avoid rbind as it is slow!
+                        #som_data_pivot <- rbind( som_data_pivot, 
+                        #                        c(NA, NA, num_time_points, NA, i ))
+
+                        # id_a, id_b, x, y, cluster, values in that order in the vector
+                        som_data_pivot[row_count,] <-  c(NA, NA, num_time_points, NA, i )
+                        
+                        row_count <- row_count + 1
+                   }
+                }
+
+        }
+
+        return ( som_data_pivot) 
+}
+```
+
+
+#### run_soms_analysis
+
+Function to performs SOMs analysis.
+
+**Input parameters** 
+
+* data_matrix - same as the input for the function 'convert_to_format_for_lattice'  
+* som_size_x - X dimension size of the SOM grid
+* som_size_y - Y dimension size of the SOM grid 
+* som_number_seed - a number seed for the random number generator used by the kohonent package (default = 7 )
+
+**Output parameters** 
+
+* som_data_pivot - same as the output for the function 'convert_to_format_for_lattice'  
+* all.som - output of the 'som' function of the 'kohonen' package.
+```{r run4, echo=TRUE, message=FALSE, warning=FALSE}
+
+run_soms_analysis <- function ( data_matrix, som_size_x, som_size_y,  som_number_seed = 7 ) {
+	
+        ### Centering the values of each gene to zero
+        data_matrix <- genescale(data_matrix, axis=1, method="Z")
+
+        ### need to remove gene in which all experiments have zero counts
+        data_matrix <- data_matrix[rowSums(is.na(data_matrix))!=dim(data_matrix)[2], ]
+
+        ### Initialize the X by Y SOM grid, we are using a rectangular grid here
+        rectangular_x_by_y <- somgrid(xdim = som_size_x, ydim = som_size_y, topo = c("rectangular"), toroidal = FALSE)
+
+        ### Need to set the seed so that every time you run the code, the results are the same
+        set.seed(som_number_seed)
+
+        # alpha = c(0.05, 0.01), radius = quantile(nhbrdist, 0.67) * c(1, -1), init, n.hood,
+        all.som <- som(data_matrix, grid=rectangular_x_by_y , rlen = 100, keep.data = TRUE)  
+
+        ### Convert the data into a format that can be used by lattice to plot the SOM
+        print("Perform data pivot")
+
+        som_data_pivot <- convert_to_format_for_lattice(all.som, data_matrix, rownames(data_matrix), 
+        												rownames(data_matrix), ncol = som_size_x, nrow = som_size_y) 
+
+        ### Save the cluster for each gene (id_a)
+        print("Save cluster for each gene")
+        cluster_for_each_id_a <- unique(som_data_pivot[,c("id_a", "id_b", "cluster")])
+
+        return( list(pivot=som_data_pivot, som=all.som) )
+}
+```
+
+#### draw_soms_xyplot
+Draw SOMs plot into the current output device
+```{r run5, echo=TRUE, message=FALSE, warning=FALSE}
+
+draw_soms_xyplot <- function ( som_data_pivot, som_size_x, som_size_y  ) { 
+	################## Plot data using xyplot ##########################################################  
+	print("Plot data using xyplot")
+	
+	### This variable gives a colour to each SOM cluster. The order of the colours must match the 'data = som_data_pivot' variable.
+	colours <- factor (som_data_pivot[,'cluster'] , labels=rainbow(som_size_x * som_size_y) )
+	
+	### This provides the grouping to the 'panel' function. We can then use 'subscripts' to select the groups specific to each cluster.
+	grouping <- factor(som_data_pivot[,'id_a'])
+	
+	xyplot (  y ~ x | cluster, 
+			  data=som_data_pivot, 
+			  groups= grouping, 
+			  layout=c(som_size_x, som_size_y),  
+			  strip=FALSE, ## The 'Strip' option removes the top header for each cluster
+			  xlab="Experiments", 
+			  ylab="Expression Level",  
+			  user.defined.color=as.character(colours) ,  ## You can add extra variable for passing onto panel
+			  panel = function(x, y,user.defined.color,groups= groups,subscripts=subscripts) {
+			  	my_fill <- user.defined.color[subscripts]     # Using the extra variable to define the colour of lines used in each cluster
+			  	panel.xyplot(x, y, 
+			  				 type=c("l"),    # Line graph options: the option 'l' gives the lines, the option 'p' gives the points
+			  				 col=my_fill, 
+			  				 groups=groups,
+			  				 subscripts=subscripts) 
+			  } )
+	
+	
+	
+}
+```
+
+#### draw_soms_xyplot_pdf
+
+Draw SOMs plot into the PDF.
+```{r run6, echo=TRUE, message=FALSE, warning=FALSE}
+
+draw_soms_xyplot_pdf <- function ( som_data_pivot,  som_size_x, som_size_y, results_directory ) { 
+	my_pdf_file <- file.path(results_directory, paste("SOMs_", som_size_x, "_by_", som_size_y, ".pdf", sep="")) 
+	
+	pdf(file= my_pdf_file )
+	
+	print ( draw_soms_xyplot ( som_data_pivot, som_size_x, som_size_y  )  ) 
+		
+	dev.off()
+	
+}
+```
+
+
+
+
+### Session Information
+```{r run7, echo=TRUE, message=FALSE, warning=FALSE}
+sessionInfo()
+```

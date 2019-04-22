@@ -34,3 +34,56 @@ vignettes/*.pdf
 
 # Shiny token, see https://shiny.rstudio.com/articles/shinyapps.html
 rsconnect/
+
+#  Data files to ignore 
+
+## C. neoformans
+cneo_synergy/Data/Broad_C_neoformans_Mar_2014
+cneo_synergy/Data/Curated_Data
+# cneo_synergy/Data/Experimental_Design
+cneo_synergy/Data/FungiDB
+# cneo_synergy/Data/Gene_Annotation
+#cneo_synergy/Data/Gene_Ontology_Annotation
+cneo_synergy/Data/Gene_Ontology_Annotation/Ancestor_Cleaned
+cneo_synergy/Data/Gene_Ontology_Annotation/Sequential_Add
+cneo_synergy/Data/Gene_Ontology_Annotation/version_2014
+cneo_synergy/Data/Gene_Ontology_Raw
+cneo_synergy/Data/OrthoMCL
+cneo_synergy/Data/QuickGO
+cneo_synergy/Data/SGD
+cneo_synergy/Data/Uniprot
+
+## S. cerevisiae
+scer_synergy/Data/Curated_Data
+# scer_synergy/Data/Experimental_Design
+# scer_synergy/Data/Gene_Annotation
+# scer_synergy/Data/Gene_Ontology_Annotation
+scer_synergy/Data/Gene_Ontology_Annotation/Ancestor_Cleaned
+scer_synergy/Data/S_cerevisiae_genome
+scer_synergy/Data/SGD
+scer_synergy/Data/Uniprot
+
+### Result files to ignore
+
+## C. neoformans
+cneo_synergy/Results/Blast2GO
+cneo_synergy/Results/BlastP
+cneo_synergy/Results/Diamond
+cneo_synergy/Results/Differential_Expression
+cneo_synergy/Results/Functional_Enrichment
+# cneo_synergy/Results/Read_Counts
+cneo_synergy/Results/Read_Counts/cneo/Original_Files
+cneo_synergy/Results/ReciprocalBestHits
+cneo_synergy/Results/Self_Organising_Maps
+
+## S. cerevisiae
+scer_synergy/Results/Differential_Expression
+scer_synergy/Results/Functional_Enrichment
+#scer_synergy/Results/Read_Counts
+scer_synergy/Results/Read_Counts/scer/Original_Files
+scer_synergy/Results/Self_Organising_Maps
+
+
+
+
+

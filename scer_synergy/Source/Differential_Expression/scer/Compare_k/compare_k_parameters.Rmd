@@ -1,0 +1,186 @@
+---
+title: "Compare different k values for RUVs QL"
+author: "Ignatius Pang"
+output: html_notebook
+---
+
+
+```{r}
+
+library(tidyverse)
+library(iheatmapr)
+
+source( '../Common/edgeR_common_functions.R')
+source( '../../../Common/global_parameters.R')
+source( '../../../Common/helper_functions.R')
+
+
+```
+
+
+## Directory Management 
+```{r}
+
+specific_variation <-  "All_Samples" # "Remove_5a" #
+
+choose_k_results_dir <-  scer_edger_ruvs_ql_results_dir
+
+choose_k_glob_pattern <- file.path(choose_k_results_dir, specific_variation, paste("k_", "*", sep="") ) 
+
+compare_k_results_output_dir <- file.path ( results_directory, "Differential_Expression/Compare_k", specific_variation)
+
+create_directory_if_not_exists(compare_k_results_output_dir)
+
+## Directory position 
+param_k_path_position <- 12
+
+```
+
+## Function to read one table 
+```{r}
+read_one_table <- function(file_name) {
+		my_table <- read.table(file_name, sep = "\t", header = TRUE)  %>%
+			t() %>%
+			as.data.frame() %>%
+			rownames_to_column()
+		
+		
+		colnames( my_table ) <- c( "Comparison", "Num_of_genes")
+		
+		return( my_table)
+}
+
+
+read_one_table_no_transpose <- function(file_name) {
+		my_table <- read.table(file_name, sep = "\t", header = TRUE)  %>%
+			as.data.frame() 
+		
+				colnames( my_table ) <- c( "Comparison", "Num_of_genes")
+
+		return( my_table)
+}
+
+
+```
+
+
+## Compare the number of significantly differentially expressed genes 
+```{r}
+
+num_sde_genes_files <- Sys.glob( file.path( choose_k_glob_pattern, "Gene_Lists", "num_sig_genes.tab") ) 
+
+num_sde_genes_list <- purrr::map( num_sde_genes_files, read_one_table)
+
+names_to_use <- purrr::map( num_sde_genes_files, function(x) {  strsplit(x, "/")[[1]][param_k_path_position] } )
+
+names( num_sde_genes_list ) <- names_to_use
+
+num_sde_genes_table <- dplyr::bind_rows( num_sde_genes_list, .id="k")
+
+head( num_sde_genes_table)
+
+
+num_sde_genes_table <- dplyr::mutate( num_sde_genes_table, 
+									  k=purrr::map_int( k, function(x) { strsplit(x, "_")[[1]][2] %>% as.integer() }  ))
+
+
+my_graph <- num_sde_genes_table %>%
+			ggplot( aes( k, Num_of_genes) ) +
+			geom_line( ) +
+			facet_wrap( ~ Comparison  )
+
+my_graph
+
+
+ggsave( file.path( compare_k_results_output_dir, "compare_num_sde_genes.png" ) )
+	
+
+```
+
+
+
+
+
+### Compare number of sde genes which had up or down expresison 
+```{r}
+num_sde_genes_up_down_files <- Sys.glob( file.path( choose_k_glob_pattern, "Gene_Lists", "num_sig_genes_up_and_down.tab") ) 
+
+num_sde_genes_up_down_list <- purrr::map( num_sde_genes_up_down_files, read_one_table_no_transpose)
+
+names_to_use <- purrr::map( num_sde_genes_up_down_files, function(x) {  strsplit(x, "/")[[1]][param_k_path_position] } )
+
+names( num_sde_genes_up_down_list ) <- names_to_use
+
+num_sde_genes_up_down_table <- dplyr::bind_rows( num_sde_genes_up_down_list, .id="k")
+
+head( num_sde_genes_up_down_table)
+
+
+num_sde_genes_up_down_table <- dplyr::mutate( num_sde_genes_up_down_table, 
+									  k=purrr::map_int( k, function(x) { strsplit(x, "_")[[1]][2] %>% as.integer() }  ))
+
+
+head( num_sde_genes_up_down_table)
+num_sde_genes_up_down_table <- num_sde_genes_up_down_table %>%
+								tidyr::separate(  Comparison, c("treatment_type",  "direction"), sep="\\."  ) %>%
+								tidyr::unite("Comparison", treatment_type, sep="." )
+
+
+
+my_graph <- num_sde_genes_up_down_table %>%
+			ggplot( aes( k, Num_of_genes, color=direction) ) +
+			geom_line(  ) +
+			facet_wrap( ~ Comparison  )
+
+my_graph
+	
+ggsave( file.path( compare_k_results_output_dir, "compare_num_sde_genes_up_and_down.png" ) ) 
+
+
+```
+
+
+## Analysis of p-values 
+```{r}
+
+p_values_files <- Sys.glob( file.path( choose_k_glob_pattern, "Gene_Lists", "experiment_label_and_logFC_FDR_table.tab") ) 
+
+p_values_list <- purrr::map( p_values_files, function( x ) { read.table ( x, sep="\t", header=TRUE)  })
+
+names_to_use <- purrr::map( num_sde_genes_up_down_files, function(x) {  strsplit(x, "/")[[1]][param_k_path_position] } )
+
+names( p_values_list ) <- names_to_use
+
+p_values_table <- dplyr::bind_rows( p_values_list, .id="k")
+
+head( p_values_table)
+
+p_values_table <- dplyr::mutate( p_values_table, 
+									  k=purrr::map_int( k, function(x) { strsplit(x, "_")[[1]][2] %>% as.integer() }  ))
+
+
+head( p_values_table)
+
+
+my_graphs <- p_values_table %>%
+			 ggplot ( aes ( PValue )) +
+			 geom_histogram( binwidth = 0.01) +
+			 facet_grid( expt_label  ~ k, scale="free_y" ) +  
+			 theme(strip.text.y = element_text(angle =   360 ))
+
+
+
+my_graphs
+
+
+ggsave( file.path( compare_k_results_output_dir, "compare_p_values.png" ) )
+
+
+```
+
+
+
+
+
+
+

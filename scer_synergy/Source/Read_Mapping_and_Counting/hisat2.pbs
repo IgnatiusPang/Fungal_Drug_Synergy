@@ -1,0 +1,47 @@
+#!/bin/bash 
+
+#PBS -l nodes=1:ppn=4
+#PBS -l vmem=30GB
+#PBS -l walltime=12:00:00
+#PBS -M i.pang@unsw.edu.au
+#PBS -j oe
+#PBS -m ae
+
+cd $PBS_O_WORKDIR
+
+module add boost/1.64.0
+module add samtools/1.9
+module add bowtie/2.3.2
+module add tophat/2.1.1
+module load hisat2/2.1.0
+
+GENOME_DIR=/srv/scratch/z3371724/Fungal/Data/S_cerevisiae_genome
+INDEX_DIR=/srv/scratch/z3371724/Fungal/Data/S_cerevisiae_index/s.cerevisiae
+
+hisat2 -p 4 --known-splicesite-infile $GENOME_DIR/splicesites.txt  -x $INDEX_DIR \
+-1 *_R1_001.fastq.gz -2  *_R2_001.fastq.gz  -S ${job_name}.sam > ${job_name}.stdout.log
+
+
+# --rna-strandness RF  ## default is unstranded so this is removed 
+
+# -k 1
+# --summary-file ${job_name}_summary.txt --new-summary \
+
+
+## https://ccb.jhu.edu/software/hisat2/manual.shtml
+# -k 1 : It searches for at most <int> distinct, primary alignments for each read. 
+# -p 6  : number of compute nodes 
+# --rna-strandness  : For paired-end reads, use either FR or RF. TopHat has a similar option, --library-type option, where fr-firststrand corresponds to R and RF; fr-secondstrand corresponds to F and FR.
+# -1 and -2: the two files for the paired-end reads
+# -x genome index base directory
+# -S: output SAM file name
+
+
+
+# tophat -p 6 -N 2 --library-type fr-unstranded -o $output $index *.paired1 *.paired2 
+# -p 6  : number of compute nodes
+# -N    : Final read alignments having more than these many mismatches are discarded.
+# -library-type  fr-unstranded:  Reads from the left-most end of the fragment (in transcript coordinates) map to the transcript strand, and the right-most end maps to the opposite strand.
+# -o  : Name of directory where the outputs are stored
+
+

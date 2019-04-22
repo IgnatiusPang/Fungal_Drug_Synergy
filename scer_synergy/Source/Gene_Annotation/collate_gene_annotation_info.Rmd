@@ -1,0 +1,101 @@
+---
+title: "collate_gene_annotation_info.Rmd"
+output: html_notebook
+---
+
+
+## Load libraies and scripts
+```{r}
+if(!require(pacman)) {
+	install.packages("pacman")
+	library(pacman)
+}
+
+p_load(knitr)
+
+source( '../Common/global_parameters.R')
+source( '../Common/helper_functions.R')
+sessionInfo()
+```
+
+
+## Read files 
+```{r}
+
+curated_data_dir <- file.path( data_directory, "Curated_Data" )
+
+kinases <- read.table ( file.path( curated_data_dir, "phos_kinase_phosphatase_list.tsv"), sep="\t", header=TRUE, quote="")
+transcription_factors <- read.table ( file.path( curated_data_dir, "scer_transcription_factors.tsv"), sep="\t", 
+									  header=TRUE, quote="", comment.char = "")
+cell_cycle_regulated_genes <- read.table ( file.path( curated_data_dir, "peak_times_of_cycling_orfs.tsv" ), sep="\t", header=TRUE, quote="\"")
+cneo_gene_annotation <- read.table ( file.path( data_directory, 'Gene_Annotation/cneo_gene_names.txt' ) , 
+								header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE, na.strings = "NA")
+
+scer_gene_annotation <- read.table ( file.path( data_directory, 'Gene_Annotation/scer_gene_names.txt' ) , 
+								header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE) %>%
+                dplyr::rename( scer_oln_id = "oln_id", 
+                               scer_gene_name = "gene_name",
+                               scer_uniprot_description = "uniprot_description")
+
+orthologs <- read.table ( file.path( curated_data_dir, "scer_cneo_orthologs.tab") , 
+								header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
+
+
+
+```
+
+## Generate C. neoformans annotation summary table 
+```{r}
+
+transcription_factors_summary <- transcription_factors %>%
+  filter( is_in_gordan == "t" | 
+          is_in_yeastract == "t" |
+          has_pfam_domain == "t" | 
+          is_in_jaspar_2014 == "t" ) %>%
+	dplyr::select(one_of (c("oln_id"))) %>%
+	dplyr::mutate( is_tf=TRUE)
+
+kinases_summary <- kinases %>%
+  dplyr::rename( oln_id = "ypd_id") %>%
+  dplyr::mutate( is_kinase = ifelse( kinase_or_phosphatase == "kinase", TRUE, FALSE)) %>%
+  dplyr::filter( is_kinase == TRUE ) %>%
+	dplyr::select(one_of (c("oln_id"))) %>%
+	dplyr::mutate( is_kinases=TRUE)
+
+cell_cycle_regulated_genes_cleaned <- cell_cycle_regulated_genes %>%
+                                      dplyr::rename( oln_id = "feature",
+                                              peak_time = "peak.time" ) %>%
+                                      dplyr::select( oln_id, peak_time)
+
+orthologs_summary <- orthologs %>%
+						dplyr::left_join ( cneo_gene_annotation, by= c("cneo_orf_id" = "orf_id") )%>%
+            dplyr::rename( cneo_gene_name = "gene_names"  ) %>%
+ 						dplyr::arrange( cneo_gene_name ) %>%
+						dplyr::group_by( cneo_orf_id) %>%
+            dplyr::rename( cneo_uniprot_description = "uniprot_gene_name"  ) %>%
+						dplyr::summarise( cneo_orthologs = paste(unique(cneo_gene_name), collapse="; " ), 
+										  cneo_ortholog_descriptions = paste(cneo_uniprot_description, collapse="; " ) ) %>%
+						dplyr::ungroup() 
+
+scer_gene_annotation_updated <- scer_gene_annotation %>% 
+	dplyr::left_join ( transcription_factors_summary, by=c("scer_oln_id" = "oln_id") ) %>%
+	dplyr::left_join ( kinases_summary, by=c("scer_oln_id" = "oln_id")) %>%
+		dplyr::left_join ( cell_cycle_regulated_genes_cleaned, by=c("scer_oln_id" = "oln_id")) %>%
+		dplyr::left_join( orthologs_summary, by =c("scer_oln_id" = "cneo_orf_id") ) %>%
+    dplyr::rename( oln_id = "scer_oln_id")
+
+
+write.table ( scer_gene_annotation_updated, 
+              file=file.path(data_directory, "Gene_Annotation", "scer_gene_annotation_summary.txt" ),
+			  	row.names = FALSE, quote=FALSE, sep="\t", na="" )
+
+```
+
+
+
+
+
+
+
+
+

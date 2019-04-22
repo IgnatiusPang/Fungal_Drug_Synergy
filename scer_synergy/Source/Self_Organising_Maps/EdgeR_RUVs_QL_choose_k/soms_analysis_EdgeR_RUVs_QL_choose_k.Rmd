@@ -1,0 +1,507 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+## Read Command Line Args
+```{r  }
+command_line_args <-  commandArgs(trailingOnly=T)
+print( command_line_args)
+
+```
+
+## Global parameters
+```{r }
+my_som_random_number_seed <- 257645
+go_terms_enrichment_p_value_cutoff <- 1
+gostat_pvalue_cutoff_param <- 1
+condition_on_child_terms_param <- FALSE
+results_to_use_dir <- "To_Use_k_0"
+
+if ( length( command_line_args) ==3  ) {
+      condition_on_child_terms_param <- as.logical( command_line_args[2] ) 
+      results_to_use_dir <- as.character( command_line_args[3] ) 
+} 
+
+```
+
+## Load libraries and codes 
+```{r}
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+p_load(knitr)
+p_load(foreach)
+p_load(genefilter)
+
+
+source( '../../Common/global_parameters.R')
+source( '../../Common/helper_functions.R')
+source_rmd_file( file.path(source_directory, "Functional_Enrichment/Common/functional_enrichment_functions.Rmd" ) )
+source_rmd_file( file.path(source_directory, "Self_Organising_Maps/Common/soms_functions.Rmd" ) )
+
+sessionInfo()
+```
+
+
+## Directories Management 
+```{r}
+
+EdgeR_RUVs_QL_de_genes_dir <- file.path( results_directory, "Differential_Expression/EdgeR_RUVs_QL/scer", results_to_use_dir)
+
+if( ! dir.exists(EdgeR_RUVs_QL_de_genes_dir)) {
+    stop( paste( "Output directory does not exists:", EdgeR_RUVs_QL_de_genes_dir))
+}
+
+EdgeR_RUVs_QL_gene_lists_dir <- file.path( EdgeR_RUVs_QL_de_genes_dir, "Gene_Lists")
+list_of_top_tags_table <- readRDS( file.path( EdgeR_RUVs_QL_gene_lists_dir,  "list_of_top_tags_table.Rdata" ) )
+
+
+EdgeR_RUVs_QL_soms_results_dir  <- file.path( results_directory, "Self_Organising_Maps/EdgeR_RUVs_QL", results_to_use_dir, "Condition_on_child_terms_false") 
+
+if( condition_on_child_terms_param == TRUE ) {
+  
+  EdgeR_RUVs_QL_soms_results_dir  <- file.path( results_directory, "Self_Organising_Maps/EdgeR_RUVs_QL", results_to_use_dir, "Condition_on_child_terms_true") 
+
+}
+
+create_directory_if_not_exists(EdgeR_RUVs_QL_soms_results_dir)
+```
+
+## Obtain the GO annotation dictionaries
+```{r}
+
+go_dictionary <- get_crypto_go_dictionary_of_choice  ( "Saccharomyces cerevisiae", gene_ontology_directory, 
+									  bp_file_name="scer_goframeData_bp.tab", 
+									  mf_file_name="scer_goframeData_mf.tab", 
+									  cc_file_name="scer_goframeData_cc.tab"  ) 
+
+gene_annotation <- read.table ( file.path( data_directory, 'Gene_Annotation/scer_gene_annotation_summary.txt' ) , header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
+
+
+universe <- unique( gene_annotation[, "oln_id"])
+
+```
+
+## Read in the gene annotations
+```{r}
+gene_annotation_table <- read_tsv( file.path( data_directory, "Gene_Annotation/scer_gene_annotation_summary.txt"  ) )
+
+```
+
+
+## Read in the read counts data 
+```{r}
+cpm_read_counts_file <- file.path(EdgeR_RUVs_QL_de_genes_dir, "edger_ruvs_log_normalised_counts_cpm.txt")
+
+if( results_to_use_dir == "To_Use_k_0"  ) {
+   cpm_read_counts_file <- file.path(EdgeR_RUVs_QL_de_genes_dir, "edger_without_ruvs_normalised_counts.txt")
+
+}
+
+norm.expr <- read.table(file=cpm_read_counts_file,
+						 header=TRUE, sep="\t")
+
+colnames( norm.expr)
+
+
+
+types_of_treatments <- c( "A",  "CA", "AL", "CAL")
+replicate_number <- c( '1', '2', '3')
+
+input_for_cross_df <- list (replicate_number, types_of_treatments )
+names( input_for_cross_df) <- c( "replicate_number", "types_of_treatments")
+
+all_time_points <-  purrr::cross_df( input_for_cross_df) %>%
+						dplyr::mutate( sample_name = paste0( types_of_treatments, replicate_number )) %>%
+						dplyr::select ( one_of ( c( "sample_name"))) %>%
+						as.data.frame() %>%
+						t() %>%
+						as.vector()
+
+
+norm.expr <- norm.expr[, all_time_points]
+
+
+```
+
+
+### List of Differentially Expressed Genes to do SOMs for 
+```{r}
+names( list_of_top_tags_table)
+```
+
+## Estabilish groups of experiments 
+```{r}
+
+compare_A <- c("compare_A" )
+
+compare_AL <-  c("compare_AL" )
+
+list_of_groups_of_experiments <- list( compare_A, compare_AL )
+
+names(list_of_groups_of_experiments ) <- c( "compare_A", "compare_AL" )
+
+```
+
+
+## Find the list of genes to use for each group
+```{r}
+
+get_list_of_genes <- function( experiment_name ) {
+	 list_of_genes <- dplyr::filter( list_of_top_tags_table[[experiment_name]], FDR < 0.05) %>%
+						dplyr::select(one_of(c("genes")))  %>%
+						t() %>%
+						as.vector()
+	 
+	 return( list_of_genes)
+}
+
+	
+list_of_gene_sets <- purrr::map( list_of_groups_of_experiments, function(x) {  purrr::map( x, get_list_of_genes) %>% unlist() %>% unique() })
+
+```
+
+## Number of genes in each gene list
+```{r}
+number_of_genes_per_category <- purrr::map( list_of_gene_sets, length) %>% as.data.frame() %>% t()
+
+number_of_genes_per_category
+
+write.table( number_of_genes_per_category, file=file.path(EdgeR_RUVs_QL_soms_results_dir, "number_of_genes_per_category.txt"),
+			 row.names = TRUE)
+
+```
+
+
+## SOMs for 'FLB_vs_CTRL_compare_pair_of_time_points' 
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+
+get_up_down_label_soms_clusters <- function( cluster_map, sde_genes) {
+  
+  cluster_map %>%
+    distinct( id_a, cluster) %>%
+    left_join(sde_genes, by=c("id_a" = "genes" ) ) %>%
+    dplyr::filter( FDR < 0.05) %>%
+    dplyr::mutate( direction = case_when( logFC > 0 ~ "Up",
+                                          logFC < 0 ~ "Down",
+                                          TRUE ~ "No change")) %>%
+    group_by(cluster, direction ) %>%
+    summarise( gene_counts = n()) %>%
+    ungroup() %>%
+    tidyr::spread( direction, gene_counts, fill=0 ) %>%
+    dplyr::mutate( Direction = case_when( Down > Up & Up == 0 ~ "All Down",
+                                          Up > Down & Down == 0 ~ "All Up",
+                                          Down > Up & Up > 0  ~ "Mix Down",
+                                          Up > Down & Down > 0   ~ "Mix Up",
+                                          Up == Down ~ "Equally Split", 
+                                          TRUE ~ NA_character_ ))
+
+}
+
+
+# 
+# # scer_compare_A_down_reg = list of genes that with significantly decreased expression in 'AMB only' treatment
+# # scer_compare_A_up_reg = list of genes that with significantly increased expression in 'AMB only' treatment
+# scer_compare_A_list_of_de_genes <-  c( scer_compare_A_down_reg, scer_compare_A_up_reg) 
+# 
+# # A label for the experiment, used for data source identification in data frame and for output files
+
+
+run_one_soms_and_go_experiment_large_scale <- function( data_matrix, list_of_top_tags_table,  
+                                                        list_of_genes, expt_label, size_x, size_y, 
+														ontologies_list = c("BP", "CC", "MF"), results_directory) { 
+		
+		counts_data_matrix <- data_matrix[list_of_genes,]
+		
+		soms_results_directory <-  file.path(results_directory, expt_label,
+		 			  			      paste( size_x, "x", size_y, sep="" ) ) 
+		
+		create_directory_if_not_exists(soms_results_directory)
+		
+		# Run a 5 x 5 SOMs analysis for S. cerevisiae (scer)
+		soms_results <- run_soms_analysis( counts_data_matrix, size_x, size_y, 
+										   my_som_random_number_seed )
+		
+		saveRDS( soms_results, 
+		 			  file=file.path(soms_results_directory,
+		 			  			    paste("soms_results", ".RDS", sep="") ) )
+		
+		write.table( soms_results$pivot, 
+		 			  file=file.path(soms_results_directory,
+		 			  			    paste("cluster_for_each_gene", ".tab", sep="") ) ) 
+		 
+		# Draw the SOMs plot, each cluster a different colour for the lines
+		draw_soms_xyplot_pdf ( soms_results$pivot, size_x, size_y, soms_results_directory  ) 
+		
+		cluster_for_each_gene <- unique(soms_results$pivot[,c("id_a", "id_b", "cluster")])
+		
+		go_enrichment_results <- run_soms_enrichment_tests( cluster_for_each_gene, 
+																	 go_dictionary, universe,  
+																	 ontologies_list ,
+																	 pvalueCutoff = go_terms_enrichment_p_value_cutoff,
+																	 gostat_pvalue_cutoff = gostat_pvalue_cutoff_param, 
+																	 testDirection = "over", 
+		 															 condition_on_child_terms = condition_on_child_terms_param )
+		
+		## Save the results into file tables 
+		enriched_genes_file_name <- file.path( soms_results_directory, "enriched_genes_SOMs.txt" )
+		enriched_go_terms_file_name <- file.path( soms_results_directory, "enriched_go_terms_SOMs.txt" )
+		
+		updated_enriched_genes <- go_enrichment_results$enriched_genes %>%
+		                          left_join( gene_annotation_table, by=c("gene_id" = "oln_id")) 
+		
+	## This bit somehow does not work because it is running in parallel mode 	
+	# 	                       %>%  dplyr::mutate( go_term = purrr::map_chr( go_id, ~ GOTERM[[.]]@Term )   )	%>% ## Add the GO Term
+	#                           dplyr::select( one_of( c( "go_id", "go_term", "gene_id", "ontology",
+	#                                                     "annotation_list_id", "query_list_id", "organism",
+	#                                                     "gene_names", "uniprot_acc", "broad_gene_name",
+	#                                                     "uniprot_gene_name", "fungidb_gene_name",
+	#                                                     "blast2go_annotation", "is_tf", "is_kinases" )))
+		
+		write.table( updated_enriched_genes, enriched_genes_file_name, sep="\t", row.names = FALSE, quote=FALSE)
+		write.table (  go_enrichment_results$enriched_go_terms,  enriched_go_terms_file_name, sep="\t", row.names = FALSE, quote=FALSE)
+			
+
+		## Work out directionality of each cluster
+		directionality_of_each_cluster <- get_up_down_label_soms_clusters( cluster_for_each_gene, list_of_top_tags_table[[expt_label]] )
+		
+		write.table( directionality_of_each_cluster, file.path( soms_results_directory, "soms_clusters_mapping.txt"), sep="\t",
+             row.names = FALSE, quote = FALSE ) 
+		
+}
+
+```
+
+
+
+```{r}
+
+
+
+
+# data_matrix <- norm.expr
+# expt_label <- "FLB_vs_CTRL_compare_pair_of_time_points"
+# list_of_genes <- list_of_gene_sets[[expt_label]]
+# size_x <- 6
+# size_y <- 7
+# results_directory <- paste( EdgeR_RUVs_QL_soms_results_dir, "_testing", sep="")
+# 
+# run_one_soms_and_go_experiment_large_scale( data_matrix, list_of_genes, expt_label, size_x, size_y,
+# 														ontologies_list = c("BP", "CC", "MF"),
+# 											results_directory)
+
+```
+
+
+```{r}
+library(doParallel)
+cl <- makeCluster(6)
+registerDoParallel(cl)
+```
+
+
+```{r}
+
+data_matrix <- norm.expr
+
+my_list_of_expt_labels <- list ("compare_A", "compare_AL" ) 
+
+
+
+grid_sizes_to_test <-  list( c(4,4), c(5,5) ) 
+
+all_parameters_to_test <- purrr::cross2( my_list_of_expt_labels, grid_sizes_to_test)
+
+packages_to_send_to_node <- c( 'plyr', 'tidyverse', 'pryr', 'kohonen', 'edgeR', 'gplots', 'genefilter', 'GOstats', 'GSEABase', 'GO.db', 'multtest', 'lattice' )
+
+
+foreach( parameters=all_parameters_to_test, .packages =  packages_to_send_to_node  ) %dopar% {
+
+	
+	expt_label <- parameters[[1]]
+	list_of_genes <- list_of_gene_sets[[  expt_label ]]
+	size_x <- parameters[[2]][1]
+	size_y <- parameters[[2]][2]
+	
+	current_run_parameters <- paste( expt_label, size_x, size_y) 
+	
+	print( current_run_parameters)
+	
+			
+	soms_results_file <-  file.path(EdgeR_RUVs_QL_soms_results_dir, expt_label,
+		 			  			      paste( size_x, "x", size_y, sep="" ), "enriched_go_terms_SOMs.txt" ) 
+		
+	if (! file.exists(soms_results_file)){
+		
+			run_one_soms_and_go_experiment_large_scale( data_matrix, list_of_top_tags_table, 
+			                                            list_of_genes, expt_label,
+												size_x, size_y,
+												ontologies_list = c("BP", "CC", "MF"),
+												EdgeR_RUVs_QL_soms_results_dir)
+		
+	}	
+
+	return(current_run_parameters)
+}
+```
+
+## Draw soms again 
+```{r}
+
+types_of_treatments <- c( "A", "CA", "AL", "CAL")
+replicate_number <- c( '1', '2', '3')
+
+input_for_cross_df <- list (  types_of_treatments, replicate_number )
+names( input_for_cross_df) <- c(  "types_of_treatments", "replicate_number")
+
+updated_all_time_points <-  purrr::cross_df( input_for_cross_df) %>%
+						dplyr::mutate( sample_name = paste0( types_of_treatments, replicate_number )) %>%
+						dplyr::select ( one_of ( c( "sample_name"))) %>%
+						as.data.frame() %>%
+						t() %>%
+						as.vector()
+
+list_of_files <- Sys.glob ( paste( EdgeR_RUVs_QL_soms_results_dir, "/*/*/cluster_for_each_gene.tab", sep="" ) )
+
+directory_cleaning <-  purrr::map ( list_of_files, function(x) { 
+									  cleaned_dir <- strsplit(x, "/")[[1]]  
+									  cleaned_dir <- cleaned_dir[1:(length(cleaned_dir)-1 )] 
+									  cleaned_dir <- paste ( cleaned_dir , collapse="/")
+									  	return ( cleaned_dir)
+									  	} )  %>%
+					unlist()
+
+list_of_x <-  purrr::map ( list_of_files, function(x) { 
+									  cleaned_dir <- strsplit(x, "/")[[1]][[13]]  
+									  cleaned_dir <- strsplit (cleaned_dir, "x" )
+									  	return ( as.integer(cleaned_dir[[1]][1]) )
+									  
+									  
+									  	} )  %>%
+					unlist()
+
+
+list_of_y <-  purrr::map ( list_of_files, function(x) { 
+									  cleaned_dir <- strsplit(x, "/")[[1]][[13]]  
+									  cleaned_dir <- strsplit (cleaned_dir, "x" )
+									  	return ( as.integer(cleaned_dir[[1]][2]) )
+									  	} )  %>%
+					unlist()
+
+
+
+list_of_clusters <- purrr::map ( list_of_files, function(x) {  read.table( x, header=TRUE)} ) 
+
+
+### rearrange the x-axis labels to the one we want 
+temp_lookup_all_time_points <- 1:length(all_time_points )
+
+names( all_time_points) <- all_time_points
+
+names( temp_lookup_all_time_points ) <- names( all_time_points)
+
+new_ordering_for_refactor <- as.integer( temp_lookup_all_time_points[updated_all_time_points] )
+ 
+hash_lookup_table <- create_id_to_attribute_hash( 1:length(all_time_points ), as.integer(new_ordering_for_refactor) )
+
+hash_lookup_table_for_list <-  function(x ) { purrr::map ( x, function(y) { convert_key_to_attribute(as.character(y), hash_lookup_table) } ) %>% unlist() }
+
+
+list_of_clusters <- purrr::map ( list_of_clusters, function(my_table) { dplyr::mutate( my_table,  
+																					   x = hash_lookup_table_for_list(x) ) %>%
+																		dplyr::arrange( cluster, x )} )   
+
+head( list_of_clusters[[1]]) 
+
+list_to_redraw_soms <- list( pivoted_table=list_of_clusters, size_x=list_of_x, size_y=list_of_y,
+							soms_results_directory=directory_cleaning)
+
+purrr::map ( list_to_redraw_soms, length)
+
+purrr::pwalk ( list_to_redraw_soms, 
+			   function ( pivoted_table, size_x, size_y, soms_results_directory) {
+			
+			   	my_pdf_file <- file.path(soms_results_directory, 
+			   							 paste("updated_SOMs_", size_x, "_by_", size_y, ".pdf", sep="")) 
+	
+				pdf(file= my_pdf_file )
+						
+				print ( draw_soms_xyplot ( pivoted_table, size_x, size_y  )  ) 
+							
+				dev.off() 
+				
+				 my_updated_pivot_file <- file.path(soms_results_directory, 
+			   							 paste("updated_cluster_for_each_gene_", size_x, "_by_", size_y, ".txt", sep="")) 
+				 
+				 
+				 write.table ( pivoted_table, file=my_updated_pivot_file, sep="\t", quote=FALSE, row.names = FALSE, na="NA" )
+				
+				})   
+
+
+```
+
+## Prototype drawing SOMs using ggplot
+```{r}
+# compare_A_soms <- read.table(file.path(results_directory, "compare_A/5x5/updated_SOMs_data_5_by_5.txt"), header=TRUE,
+#                              sep="\t", stringsAsFactors = FALSE)
+# 
+# 
+# ggplot(compare_A_soms, aes( x, y, fill=id_a, col=cluster)) +
+#   geom_line() +
+#   facet_wrap( .~ cluster)
+           
+# axis.text.x = element_text()           
+```
+
+
+
+## Add the GO Term column back in as the relevant section of code doesn't work in parallel 'foreach' for some reason
+```{r}
+
+list_of_files <- Sys.glob ( paste( EdgeR_RUVs_QL_soms_results_dir, "/*/*/enriched_genes_SOMs.txt", sep="" ) )
+
+purrr::walk ( list_of_files, 
+			   function ( input_file ) {
+			
+            x <- input_file
+			     
+            cleaned_dir <- strsplit(x, "/")[[1]]  
+						cleaned_dir <- cleaned_dir[1:(length(cleaned_dir)-1 )] 
+						cleaned_dir <- paste ( cleaned_dir , collapse="/")
+
+
+
+            genes_vs_go_terms <-  read.table( x, header=TRUE, sep="\t", stringsAsFactors = FALSE, quote="")
+			     
+            list_of_go_terms <- genes_vs_go_terms %>%
+                                dplyr::distinct(go_id) %>%
+                                dplyr::mutate( go_term = purrr::map_chr( go_id, ~ GOTERM[[.]]@Term )   )  ## Add the GO Term
+
+             enriched_genes_soms_cleaned <- genes_vs_go_terms %>%
+                               dplyr::left_join( list_of_go_terms, by = "go_id" ) %>%
+	                             dplyr::select( one_of( c( "go_id", "go_term", "gene_id", "ontology",
+	                                                    "annotation_list_id", "query_list_id", "organism",
+	                                                    "scer_gene_name", "uniprot_acc", 
+	                                                    "sgd_description",  "scer_uniprot_description", "is_tf", "is_kinases", "peak_time" )))
+
+  write.table(enriched_genes_soms_cleaned, file= file.path( cleaned_dir, "enriched_genes_SOMs_updated.txt"),
+            sep="\t", quote = FALSE, row.names = FALSE, na="NA")
+
+})   
+
+
+```
+
+
+
+
+

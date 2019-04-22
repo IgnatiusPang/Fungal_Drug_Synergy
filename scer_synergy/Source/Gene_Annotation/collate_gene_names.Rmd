@@ -1,0 +1,94 @@
+---
+title, #: "R Notebook"
+output, #: html_notebook
+---
+
+## Import libraries
+```{r}
+if(!require(pacman)) {
+	install.packages("pacman")
+	library(pacman)
+}
+
+p_load(tidyverse)
+```
+
+## Directory Management
+```{r}
+
+base_dir <- "/home/ignatius/PostDoc/2019/scer_synergy"
+data_dir <- file.path(base_dir, "Data")
+results_dir <- file.path(base_dir, "Results")
+
+```
+
+
+```{r}
+sgd_feature_table <- read.table( file.path(data_dir, "SGD/SGD_features.tab"), sep="\t", stringsAsFactors = FALSE, quote = "", header=FALSE  )
+                                  
+colnames( sgd_feature_table)   <-  c( "sgd_id" 
+, "feature_type" 
+, "feature_qualifier" 
+, "oln_id"
+, "standard_gene_name" 
+, "alias" 
+, "parent_feature_name" 
+, "secondary_sgd_id" 
+, "chromosome" 
+, "start" 
+, "stop" 
+, "strand" 
+, "genetic_position" 
+, "coordinate_version" 
+, "sequence_version" 
+, "description"  ) 
+
+oln_id_list <- sgd_feature_table %>%
+                distinct( oln_id) %>%
+                filter ( !is.na(oln_id))
+
+
+
+```
+
+
+```{r}
+
+scer_uniprot_annot <- read.table( file.path(data_dir, "Uniprot/scer/uniprot-proteome_UP000002311.tab") , sep="\t", stringsAsFactors = FALSE, quote = "", header=TRUE  ) 
+
+
+
+
+scer_uniprot_annot_cleaned <- scer_uniprot_annot %>% 
+  mutate( gene_names = str_split( Gene.names, " ")  ) %>%
+  unnest() %>%
+  dplyr::select( Entry, gene_names, Protein.names) %>%
+  inner_join( oln_id_list, by= c( "gene_names" = "oln_id")) %>%
+  dplyr::rename( uniprot_acc = "Entry",
+                 oln_id = "gene_names",
+                 uniprot_description = "Protein.names")
+
+
+
+
+```
+
+
+
+
+```{r}
+scer_gene_names <- sgd_feature_table %>%
+  dplyr::select( oln_id,  standard_gene_name,  description ) %>%
+  dplyr::rename( gene_name = "standard_gene_name",
+                 sgd_description = "description") %>%
+  dplyr::left_join( scer_uniprot_annot_cleaned, by= "oln_id") %>%
+  dplyr::select( oln_id, gene_name, sgd_description, uniprot_description, uniprot_acc)
+
+
+write.table(scer_gene_names,  file=file.path(data_dir, "Gene_Annotation/scer_gene_names.txt"),
+            sep="\t", quote=FALSE, row.names = FALSE, na="") 
+```
+
+
+
+

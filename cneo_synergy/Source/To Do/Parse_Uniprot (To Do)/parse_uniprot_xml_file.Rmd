@@ -1,0 +1,121 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+require(XML)
+library("methods")
+library(rvest)
+library(tidyverse)
+```
+
+```{r}
+base_dir <- "/home/ignatius/PostDoc/2016/PCP"
+homodimer_data_dir <- file.path(base_dir, "Data/Uniprot/20181026/Homodimers")
+homodimer_results_dir <- file.path(base_dir, "Results/Cross-linking/20181011/FDR_5_Percent/Homodimers")
+```
+
+
+```{r, eval=FALSE}
+ data <- xmlParse(file.path( homodimer_data_dir, "uniprot-559292++homodimer.xml") ) 
+
+subunits_text <- xpathSApply(data, "////*[@type='subunit']/*", xmlValue)
+accessions <- xpathSApply(data, "///a:accession", xmlValue, namespaces="a", simplify = TRUE)
+
+```
+
+
+
+```{r}
+
+y <- read_xml(file.path( homodimer_data_dir, "uniprot-559292++homodimer.xml") )
+
+y %>% xml_nodes(xpath = '//d1:feature[@type="sequence variant"]')
+y %>% xml_nodes(xpath = '//d1:comment[@type="subunit"]')
+y %>% xml_nodes(xpath = '//d1:accession')
+
+
+all_accessions <- xml_find_all(y, '//d1:accession[1]')  %>% xml_text()
+all_subunits <- xml_find_all(y, '//d1:comment[@type="subunit"][1]')  %>% xml_text()
+
+length(all_accessions)
+length(all_subunits)
+
+
+
+```
+
+
+```{r}
+accession_vs_subunits <- y %>% 
+    xml_nodes(xpath = '//d1:entry') %>% 
+    map_df(~{
+
+
+#       <gene>
+# <name type="primary" evidence="20">DCS1</name>
+# <name type="ordered locus">YLR270W</name>
+# </gene>
+      
+        gene_symbol <- xml_node( .x, xpath = 'd1:gene/d1:name[@type="primary"]') %>% 
+                      xml_text()
+      
+        accession    <- xml_node(.x, xpath = 'd1:accession') %>%
+                             xml_text()
+
+        subunit   <- xml_node(.x, xpath = 'd1:comment[@type="subunit"][1]') %>% 
+                             xml_text()
+
+
+        data.frame(gene_symbol, accession, subunit,
+                   stringsAsFactors = FALSE)
+    })
+
+head( accession_vs_subunits)
+```
+
+
+```{r}
+possible_heterodimer <- accession_vs_subunits %>%
+  filter( grepl("heterodimer",tolower(  subunit) ) == TRUE ) 
+
+
+write.table ( possible_heterodimer, file=file.path(homodimer_results_dir, "possible_heterodimers.txt"), row.names = FALSE, sep="\t", quote=FALSE)
+
+## Checked that these are not homodimers 
+# P09938
+# P21672
+# P49723
+# Q06623
+# Q06629
+
+heterodimers <- c( "P09938", "P21672", "P49723", "Q06623", "Q06629")
+
+list_of_all_homodimers <- accession_vs_subunits %>% 
+                          filter ( ! accession %in% heterodimers & is.na(subunit) == FALSE) 
+
+
+write.table ( list_of_all_homodimers, 
+              file=file.path(homodimer_results_dir, "list_of_all_s_cerevisiae_homodimers_from_uniprot.txt"), 
+              row.names = FALSE, sep="\t", quote=FALSE)
+
+
+```
+
+
+## Example
+```{r}
+
+x <- read_xml("<foo> <bar><baz/></bar> <bar><las/></bar> <baz/> </foo>")
+xml_find_all(x, "/foo")
+
+xml_find_all(x, "/foo/bar")
+xml_find_all(x, "/foo/baz")
+
+xml_find_all(x, ".//baz")
+xml_path(xml_find_all(x, ".//baz"))
+xml_find_all(x, "/foo")
+```
+

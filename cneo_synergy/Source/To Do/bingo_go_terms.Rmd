@@ -1,0 +1,41 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+if(!require( pacman )){
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+```
+
+
+## Read in ClueGO Annotations
+```{r}
+bingo_annotation <- read.table ( "/home/ignatius/ClueGOConfiguration/v2.5.3/ClueGOSourceFiles/Organism_Cryptococcus neoformans var. grubii H99/Cryptococcus neoformans var. grubii H99_GO_BiologicalProcess-EBI-QuickGO-GOA_25.09.2017_00h00.txt", sep="\t", stringsAsFactors=FALSE, header=TRUE )
+
+bingo_annotation
+```
+
+```{r}
+
+bingo_annotation_tbl <- as_tibble( bingo_annotation)
+
+
+bingo_annotation_expanded <- bingo_annotation_tbl %>% 
+  mutate(   AllTheGenesInTheNode = str_split( AllTheGenesInTheNode, "\\|") ) %>%
+  unnest()
+
+
+bingo_annotation_expanded %>%
+  distinct( AllTheGenesInTheNode) %>%
+  count()
+```
+

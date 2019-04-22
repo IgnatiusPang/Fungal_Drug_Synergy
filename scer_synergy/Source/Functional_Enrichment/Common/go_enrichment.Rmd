@@ -1,0 +1,165 @@
+---
+title: "edgeR_go_enrichment.Rmd"
+output: html_notebook
+---
+
+```{r}
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(knitr)
+p_load(limma)
+p_load(tidyverse)
+
+source( '../../Common/global_parameters.R')
+source( '../../Common/helper_functions.R')
+source_rmd_file( file.path(source_directory, "Functional_Enrichment/Common/functional_enrichment_functions.Rmd" ) )
+sessionInfo()
+```
+
+
+## Global parameters to change for the analysis 
+```{r}
+
+command_line_args <-  commandArgs(trailingOnly=T)
+
+#### This is a parameter to change #### *******************
+base_results_dir <-   base::get(command_line_args[2] ) # file.path( results_directory, "Differential_Expression/EdgeR_RUVs_QL/scer/To_Use_k_5_Remove_5a" ) 
+
+##### This is a parameter to change #### *******************
+de_method_label <-  command_line_args[3] #  "To_Use_k_5_Remove_5a" 
+
+####################################################
+
+# No need to change this parameter
+input_data_for_go_enrichment_dir <- file.path( base_results_dir, "Gene_Lists")
+
+# Set output directory for the results
+# No need to change this parameter
+go_terms_results_dir <- file.path( results_directory, "Functional_Enrichment", de_method_label,"GOStat")
+
+# No need to change this parameter
+create_directory_if_not_exists(go_terms_results_dir)
+
+# No need to change this parameter
+possible_matches  <- Sys.glob( file.path(input_data_for_go_enrichment_dir,  "*up_and_down_significant_DE_genes.Rdata" )  ) 
+
+list_of_up_and_down_genes <- readRDS( possible_matches[1] )
+
+# No need to change this parameter
+experiment_label_and_logFC_FDR_table <- read.table (file=file.path(input_data_for_go_enrichment_dir,
+				  			 										"experiment_label_and_logFC_FDR_table.tab" ), 
+													 sep="\t", header=TRUE)
+
+```
+
+## Obtain the GO annotation dictionaries
+```{r}
+
+go_dictionary <- get_crypto_go_dictionary_of_choice  ( "Saccharomyces cerevisiae", gene_ontology_directory, 
+									  bp_file_name="scer_goframeData_bp.tab", 
+									  mf_file_name="scer_goframeData_mf.tab", 
+									  cc_file_name="scer_goframeData_cc.tab"  ) 
+
+gene_annotation <- read.table ( file.path( data_directory, 'Gene_Annotation/scer_gene_annotation_summary.txt' ) , header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
+
+
+universe <- unique( gene_annotation[, "oln_id"])
+
+```
+
+
+## Performs GO terms enrichment test on list of sigificantly differentially expressed genes 
+* Outputs the following two files:
+
+	+ enriched\_go\_terms\_global.txt - List of significantly enriched GO terms for each cluster of co-expressed genes
+	+ enriched\_go\_terms\_global.txt - List of genes associated with each significantly enriched GO terms
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+# Determine list of parameters to loop over
+annotation_for_lists_of_DE_genes <- as.list(names( list_of_up_and_down_genes) )
+
+multiple_lists_of_DE_genes <- list_of_up_and_down_genes
+ontologies_list <- c( "BP", "CC", "MF")
+
+
+# annotation_for_lists_of_DE_genes <- annotation_for_lists_of_DE_genes[21:22]
+# multiple_lists_of_DE_genes <- multiple_lists_of_DE_genes[21:22]
+# ontologies_list <- c( "BP", "CC", "MF")
+
+go_enrichment_results <-  run_list_of_go_term_enrichment_tests ( annotation_for_lists_of_DE_genes, multiple_lists_of_DE_genes,
+																 ontologies_list,
+																 go_dictionary, universe,
+												  pvalueCutoff = 0.05 ,
+												  gostat_pvalue_cutoff = 1,
+												  testDirection = "over", condition_on_child_terms = FALSE)
+
+
+
+saveRDS( go_enrichment_results, file.path( go_terms_results_dir, "go_enrichment_results.RData") )
+
+```
+
+```{r}
+ go_enrichment_results <- readRDS(file.path( go_terms_results_dir, "go_enrichment_results.RData"))
+options(digits=3)
+
+# Save the enriched GO terms
+enriched_go_terms_file_name <- file.path( go_terms_results_dir, "enriched_go_terms_global.txt" )
+
+columns_to_include <- c("query_list_id", "rank",  "term", "raw_p_value", "bonferroni", "bh", "oddsratio", "expcount", "count", "size",                
+                "gobpid",  "ontology" ) 
+
+cleaned_enriched_go_terms <-  go_enrichment_results$enriched_go_terms %>%
+								dplyr::select( one_of ( columns_to_include))
+
+
+write.table (  cleaned_enriched_go_terms,  file=enriched_go_terms_file_name, sep="\t", quote=FALSE, row.names = FALSE)
+
+## Get GO_ID to GO_TERM lookup table
+go_id_to_term_lookup_table <- go_enrichment_results$enriched_go_terms %>%
+					dplyr::select(one_of(c("query_list_id", "gobpid", "term", "rank", "bh")))
+
+
+# Show the first few lines of the table with enriched GO terms 
+head(cleaned_enriched_go_terms)
+
+
+```
+
+## Save the list of genes associated with each enriched GO terms
+```{r}
+options(digits=3)
+
+enriched_genes_file_name <- file.path( go_terms_results_dir,"enriched_genes_global.txt" )
+
+go_enrichment_results$enriched_genes <- go_enrichment_results$enriched_genes %>%
+										dplyr::left_join( go_id_to_term_lookup_table, by=c( "query_list_id" = "query_list_id", "go_id" = "gobpid")) %>%
+										dplyr::left_join( gene_annotation , by=c("gene_id"="oln_id")) %>%
+										dplyr::left_join ( experiment_label_and_logFC_FDR_table, by=c("gene_id"= "genes", "query_list_id" = "query_list_id" ) )
+
+FDR_column_name <- "FDR"
+if ( "adj.P.Val" %in% colnames( go_enrichment_results$enriched_genes )) {
+	FDR_column_name <- "adj.P.Val"
+}
+
+columns_to_include <-   c( "query_list_id", "rank", "go_id",  "ontology", "term", "bh", "gene_id", "gene_name", "logFC",  FDR_column_name, 
+  "broad_gene_name", "uniprot_gene_name", 
+  "fungidb_gene_name",	"blast2go_annotation",
+  "is_tf", "is_kinases",                 
+ "is_virulence_gene", "order_peaktime", "scer_orthologs", "scer_ortholog_descriptions", "expt_label" ) 
+
+go_enrichment_results$enriched_genes <- go_enrichment_results$enriched_genes %>%
+										dplyr::select( one_of( columns_to_include))
+
+write.table( go_enrichment_results$enriched_genes, file=enriched_genes_file_name, sep="\t", quote=FALSE, row.names = FALSE, na="")
+
+# Show the first few lines of the table of genes associated with enriched GO terms
+head (go_enrichment_results$enriched_genes)
+
+```
+

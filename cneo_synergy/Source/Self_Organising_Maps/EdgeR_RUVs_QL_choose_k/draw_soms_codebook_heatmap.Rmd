@@ -1,0 +1,89 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+p_load(gplots)
+
+
+source( '../../Common/global_parameters.R')
+
+```
+
+
+```{r}
+
+soms_results_dir <- file.path( results_directory, "Self_Organising_Maps/EdgeR_RUVs_QL/To_Use_k_0_Remove_5a/Condition_on_child_terms_true" ) 
+
+compare_A_soms <- readRDS ( file.path( soms_results_dir, "compare_A/5x5/soms_results.RDS" ) )
+compare_AL_soms <- readRDS ( file.path( soms_results_dir, "compare_AL/5x5/soms_results.RDS" ) )
+
+
+str(compare_A_soms$som$codes)
+
+compare_A_codebook_vector  <- compare_A_soms$som$codes[[1]]
+compare_AL_codebook_vector <- compare_AL_soms$som$codes[[1]]
+
+```
+
+
+```{r}
+##################################################################################################################
+
+# Heatmap of the codebook vector
+
+my_colour_palette <- colorRampPalette(c("#2166ac","#f7f7f7","#b2182b"))(75) 
+margins_size_factor <- 5
+texts_size_factor_col <- 10
+texts_size_factor_row <- 30
+heatmap_column_labels <-  c( "CA1", "CA2", "CA3", "A1", "A2", "A3", "CAL1", "CAL2", "CAL3", "AL1",  "AL3" ) 
+
+### AMB only model, A - CA
+pdf( file.path( soms_results_dir, "compare_A/5x5/edgeR_compare_A_som_codebook_vector.pdf") ) 
+
+heatmap.2(compare_A_codebook_vector[,heatmap_column_labels],  symm = FALSE, col = my_colour_palette, Colv=NA,  #distfun = function(c) as.dist(1 - c),
+          dendrogram = "row", hclustfun=function(h)hclust(h,method="average"),  density.info="none", trace="none", # main = "Clustering miRNA with low to medium CV",
+          #labRow=,
+          xlab="Samples",
+          ylab="Clusters",
+          labCol= heatmap_column_labels, 
+          cexCol= 0.0 + 1/log(length(compare_A_codebook_vector[1,]), texts_size_factor_col), cexRow= 0.0 + 1/log(length(compare_A_codebook_vector[,1]), texts_size_factor_row),
+          margins = c(margins_size_factor, margins_size_factor),
+          offsetRow = 0.02,
+          offsetCol = 0.02 )
+dev.off()
+
+
+
+
+pdf( file.path( soms_results_dir, "compare_AL/5x5/edgeR_compare_AL_som_codebook_vector.pdf") ) 
+          
+### AMB + LF model, AL - CAL
+heatmap.2(compare_AL_codebook_vector[,heatmap_column_labels],  symm = FALSE, col = my_colour_palette, Colv=NA,  #distfun = function(c) as.dist(1 - c),
+          dendrogram = "row", hclustfun=function(h)hclust(h,method="average"),  density.info="none", trace="none", # main = "Clustering miRNA with low to medium CV",
+          #labRow=, 
+          xlab="Samples",
+          ylab="Clusters",
+          labCol= heatmap_column_labels, 
+          cexCol= 0.0 + 1/log(length(compare_AL_codebook_vector[1,]), texts_size_factor_col), cexRow= 0.0 + 1/log(length(compare_AL_codebook_vector[,1]), texts_size_factor_row),
+          margins = c(margins_size_factor, margins_size_factor),
+          offsetRow = 0.02,
+          offsetCol = 0.02 )
+dev.off()
+          
+
+
+##################################################################################################################
+
+
+```
+

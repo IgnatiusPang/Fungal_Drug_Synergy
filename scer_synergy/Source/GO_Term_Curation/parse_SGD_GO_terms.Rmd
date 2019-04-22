@@ -1,0 +1,135 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+## Load libraries and scripts
+```{r}
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+p_load(GO.db)
+
+source( '../Common/global_parameters.R')
+source( '../Common/helper_functions.R')
+
+sessionInfo()
+
+```
+
+## Global parameters
+```{r}
+
+gaf_headers <- c("DB",
+"DB Object ID",
+"SYMBOL", # "DB Object Symbol",
+"Qualifier",
+"GO.TERM", # "GO ID"
+"DB:Reference (|DB:Reference)",
+"GO.EVIDENCE.CODE", # "Evidence Code",
+"With (or) From",
+"GO.ASPECT", #  "Aspect"
+"DB Object Name",
+"DB Object Synonym (|Synonym)",
+"DB Object Type",
+"Taxon(|taxon)",
+"Date",
+"ASSIGNED.BY",  # "Assigned By",
+"Annotation Extension",
+"Gene Product Form ID" ) 
+
+```
+
+
+## Read SGD feature table
+```{r}
+sgd_feature_table <-  read.table( file.path(data_directory, "SGD/SGD_features.tab"), sep="\t", stringsAsFactors = FALSE, quote = "", header=FALSE  )
+                                  
+colnames( sgd_feature_table)   <-  c( "sgd_id" 
+, "feature_type" 
+, "feature_qualifier" 
+, "oln_id"
+, "standard_gene_name" 
+, "alias" 
+, "parent_feature_name" 
+, "secondary_sgd_id" 
+, "chromosome" 
+, "start" 
+, "stop" 
+, "strand" 
+, "genetic_position" 
+, "coordinate_version" 
+, "sequence_version" 
+, "description"  ) 
+```
+
+
+## SGD GO
+```{r}
+sgd_go <- read.table(file.path( data_directory, "SGD/Gene_Ontology/gene_association.sgd"  ), sep="\t",
+                       stringsAsFactors = FALSE, header=FALSE, quote = "", strip.white=TRUE, comment.char = "!" )
+
+dim(sgd_go)
+
+colnames( sgd_go )  <-  gaf_headers
+
+sgd_go_cleaned <- sgd_go %>% 
+              dplyr::select(  one_of ( c( "DB Object ID", "SYMBOL", "GO.TERM", "GO.NAME", 
+                                          "GO.EVIDENCE.CODE", "ASSIGNED.BY", "GO.ASPECT" )) ) %>%
+              distinct() %>%
+              left_join( sgd_feature_table, by =c( "DB Object ID" = "sgd_id")) %>%
+              dplyr::select(  one_of ( c( "oln_id", "GO.TERM", "GO.NAME", 
+                                          "GO.EVIDENCE.CODE", "ASSIGNED.BY", "GO.ASPECT" )) )  %>%
+              dplyr::rename (  SYMBOL = "oln_id")
+
+
+dim(sgd_go_cleaned)
+
+sgd_go_cleaned %>%
+  distinct( GO.EVIDENCE.CODE)
+
+```
+
+```{r}
+
+```
+
+
+
+## Remove the ancestors whenever it is possible 
+```{r}
+
+list_of_go_aspects <- c("P", "C", "F")
+
+list_of_tables <- purrr::map( list_of_go_aspects, function(go_aspect) {
+sgd_go_cleaned %>% 
+  dplyr::filter( GO.ASPECT == go_aspect) %>%
+  dplyr::distinct( GO.TERM, GO.EVIDENCE.CODE, SYMBOL ) %>%
+  dplyr::rename (  go_id = "GO.TERM",
+            evidence = "GO.EVIDENCE.CODE",
+            oln_id = "SYMBOL") } )
+
+names( list_of_tables) <- list_of_go_aspects
+
+list_of_output_files <- c( "scer_goframeData_bp.tab",
+                           "scer_goframeData_cc.tab",
+                           "scer_goframeData_mf.tab")
+
+create_directory_if_not_exists(file.path( data_directory, "Gene_Ontology_Annotation", "Ancestor_Cleaned"))
+
+purrr::walk2(list_of_tables, list_of_output_files, 
+             function( x, y){ write.table( x, 
+                                           file.path( data_directory, "Gene_Ontology_Annotation", "Ancestor_Cleaned", y ),
+                                           sep="\t", row.names = FALSE, col.names = TRUE, quote=FALSE) } )
+
+
+```
+
+
+
+

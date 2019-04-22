@@ -1,0 +1,655 @@
+---
+title: "edgeR_cneo_clean_v2.Rmd"
+author: "Ignatius Pang"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+# Differential Gene Expression Analysis Using Edge R
+
+
+```{r}
+## try http:// if https:// URLs are not supported
+# source("https://bioconductor.org/biocLite.R")
+# biocLite("RUVSeq")
+```
+
+
+## Load libraries and scripts
+```{r}
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+p_load(edgeR)
+p_load(limma)
+p_load(mixOmics)
+p_load(RUVSeq)
+p_load(EDASeq)
+p_load(RColorBrewer)
+p_load(lazyeval)
+		
+source( '../Common/edgeR_common_functions.R')
+source( '../../../Common/global_parameters.R')
+source( '../../../Common/helper_functions.R')
+
+sessionInfo()
+
+```
+
+## Command-line parameters
+```{r}
+
+command_line_args <-  commandArgs(trailingOnly=T)
+
+print( command_line_args)
+
+if ( length(command_line_args) > 0   ) {
+	##### This is a parameter to change #### *******************
+	num_unwanted_variables <- as.integer( command_line_args[2]    ) 
+	
+	##### This is a parameter to change #### *******************
+	is_quasi_likelihood_test <- as.logical( command_line_args[3]  )
+	
+	##### This is a parameter to change #### *******************
+	type_of_ruv <-  as.character( command_line_args[4]  ) # RUVg, RUVs, RUVr
+	
+	##### This is a parameter to change #### *******************
+	organism <-  as.character( command_line_args[5]  ) # 
+		
+} else {
+	
+	num_unwanted_variables <- 5
+	
+	is_quasi_likelihood_test <- TRUE
+	
+	type_of_ruv <-  "RUVs"
+	
+	organism <- "cneo"
+		
+}
+	
+
+
+
+if( !(type_of_ruv %in% c( "RUVg", "RUVs", "RUVr", "none"))) {
+	stop( "Type of RUV chosen is not valid.")
+}
+
+```
+
+## Global parameters
+```{r}
+
+ 
+min_count <- 1 # threshold cpm for a gene
+num_samples_above_cutoff <- 6 # At least this many column above minimum count
+normalization_method <- "upperquartile"
+normalization_method_between_lane <- "upper"
+
+```
+
+
+## Directory Management
+```{r}
+
+type_of_hypothesis_test <- ifelse(  is_quasi_likelihood_test, "QL", "LRT")
+
+ num_samples_dir <- "All_Samples"
+
+if( "5a" %in% samples_to_remove) {
+  
+  num_samples_dir <- "Remove_5a"
+} 
+
+choose_k_results_directory <- file.path(results_directory, "Differential_Expression",  
+										paste(  "EdgeR",  type_of_ruv,  type_of_hypothesis_test, sep="_" ),  
+										organism , 
+										num_samples_dir, "k_0" ) 
+
+create_directory_if_not_exists( choose_k_results_directory ) 
+
+
+## Save the results into files 
+edger_gene_lists_dir <- file.path( choose_k_results_directory, "Gene_Lists")
+create_directory_if_not_exists( edger_gene_lists_dir)
+
+
+
+```
+
+## Load Gene Annotation
+```{r}
+gene_annotation <- read.table ( file.path( data_directory, 'Gene_Annotation/cneo_gene_annotation_summary.txt' ) , header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
+
+```
+
+
+## Load design matrix
+```{r}
+
+design_matrix <- read.table(cneo_design_matrix_file, header=TRUE, sep="\t", stringsAsFactors = TRUE)
+
+as.character(design_matrix$Date)
+
+design_matrix <- design_matrix %>%
+				 dplyr::mutate( Biological_Replicate = as.character(Replicate ) )
+
+design_matrix <- design_matrix %>%
+				 dplyr::mutate( Short_Name = paste(Experiment , Biological_Replicate, sep="") )
+
+## Remove sample 5a
+
+design_matrix <- design_matrix %>%
+                  filter( ! (Sample %in% samples_to_remove ) )  
+
+```
+
+## Hash tables for design matrix 
+```{r}
+
+short_names <- purrr::map_chr(design_matrix$Sample, function(x) { paste( "X", toupper(x), sep="") } )
+map_long_to_short_experiment_name <- create_id_to_attribute_hash ( short_names , design_matrix$Short_Name) 
+map_short_name_to_treatment_type  <- create_id_to_attribute_hash (  design_matrix$Short_Name, design_matrix$Experiment ) 
+map_short_name_to_expt_group      <- create_id_to_attribute_hash (  design_matrix$Short_Name, design_matrix$Experiment ) 
+
+```
+
+## Read in the file and calculate normalisation factor 
+```{r}
+
+
+samples_counts <- read.table(cneo_read_counts_file, header=TRUE)
+rownames(samples_counts) <- samples_counts[, "orf_id"]
+samples_counts <- samples_counts[,2:length(samples_counts[1,])]
+
+to_remove_short_names <- purrr::map_chr(samples_to_remove, function(x) { paste( "X", toupper(x), sep="") } )
+
+samples_counts <- samples_counts[ , !( colnames(samples_counts)  %in% to_remove_short_names ) ]
+
+# Convert long name to short experiment name 
+short_names <- map_chr ( colnames(samples_counts), function(key) {  convert_key_to_attribute (key, map_long_to_short_experiment_name) } )
+colnames( samples_counts) <- short_names
+samples_counts <- samples_counts[, sort(colnames( samples_counts))]
+
+## Remove sample 5a
+
+## Fix up ordering of design matrix and sample_counts
+rownames(design_matrix) <- design_matrix$Short_Name
+design_matrix <- design_matrix[colnames(samples_counts),]
+
+purrr::map_chr( design_matrix$Sample , ~paste( "X", toupper(.), sep="" )) == colnames( samples_counts[,2:(ncol(samples_counts))])
+
+if ( any( colnames(samples_counts) != rownames(design_matrix) ) ) {
+	stop ( "Problem with consistency between the column names of counts table and design matrix.")
+}
+
+# Pre-filtering
+genes_to_keep <- apply( cpm(samples_counts), 1, function(x) length(x[ x > min_count]) >= num_samples_above_cutoff )
+# genes_to_keep_2 <- rowSums( samples_counts   >= min_count) >= num_samples_above_cutoff
+
+length(which(genes_to_keep))
+# length(which(genes_to_keep_2))
+samples_counts <- samples_counts[genes_to_keep, ]
+
+# Create dgelist object
+cneo_dgelist <- DGEList(counts=samples_counts, genes=rownames(samples_counts) )
+
+
+# Calculate normalisation factor
+cneo_dgelist <- calcNormFactors(cneo_dgelist, method=normalization_method)
+```
+	
+## Set Model Matrix	
+```{r}
+design <- model.matrix(~0 + design_matrix$Experiment + 
+					   	design_matrix$Lane + 
+					   	design_matrix$Biological_Replicate, data=design_matrix)
+
+colnames( design)  <- c( levels(design_matrix$Experiment ), "LaneL2", "Biological_Replicate2", "Biological_Replicate3" ) 
+rownames( design)  <- design_matrix$Sample
+
+```
+
+## log raw counts plot 
+```{r}
+
+logcounts <- log2(samples_counts+0.1)
+
+treatment_type_list <- map_chr ( colnames( samples_counts), function(key){ convert_key_to_attribute(key, map_short_name_to_treatment_type) })
+expt_group_list <- map_chr ( colnames( samples_counts), function(key){ convert_key_to_attribute(key, map_short_name_to_expt_group) })
+
+group.colours <- c('slateblue','orange')[as.numeric(as.factor(treatment_type_list))];
+# par(mar=c(5.1, 5, 4.1, 7), xpd=TRUE)
+boxplot(logcounts,
+		col=group.colours,
+		main="Distribution of log counts",
+		xlab="",
+		ylab="Log2(raw counts+0.1)",
+		las=2,cex.axis=0.8)
+
+legend("topright", # inset=c(-0.2,0), cex = 0.8,
+		legend = levels(as.factor(design_matrix$Experiment)),
+		fill = unique(group.colours))
+
+```
+
+## Run normalisation
+```{r}
+# voom_output <- voom(cneo_dgelist, design)
+# norm.expr <- voom_output$E
+
+cneo_dgelist <- estimateGLMCommonDisp(cneo_dgelist, design, verbose=TRUE)
+cneo_dgelist <- estimateGLMTrendedDisp(cneo_dgelist, design)
+cneo_dgelist <- estimateGLMTagwiseDisp(cneo_dgelist, design)
+
+norm.expr <- cpm(cneo_dgelist, log=TRUE)
+
+
+write.table(norm.expr, file=file.path(choose_k_results_directory, "edger_without_ruvs_normalised_counts.txt"),
+						row.names=T, quote=F, sep="\t")
+```
+
+## log normalized counts plot 
+```{r}
+boxplot( norm.expr,
+col=group.colours,
+main="Distribution of normalised counts",
+xlab="",
+ylab="log2 normalised expression",
+las=2,cex.axis=0.8)
+
+```
+
+## Heat map of samples correlation after normalisation
+```{r}
+ heatmap ( 1 - cor (norm.expr, method="spearman" ),scale="none" )
+
+```
+
+
+## PCA plots
+```{r}
+
+norm.expr.df <- t(norm.expr)
+dim(norm.expr.df)
+
+## check if any feature has 0 variance, if so might need to remove
+colVar <- apply(norm.expr.df,2,var)
+length(which(colVar==0))
+
+tuning <- tune.pca(norm.expr.df, center=TRUE, scale=TRUE)
+
+
+pca.result <- pca(norm.expr.df, ncomp=3, center=T, scale=T)
+
+plotIndiv(pca.result, comp=c(1,2) , group=treatment_type_list, title="PCA: Colour by treatment type")
+plotIndiv(pca.result, comp=c(1,2) , group=expt_group_list, 
+		  title="PCA: Colour by treatment type and time point")
+
+```
+
+## Using a subset of genes for pca
+```{r}
+subset_of_genes_for_pca <- names( sort( abs( pca.result$loadings$X[, "PC1"] ), decreasing = TRUE )[1:1000] )
+
+norm.expr.df <- t(norm.expr[subset_of_genes_for_pca, ])
+dim(norm.expr.df)
+
+## check if any feature has 0 variance, if so might need to remove
+colVar_ruv <- apply(norm.expr.df,2,var)
+length(which(colVar_ruv==0))
+
+tuning <- tune.pca(norm.expr.df, center=TRUE, scale=TRUE)
+
+pca.result <- pca(norm.expr.df, ncomp=3, center=T, scale=T)
+
+plotIndiv(pca.result, comp=c(1,2) , group=treatment_type_list, title="PCA: Colour by treatment type")
+plotIndiv(pca.result, comp=c(1,2) , group=expt_group_list, 
+		  title="PCA: Colour by treatment type and time point")
+
+```
+
+
+## ANOVA test of any differential gene expression to get empirical control genes 
+```{r}
+
+design_for_ruv <- model.matrix( ~ 0 + design_matrix$Experiment , data=design_matrix)
+
+colnames(design_for_ruv) <- c("A", "AL", "CA", "CAL")
+
+design_by_group <- design_for_ruv
+
+## Assign the expression set
+input_data <- as.matrix(samples_counts)
+input_data <- input_data[, design_matrix$Short_Name ]
+set <- newSeqExpressionSet( input_data, 
+						    phenoData=data.frame(design_for_ruv, row.names= rownames(design_for_ruv)  )) 
+
+set <- betweenLaneNormalization(set, which=normalization_method_between_lane)
+```
+
+## Plot RLE and PCA plot
+```{r}
+
+plot_PCA_RLE <- function ( set_before,  title_for_before_ruv, expt_group_list, treatment_type_list, results_directory, output_file_name ) {
+  
+  logCPM_set_before <- cpm(set_before@assayData$normalizedCounts, log=TRUE, prior.count = 2)
+  
+  
+  group.colours <- c('slateblue','orange')[as.numeric(as.factor(expt_group_list))];
+  
+  # RLE plots Before and after RUV
+  plotRLE(set_before , outline=FALSE, ylim=c(-0.4, 0.4), col=brewer.pal(6, "Set2")[as.numeric(as.factor(expt_group_list))], 
+          main=title_for_before_ruv, las=3)
+
+  plotPCA(set_before, col=brewer.pal(6, "Set2")[as.numeric(as.factor(expt_group_list))], cex=1.2, main=title_for_before_ruv)
+  plotPCA(set_before, col=c("blue", "green")[as.numeric(as.factor(treatment_type_list))], cex=1.2, main=title_for_before_ruv)
+
+  plotMDS(logCPM_set_before, col=brewer.pal(6, "Set2")[as.numeric(as.factor(expt_group_list))], cex=1.2, main=title_for_before_ruv)
+  plotMDS(logCPM_set_before, col=c("blue", "green")[as.numeric(as.factor(treatment_type_list))], cex=1.2, main=title_for_before_ruv)
+
+  
+  pdf( file=file.path( results_directory, output_file_name) )
+  # RLE plots Before and after RUV
+  plotRLE(set_before , outline=FALSE, ylim=c(-0.4, 0.4), col=brewer.pal(6, "Set2")[as.numeric(as.factor(expt_group_list))], 
+          main=title_for_before_ruv, las=3)
+
+  plotPCA(set_before, col=brewer.pal(6, "Set2")[as.numeric(as.factor(expt_group_list))], cex=1.2, main=title_for_before_ruv)
+  plotPCA(set_before, col=c("blue", "green")[as.numeric(as.factor(treatment_type_list))], cex=1.2, main=title_for_before_ruv)
+  
+  
+  plotMDS(logCPM_set_before, col=brewer.pal(6, "Set2")[as.numeric(as.factor(expt_group_list))], cex=1.2, main=title_for_before_ruv)
+  plotMDS(logCPM_set_before, col=c("blue", "green")[as.numeric(as.factor(treatment_type_list))], cex=1.2, main=title_for_before_ruv)
+  
+  dev.off()
+  
+}
+
+plot_PCA_RLE( set, 
+											 "After upper quartile normalisation but no batch effects removal", 
+											 expt_group_list, treatment_type_list,
+											 choose_k_results_directory,
+											 "RLE_plots.pdf")
+
+```
+
+
+
+```{r}
+y <- DGEList(counts=counts(set), group=design_matrix$Experiment )
+y <- calcNormFactors(y, method=normalization_method)
+y <- estimateGLMCommonDisp(y, design_for_ruv)
+y <- estimateGLMTrendedDisp(y, design_for_ruv)
+y <- estimateGLMTagwiseDisp(y, design_for_ruv)
+
+cneo_fit <-  NULL
+lrt <- NULL
+if ( is_quasi_likelihood_test == TRUE) {
+	cneo_fit <- glmQLFit( y , design_for_ruv)
+	lrt <- glmQLFTest(cneo_fit, coef=2:ncol(cneo_fit$design))
+
+} else {
+	cneo_fit <- glmFit( y , design_for_ruv)
+	lrt <- glmLRT(cneo_fit, coef=2:ncol(cneo_fit$design))
+}
+```
+
+
+
+## Define the different comparisons we want to perform 
+```{r}
+
+ 
+
+# Then we can make any comparisons we wish. For example, we might wish to make the following contrasts:
+ my.contrasts <- makeContrasts( compare_A   = A - CA,
+								compare_AL   = AL - CAL,
+								levels=design_by_group  )
+```
+
+
+```{r}
+fit_by_group <- NULL
+if ( is_quasi_likelihood_test == TRUE) {
+	
+	fit_by_group <- glmQLFit(cneo_dgelist, design_by_group)
+
+} else {
+	
+	fit_by_group <- glmFit(cneo_dgelist, design_by_group)
+
+}
+```
+
+
+```{r}
+
+## Do calculation and get list of significantly differentially expressed genes
+get_top_tags_baseed_on_group <- function ( group,  fit_by_group ) {
+ 	
+	if ( is_quasi_likelihood_test == TRUE ) {
+ 		lrt <- glmQLFTest(fit_by_group, contrast=my.contrasts[,group]) 
+	} else   {
+ 		lrt <- glmLRT(fit_by_group, contrast=my.contrasts[,group]) 
+	}
+ 	
+	top <- topTags(lrt, n=nrow(fit_by_group), sort.by="PValue")$table
+	
+	print(colnames(top))
+	top <- rownames_to_column(top) # , var="genes"
+	
+	# colnames( top) <-  c("genes", "logFC", "logCPM", "F", "PValue", "FDR") 
+    
+	is.de <- decideTestsDGE(lrt)
+
+	plotMD(
+	lrt,
+	status = is.de,
+	values = c(1, -1),
+	col = c("red", "blue"),
+	legend = "topright",
+	main = group,
+	cex.main = 1)
+	
+	return (top)
+}
+
+my_get_top_tag <- partial( get_top_tags_baseed_on_group, fit_by_group=fit_by_group)
+list_of_top_tags <- purrr::map(  colnames( my.contrasts) ,  my_get_top_tag  )
+names( list_of_top_tags) <- colnames( my.contrasts)
+```
+
+```{r}
+## Plot p-values distribution
+plot_p_values_dist <- function(input_table, plot_title ) {
+  
+  return( input_table %>%
+  ggplot ( aes(PValue )) +
+  geom_histogram()  +
+  ggtitle( plot_title))
+}
+
+list_of_p_val_dist <-  purrr::map2(list_of_top_tags, names(list_of_top_tags), plot_p_values_dist )
+
+
+pdf(file.path(edger_gene_lists_dir, "p_values_distribution.pdf" ))
+invisible(lapply(list_of_p_val_dist, print))
+dev.off()
+
+## Merge with gene annotation
+merge_with_gene_annotation <- function ( input_table, gene_annotation) {
+	
+	return_table <- input_table %>%
+					dplyr::left_join( gene_annotation, by=c("genes" = "orf_id")) %>%
+					dplyr::distinct()
+	
+	return_table
+}
+
+my_merge_with_gene_annotation <- partial (merge_with_gene_annotation,  gene_annotation=gene_annotation)
+
+list_of_top_tags_with_annot <- purrr::map ( list_of_top_tags,  my_merge_with_gene_annotation)
+
+
+file_names_to_use <- purrr::map( names( list_of_top_tags_with_annot)  , function(x) {  file.path(edger_gene_lists_dir, paste(x, ".tab" , sep="") )  } )
+
+walk2 ( list_of_top_tags_with_annot, file_names_to_use, ~write.table( .x, file=.y , sep="\t", row.names = FALSE, quote = FALSE, na=""   ))
+
+saveRDS(list_of_top_tags_with_annot, file=file.path(edger_gene_lists_dir, "list_of_top_tags_table.Rdata" ))
+
+```
+
+
+## Calcuate number of significantly differentially expressed genes 
+```{r}
+num_sig_genes_list <- purrr::map ( list_of_top_tags_with_annot, num_significant_genes_edgeR)
+
+num_sig_genes_list
+
+# filter( list_of_top_tags_with_annot[["FLBvsCTRL.12h"]], FDR <0.05)
+# filter( list_of_top_tags_with_annot[["FLBvsCTRL.8h"]], FDR <0.05)
+# filter( list_of_top_tags_with_annot[["FLBvsCTRL.12vs8"]], FDR <0.05)
+
+write.table(  as.data.frame( num_sig_genes_list ), file=file.path(edger_gene_lists_dir, "num_sig_genes.tab" ), sep="\t", row.names = FALSE, quote = FALSE, na="" )
+
+```
+
+
+
+
+## Calculate number of significant genes, up and down in gene expression
+```{r}
+
+my_num_significant_genes_up_and_down <- partial( num_significant_genes_up_and_down_edgeR, fdr_threshold=de_genes_fdr_cutoff )
+
+num_sig_genes_list_up_and_down <- purrr::map ( list_of_top_tags_with_annot, my_num_significant_genes_up_and_down)
+
+num_sig_genes_up_and_down <- data.frame( edgeR_ruvs=unlist( num_sig_genes_list_up_and_down ) )
+
+num_sig_genes_up_and_down <- tibble::rownames_to_column(num_sig_genes_up_and_down)
+
+write.table(  num_sig_genes_up_and_down, file=file.path(edger_gene_lists_dir, "num_sig_genes_up_and_down.tab" ), 
+			  sep="\t", row.names = FALSE, quote = FALSE, na="")
+
+```
+
+## Separate list of genes that have statistically significantly up and down changes in gene expression
+```{r}
+
+split_into_up_and_down <- function ( top_tags, table_name, fdr_cutoff=0.05, gene_names_column = "genes") {
+	
+	significant_genes <-  dplyr::filter( top_tags , FDR < fdr_cutoff ) 
+	
+	up_genes <- dplyr::filter ( significant_genes, logFC > 0) %>%
+				dplyr::select ( one_of(c( gene_names_column)) ) %>%
+				t() %>%
+				as.vector()
+	
+	down_genes <- dplyr::filter ( significant_genes, logFC < 0) %>%
+				dplyr::select ( one_of(c( gene_names_column)) ) %>%
+				t() %>%
+				as.vector()
+	
+	return_list <- list ( up_genes, down_genes)
+	
+	names(return_list) <-  c( paste(table_name, "up", sep="." ) , 
+							  paste(table_name, "down", sep="." ) ) 
+	
+	return( return_list)
+	
+}
+
+# test_list <- split_into_up_and_down( list_of_top_tags_with_annot[[1]], names( list_of_top_tags_with_annot)[[1]])
+
+
+my_split_into_up_and_down <- partial( split_into_up_and_down, fdr_cutoff=de_genes_fdr_cutoff, gene_names_column = "genes" )
+
+list_of_up_and_down_genes <- map2(  list_of_top_tags_with_annot, names( list_of_top_tags_with_annot), my_split_into_up_and_down) 
+list_of_up_and_down_genes <- unlist( unname(list_of_up_and_down_genes), recursive=FALSE)
+
+
+saveRDS( list_of_up_and_down_genes, file=file.path(edger_gene_lists_dir, "edgeR_up_and_down_significant_DE_genes.Rdata" ))
+
+purrr::walk2( list_of_up_and_down_genes, names(list_of_up_and_down_genes),    
+              function(x, y ) {  write.table( data.frame(orf_id= x),    
+                                              file= file.path(edger_gene_lists_dir, paste(y, ".tab", sep="" )),
+                                              sep="\t", col.names = FALSE, row.names = FALSE, quote=FALSE        )         }    )
+
+
+```
+
+
+## Combine statistical values with experimental labels. 
+
+For example, this table will merged with list of genes associated with enriched GO terms so that we can see the statistics and values side by side. 
+```{r}
+
+experiment_label_and_logFC_FDR_table <-  plyr::ldply( list_of_top_tags, .id="expt_label")
+
+experiment_label_and_logFC_FDR_table <- experiment_label_and_logFC_FDR_table %>% 
+										dplyr::mutate( query_list_id = paste( expt_label, 
+																			  ifelse(logFC > 0 , "up", "down"), 
+																			  sep="." ) ) %>%
+										dplyr::distinct()
+
+write.table ( experiment_label_and_logFC_FDR_table, 
+			  file=file.path(edger_gene_lists_dir,
+				  			 "experiment_label_and_logFC_FDR_table.tab" ), sep="\t", row.names = FALSE, quote = FALSE, na="" )
+
+
+FDR_table_all_tests_with_annotation <- merge_with_gene_annotation ( experiment_label_and_logFC_FDR_table, gene_annotation)
+
+head( FDR_table_all_tests_with_annotation)
+
+
+write.table ( FDR_table_all_tests_with_annotation, 
+			  file=file.path(edger_gene_lists_dir,
+				  			 "FDR_table_all_tests_with_annotation.tab" ), sep="\t", row.names = FALSE, quote = FALSE, na="" )
+
+
+```
+
+## Function: draw_volcano_plot 
+```{r}
+
+draw_volcano_plot <- function ( fold_change_table, title, 
+								fdr_threshold=0.05, fdr_column_name="FDR", logFC_column_name = "logFC" ) {
+	
+	data_frame_for_volcano_plot <- data.frame( logFC=fold_change_table[, logFC_column_name],
+											   logPvalue=-log10(fold_change_table[, fdr_column_name]),
+											   is_significant=ifelse ( fold_change_table[, fdr_column_name] < fdr_threshold, 
+											   						TRUE, FALSE) ) 
+
+	
+	my_plot <- data_frame_for_volcano_plot %>%
+			   dplyr::mutate( color_groups = ifelse(logPvalue >  -log10(0.05) & abs(logFC) <= 1, "orange", "black" )) %>%
+			   dplyr::mutate( color_groups = ifelse(logPvalue <= -log10(0.05) & abs(logFC) > 1, "black", color_groups )) %>%
+			   dplyr::mutate( color_groups = ifelse(logPvalue >  -log10(0.05) & abs(logFC) > 1, "red", color_groups )) %>%
+			   ggplot (aes(logFC, logPvalue )) +
+			   geom_point(aes(color=color_groups)) + 
+			   xlab("log2 fold change") +
+			   ylab("-log10 p-value") + 
+			   theme(legend.position="topright") + 
+			   ggtitle(title) +
+			   scale_color_identity( )
+			
+	
+	return(my_plot)
+	
+}
+
+
+my_volcano_plot <- partial(  draw_volcano_plot, fdr_threshold = de_genes_fdr_cutoff, 
+							 fdr_column_name="FDR", logFC_column_name = "logFC")
+
+list_of_volcano_plot <- map2(list_of_top_tags, names(list_of_top_tags) , my_volcano_plot)
+
+pdf(file.path(edger_gene_lists_dir, "volcano_plots.pdf" ))
+invisible(lapply(list_of_volcano_plot, print))
+dev.off()
+```

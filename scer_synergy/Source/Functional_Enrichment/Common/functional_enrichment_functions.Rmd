@@ -1,0 +1,588 @@
+---
+  title: "Running Gene Ontology term enrichment"
+  output: html_document
+---
+
+### Copyright
+
+Copyright 2016, Chi Nam Ignatius Pang
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Introduction
+
+This script performs the Gene Ontology (GO) term enrichment on list of differentially expressed genes and list of genes in co-expressed clusters.
+
+### Global Parameters, Libraries
+Author:               Ignatius Pang
+Date:                 18 April 2016
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+library("GOstats")
+library("GSEABase")
+library(GO.db)
+library(multtest)
+
+```
+
+
+## Functions
+
+### Function: run_go_terms_enrichment
+
+Input Parameters:
+
+* GO_params -  an R object that contains the list of query genes. See run\_list\_of\_go\_term\_enrichment_tests on how to use this.
+* Benjamini-Hochberg adjusted p-value < X for a GO term to be significant (default 0.05)
+
+Output Parameters:
+
+This function runs the GO terms enrichment for a list of query genes and returns two result tables stored within a list:
+
+1. The list of enriched GO terms ($enriched_go_terms )
+2. The list of genes that are associated with each enriched GO terms ($enriched_genes )
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+run_go_terms_enrichment <- function ( GO_params, pvalueCutoff = 0.05 )  {
+
+                debug_flag <- 0
+
+                gene_list_results <- list( enriched_go_terms=c(), enriched_genes=c())
+
+                Over <- hyperGTest(GO_params)
+                # head(summary(Over))
+
+                # This is the list of genes from the input list that is associated with each Enriched GO terms.
+                gene_list_results$enriched_genes <- geneIdsByCategory(Over) 
+
+                Over_summary <- summary(Over)
+
+		# Remove GO terms with less than 2 genes matched to it
+                Over_summary <- Over_summary[ Over_summary[,"Count"] >= 2, ]
+               
+                go_term_enrichment_results <- as.data.frame(matrix(0,nrow=0,ncol=12), stringsAsFactors = FALSE)  
+
+                colnames(go_term_enrichment_results) <- c(  "gobpid", "pvalue", "oddsratio", "expcount", "count",     
+                                              "size", "term", "rank", "raw_p_value", "bonferroni", "bh", "ontology")  
+
+                if ( length(Over_summary[, 1]) > 0 )  {
+			#procs <- c("Bonferroni", "Holm", "Hochberg", "SidakSS", "SidakSD", "BH", "BY")
+ 			procs <- c("Bonferroni",  "BH")
+
+                         if ( debug_flag == 1 )  {
+                            print (Over_summary[,"Pvalue"] )
+                         }
+
+
+                        more_adjp <- data.frame(  Over_summary
+                                               , rank = seq(1,length(Over_summary[,1]),1 )
+  				             				   , raw_p_value = Over_summary[,"Pvalue"]
+  					     					   , bonferroni =  Over_summary[,"Pvalue"]
+  				             				   , bh = Over_summary[,"Pvalue"]
+                                               , ontology = ontology(GO_params)
+  					     					   , stringsAsFactors = FALSE
+  				         )
+
+                         if ( length(  Over_summary[,"Pvalue"] ) > 1 ) {
+                            # mt.rawp2adjp does not work if the number of p-values to fix is less than 2
+                            # If less than 2 p-values, then it will give this error:
+                            # Error in if (is.na(spval[i])) tmp[i] <- NA : argument is of length zero
+                            
+    			     res <- mt.rawp2adjp( Over_summary[,"Pvalue"]  , procs)
+    
+                             if ( debug_flag == 1 )   {
+                               print ("Hello")
+                             }
+
+                             #  mt.rawp2adjp automatically sorts table according to p-values in ascending order
+                             #  This step reorders the table back to the original positions (i.e. not sorted by p-value)
+    			     adjp <- res$adjp[order(res$index), ]
+
+                          # Convert GO ID to GO Term
+                          # go_terms <-  mget( names(pvalues(Over)) ,env=GOTERM)
+                          # go_terms_list <- as.vector(unlist ( lapply( as.list(go_terms), Term)))
+                         
+                          more_adjp <- data.frame(  Over_summary                                             
+                                               , rank = seq(1,length(Over_summary[,1]),1 )
+  				               				   , raw_p_value = adjp[,1]
+  					       					   , bonferroni =  adjp[,2]
+  				               				   , bh = adjp[,3]
+                                               , ontology = ontology(GO_params)
+  					       					   , stringsAsFactors = FALSE
+  				         )
+
+                         }  
+
+                        colnames(more_adjp) <- c( "gobpid", "pvalue", "oddsratio", "expcount", "count",     
+                                                  "size", "term", "rank", "raw_p_value", "bonferroni", "bh", "ontology")  
+				      
+                        go_term_enrichment_results <- more_adjp
+                                                                                 
+                        if ( length(more_adjp[,1]) > 0 ) {
+                                        go_term_enrichment_results <- more_adjp[more_adjp[,"bh"] < pvalueCutoff,]
+          
+                        } 
+                }
+
+                # This is the list of enriched GO terms
+                gene_list_results$enriched_go_terms <- go_term_enrichment_results
+
+                
+        # The gene_list_results is a list containing two tables, including 'enriched_go_terms' and 'enriched_genes'
+        return (gene_list_results)
+}
+```
+
+
+### Function: tabulate_enriched_genes
+
+ Print the list of genes associated with each enriched GO terms
+ 
+Input Parameters:
+
+* Takes the outputs from the function 'run\_go\_terms\_enrichment'. This includes 'result$enriched_go_terms' and 'result$enriched_genes'.
+
+Output Parameters: 
+
+* List of genes associated with significantly enriched GO terms, in table format (see worked examples below).
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+tabulate_enriched_genes <- function(enriched_genes, enriched_go_terms)
+{
+        go_id      <- c()
+        gene_id    <- c()
+
+        result_go_id_list <-  enriched_go_terms[,"gobpid"] 
+
+        test_go_id_gene_list <- as.data.frame(matrix(0,nrow=0,ncol=2), stringsAsFactors = FALSE)
+        colnames(test_go_id_gene_list) <- c("go_id", "gene_id")
+        
+        if (  length(result_go_id_list) > 0  )   {
+
+           for ( i in 1:length(result_go_id_list) ) { 
+       
+                my_gene_id_list <- enriched_genes[[result_go_id_list[i]]]
+
+                if ( length(my_gene_id_list) > 0 )  {
+
+                     for( j in 1:length(my_gene_id_list) ) {                
+
+                          go_id <- c(go_id, result_go_id_list[i] )   
+                          gene_id <- c( gene_id, my_gene_id_list[j])
+                     }  
+                }        
+          }
+
+                test_go_id_gene_list <-  data.frame( go_id=go_id, gene_id=gene_id, stringsAsFactors= FALSE)
+        }
+
+       return (test_go_id_gene_list)
+}
+```
+
+
+### Function: go_terms_analysis_tabulate
+
+Run the GO enrichment analysis and save the results into tables
+
+Input Parameters:
+
+* GO\_params -  an R object that contains the list of query genes. See run_list_of_go_term_enrichment_tests on how to use this.
+* query\_list\_id  - A lavel to annotate a list of query genes 
+* annotation\_list\_id  - Typically, the type of GO ontology used (e.g. BP = biological processes, CC = cellular componenent, MF = molecular function). The user could input anything here to give a short name for an experiment. 
+* organism - a label to indicate the organism
+* pvalueCutoff  - Benjamini-Hochberg adjusted p-value < X for a GO term to be significant (default 0.05)
+
+Output Parameters: 
+
+A list containing the following two elements: 
+
+* enriched\_genes - A table of significantly enriched GO terms for each cluster of co-expressed genes
+* enriched\_go\_terms - A table of genes associated with each significantly enriched GO terms
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+go_terms_analysis_tabulate <- function ( GO_params,  query_list_id,  annotation_list_id, organism, pvalueCutoff = 0.05 ) {
+        ### Run the GO terms analysis
+        go_term_enrichment_results <- run_go_terms_enrichment( GO_params, pvalueCutoff = pvalueCutoff ) 
+
+        enriched_genes <- go_term_enrichment_results$enriched_genes
+
+        enriched_go_terms <- go_term_enrichment_results$enriched_go_terms
+
+        go_id_gene_list <- tabulate_enriched_genes(enriched_genes, enriched_go_terms ) 
+
+        ## Adding the extra columns for the Gene list table
+        gene_annotation_list_id <- rep( as.character(annotation_list_id), length( go_id_gene_list[,1] ) )   
+        gene_query_list_id      <- rep( as.character(query_list_id),      length( go_id_gene_list[,1] ) ) 
+        gene_organism           <- rep( as.character(organism),           length( go_id_gene_list[,1] ) ) 
+        gene_ontology           <- rep( ontology(GO_params), length( go_id_gene_list[,1] ) ) 
+
+        enriched_genes <- base::cbind (  go_id_gene_list
+                                        , ontology =            gene_ontology 
+                                        , annotation_list_id=   gene_annotation_list_id
+                                        , query_list_id=        gene_query_list_id 
+                                        , organism =            gene_organism
+        						        , stringsAsFactors = FALSE )
+
+        ## Adding the extra columns for the statistics table 
+        stats_annotation_list_id <- rep( annotation_list_id, length( enriched_go_terms[,1] ) ) 
+        stats_query_list_id      <- rep( query_list_id,      length( enriched_go_terms[,1] ) ) 
+        stats_organism           <- rep( organism,           length( enriched_go_terms[,1] ) ) 
+
+        enriched_go_terms <- base::cbind( enriched_go_terms
+                , annotation_list_id=   stats_annotation_list_id
+                , query_list_id=        stats_query_list_id 
+                , organism =            stats_organism
+                , stringsAsFactors = FALSE) 
+
+        ### I will return any error messages that were produced during the data insert, insert for statistics and gene list
+        return ( list(enriched_genes=enriched_genes, enriched_go_terms=enriched_go_terms) ) 
+}
+```
+
+
+
+
+```{r}
+
+run_for_one_gene_list_GO_term_query <-   function ( query_list_id, query_genes, type_of_ontology_used, go_dictionary, universe, 
+													pvalueCutoff = 0.05, # This is the p-value cutoff after Benjamini-Hochberg correction
+													gostat_pvalue_cutoff = 1, # Setting this to 1 will give all possible GO terms
+													testDirection = "over", 
+													condition_on_child_terms = FALSE ){
+	
+	# Initialize the result tables
+	enriched_genes <- data.frame ( go_id = NA, gene_id=NA, ontology= NA, annotation_list_id=NA, query_list_id=NA, organism=NA, stringsAsFactors=FALSE )
+	enriched_genes <- enriched_genes[FALSE,] # Table with 0 rows
+	
+	enriched_go_terms <- data.frame ( "gobpid" = NA, "pvalue" = NA, "oddsratio" = NA, 
+									  "expcount" = NA,
+									  "count" = NA, "size" = NA, "term" = NA, "rank" = NA, 
+									  "raw_p_value" = NA,
+									  "bonferroni" = NA, "bh" = NA, "ontology" = NA, 
+									  "annotation_list_id" = NA,
+									  "query_list_id" = NA, "organism" = NA, stringsAsFactors=FALSE )
+	
+	enriched_go_terms <- enriched_go_terms[FALSE,] # Table with 0 rows
+	
+	organism            <- "scer"
+	
+	if ( length(query_genes) > 0 ) {
+		
+		print ( paste( type_of_ontology_used,  query_list_id)  )
+		
+		### Remove genes with no GO terms of this type. 
+		genes_of_this_go_type <- unique ( unlist ( geneIds(go_dictionary[[type_of_ontology_used]])))
+		haveGo <- query_genes %in% genes_of_this_go_type
+		query_genes <- query_genes[haveGo]
+		### End of codes to remove genes with no GO terms
+		
+		### Only proceed with enrichment if there are actually genes with GO terms
+		if ( length(query_genes) > 0 ) {
+			
+			#universe <-  unique( unlist ( geneIds(go_dictionary[[type_of_ontology_used]]) )  ) # List of all the genes with GO terms
+			
+			# Prepare and run hypergeometric test
+			GO_params <- GSEAGOHyperGParams(name = "My Custom GSEA based annot Params"
+											, geneSetCollection =   go_dictionary[[type_of_ontology_used]]
+											, geneIds =             query_genes
+											, universeGeneIds =     universe
+											, ontology=             type_of_ontology_used
+											, conditional=          condition_on_child_terms
+											, pvalueCutoff=         gostat_pvalue_cutoff 
+											, testDirection=        testDirection   )
+			
+			
+			go_enrichment_results <- go_terms_analysis_tabulate(GO_params, query_list_id, 
+																type_of_ontology_used,
+																organism, pvalueCutoff = pvalueCutoff)
+			
+			
+			# print( "run_for_one_gene_list_GO_term_query: start")
+			# print(head(go_enrichment_results$enriched_go_terms))
+			# print( "run_for_one_gene_list_GO_term_query: end")
+			
+			if (  length ( enriched_genes[,1] ) > 0 ) {  
+				enriched_genes <- base::rbind ( enriched_genes, go_enrichment_results$enriched_genes, stringsAsFactors = FALSE)
+			}	else {
+				
+				enriched_genes <- go_enrichment_results$enriched_genes
+			}
+			
+			if (  length ( enriched_go_terms[,1] ) > 0   ) {
+				enriched_go_terms <- base::rbind ( enriched_go_terms, go_enrichment_results$enriched_go_terms, stringsAsFactors = FALSE)
+			}	else {
+				enriched_go_terms <- go_enrichment_results$enriched_go_terms
+			}
+			
+		}
+	}
+	
+	return(list ( enriched_genes=enriched_genes, enriched_go_terms=enriched_go_terms ) )
+	
+}
+
+```
+
+
+### Function: run_list_of_go_term_enrichment_tests
+
+Perform all possile combinations of GO type and query lists to run all gene ontology enrichment test.
+
+Input Parameters:
+
+* query\_list\_id\_list - List of labels to annotate the multiple lists of query genes 
+* multiple\_lists\_of\_genes - Multiple lists of query genes 
+* ontologies\_list - 
+* go\_dictionary  -
+* universe  - 
+* pvalueCutoff  - Benjamini-Hochberg adjusted p-value < X for a GO term to be significant (default 0.05)
+* gostat_pvalue_cutoff - p-value cutoff for GO stats, useful for when condition_on_child_terms is TRUE
+* testDirection - Over- or under-representation of the GO terms (default "over")
+* condition\_on\_child\_terms - If true, genes associated with significantly enriched child GO term are removed from the query list before testing the parent GO term (default = TRUE)
+
+Return parameter: 
+
+A list containing the following two elements: 
+
+* enriched\_genes - A table of significantly enriched GO terms for each cluster of co-expressed genes
+* enriched\_go\_terms - A table of genes associated with each significantly enriched GO terms
+```{r}
+
+  
+
+run_list_of_go_term_enrichment_tests <- function( query_list_id_list, multiple_lists_of_genes, 
+												  ontologies_list, 
+												  go_dictionary, universe, 
+												  pvalueCutoff = 0.05, # This is the p-value cutoff after Benjamini-Hochberg correction
+												  gostat_pvalue_cutoff = 1, # Setting this to 1 will give all possible GO terms
+												  testDirection = "over", 
+												  condition_on_child_terms = FALSE 
+												  ) {
+
+	## BP = biological processes, 
+	## CC = cellular component, 
+	## MF = molecular function
+	
+	debug_flag <- 0
+	
+	num_of_ontologies <-  length(ontologies_list)
+	num_of_queries <- length(query_list_id_list)
+	
+	ontologies_list <- purrr::map( ontologies_list, function(x) {  rep(x, times=num_of_queries)    }) %>% unlist() %>% as.list()
+
+	query_list_id_list <- rep(query_list_id_list, num_of_ontologies  ) 
+	
+	multiple_lists_of_genes <- rep( multiple_lists_of_genes, num_of_ontologies)
+	
+	my_input_list <- list( query_list_id_list, multiple_lists_of_genes, ontologies_list )
+	
+	my_partial_go_term_query <- purrr::partial ( run_for_one_gene_list_GO_term_query, 
+										  go_dictionary = go_dictionary, 
+										  universe =universe, 
+										  pvalueCutoff = pvalueCutoff, 
+										  gostat_pvalue_cutoff = gostat_pvalue_cutoff, 
+										  testDirection = testDirection, 
+										  condition_on_child_terms = condition_on_child_terms ) 
+	
+	if (debug_flag == 1) { 
+			str(my_input_list )
+	}
+		
+	results_list <- purrr::pmap(my_input_list, my_partial_go_term_query)
+
+	if (debug_flag == 1) { 
+		# print( head( results_list[[3]]$enriched_genes ) )
+		# print ( head( results_list[[3]]$enriched_go_terms) )
+	}
+	
+	enriched_genes <- purrr::map ( results_list, function ( x) {  return(  x$enriched_genes ) }) %>% 
+					  plyr::ldply()	
+					  #  purrr::map ( function ( x) {  return( dplyr::mutate(x, go_id = as.character(go_id),
+					  #  													  gene_id = as.character(gene_id))) }) %>%
+					  # purrr::reduce(dplyr::bind_rows)
+	
+	enriched_go_terms <- purrr::map ( results_list, function ( x) {  return(  x$enriched_go_terms ) }) %>% 
+						 plyr::ldply()
+						 #  purrr::map ( function ( x) {  return( dplyr::mutate(x, go_id = as.character(go_id) )) }) %>%
+						 # purrr::reduce(dplyr::bind_rows)
+	
+	return(list ( enriched_genes=enriched_genes, enriched_go_terms=enriched_go_terms ) )
+}
+```
+
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+run_list_of_go_term_enrichment_tests_old <- function( query_list_id_list, multiple_lists_of_genes, go_dictionary, universe, 
+												  pvalueCutoff = 0.05, # This is the p-value cutoff after Benjamini-Hochberg correction
+												  gostat_pvalue_cutoff = 0.05, # Setting this to 1 will give all possible GO terms
+												  testDirection = "over", 
+												  condition_on_child_terms = FALSE) {
+	# pvalueCutoff             # p-value cutoff
+	# testDirection            # Over representation of genes in the gene list
+	# condition_on_child_terms # If conditional is TRUE, then less results are produced
+	## BP = biological processes, 
+	## CC = cellular component, 
+	## MF = molecular function
+	ontologies_list <- c("BP", "CC", "MF"  ) 
+	
+	# Initialize the result tables
+	num_elements_in_list <- length(ontologies_list) * length(query_list_id_list)
+	enriched_genes       <- lapply( 1:num_elements_in_list   , function(i) { return(NULL)})
+	enriched_go_terms    <- lapply( 1:num_elements_in_list   , function(i) { return(NULL)})
+	curr_position <- 1
+	
+	### Loop over all possible combinations of GO type and query lists to run all gene ontology enrichment test
+	for ( i in 1:length(ontologies_list) ) {
+		for ( j in 1:length(query_list_id_list) ) {
+			
+			# Deal with the ontologies used
+			# Note that: annotation_list_id == type_of_ontology_used                         
+			type_of_ontology_used   <- ontologies_list[i]
+			
+			# Deal with the type of queries done
+			query_genes <-  multiple_lists_of_genes[[j]]
+			query_list_id       <-  query_list_id_list[j]
+			
+			
+			results_list <- run_for_one_gene_list_GO_term_query ( query_list_id, query_genes, type_of_ontology_used, 
+																  go_dictionary = go_dictionary, universe =universe, 
+																  pvalueCutoff = pvalueCutoff, 
+																  gostat_pvalue_cutoff = gostat_pvalue_cutoff, 
+																  testDirection = testDirection, 
+																  condition_on_child_terms = condition_on_child_terms ) 
+			
+			enriched_go_terms[[curr_position]] <- results_list$enriched_go_terms
+			
+			enriched_genes[[curr_position]] <- results_list$enriched_genes
+			
+			curr_position <- curr_position + 1
+			
+		}
+	}
+	
+	return(list ( enriched_genes=enriched_genes, enriched_go_terms=enriched_go_terms ) )
+}
+```
+
+### Function: get_crypto_go_dictionary_of_choice
+```{r}
+
+# Get the gene to GO terms dictionary for Cryptococcus species, using a dictionary chosen by the user
+get_crypto_go_dictionary_of_choice <- function (  organism_long_name, annotation_directory, bp_file_name, mf_file_name, cc_file_name) {
+
+        ### Using Blast2GO, Uniprot, and manual OrthoMCL (1 to 1 matches) annotations
+        goframeData_bp <- read.table ( file.path( annotation_directory, bp_file_name),  sep="\t", header=TRUE) 
+        goframeData_mf <- read.table ( file.path( annotation_directory, mf_file_name),  sep="\t", header=TRUE) 
+        goframeData_cc <- read.table ( file.path( annotation_directory, cc_file_name),  sep="\t", header=TRUE) 
+        
+        goFrame_bp <- GOFrame(goframeData_bp, organism = organism_long_name)
+        goFrame_mf <- GOFrame(goframeData_mf, organism = organism_long_name)
+        goFrame_cc <- GOFrame(goframeData_cc, organism = organism_long_name)
+
+        goAllFrame_bp <- GOAllFrame(goFrame_bp)
+        goAllFrame_mf <- GOAllFrame(goFrame_mf)
+        goAllFrame_cc <- GOAllFrame(goFrame_cc)
+
+        go_dictionary_bp <- GeneSetCollection(goAllFrame_bp, setType = GOCollection())
+        go_dictionary_mf <- GeneSetCollection(goAllFrame_mf, setType = GOCollection())
+        go_dictionary_cc <- GeneSetCollection(goAllFrame_cc, setType = GOCollection())
+
+        go_dictionary <- list ( BP=go_dictionary_bp, MF=go_dictionary_mf, CC=go_dictionary_cc)
+
+        return( go_dictionary  )
+}
+```
+
+
+### Function: get_scer_universe
+Get the list of all genes for C. neoformans H99
+```{r}
+
+get_scer_universe <- function(my_channel) {
+  # List of all the genes from C. neoformans H99
+        ### Need to replace query of list of universe genes with a proper one
+        universe_helper <- sqlQuery( my_channel, " select distinct orf_id from genome_annotation_scer_table order by orf_id")
+        universe <- as.vector ( universe_helper[,1])
+
+        return(universe)
+}
+```
+
+
+
+
+### Function: run_soms_enrichment_tests
+
+Perform GO terms enrichment on each of the SOM clusters.
+
+Input parameters:
+
+* cluster\_for\_each\_gene - results generated from the script 'run_SOMs_analysis.Rmd'
+* expt\_label - The label for each experiment
+* results\_directory - the directory to save the output files 
+* pvalueCutoff  - Benjamini-Hochberg adjusted p-value < X for a GO term to be significant (default 0.05)
+
+* Outputs the following files:
+
+	+ enriched\_go\_terms\_SOMs\_<expt\_label>.txt - List of significantly enriched GO terms for each cluster of co-expressed genes
+	+ enriched\_genes\_SOMs\_<expt\_label>.txt - List of genes associated with each significantly enriched GO terms
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+run_soms_enrichment_tests <- function(  cluster_for_each_gene, go_dictionary, universe,  
+										ontologies_list = c("BP", "CC", "MF"),
+										pvalueCutoff = 0.05, 
+										gostat_pvalue_cutoff = 1, 
+ 										testDirection = "over", 
+ 										condition_on_child_terms = FALSE ) {
+	list_of_de_genes <- list()
+	
+	som_cluster_names <- c()
+	
+	for ( i in  sort(as.vector(unique ( cluster_for_each_gene[, "cluster"] ))) ) 
+	{
+		temp_array <- as.vector( cluster_for_each_gene[cluster_for_each_gene[, "cluster"] == i, "id_a"] )
+		temp_cluster_name <- paste( "SOMs_cluster_C", i, sep="" ) 
+		
+		som_cluster_names <- c( som_cluster_names, temp_cluster_name)
+		
+		if ( is.na(temp_array)[1] == FALSE)
+		{ 
+			list_of_de_genes[[i]] <- temp_array
+		}
+	}
+	
+	## Performs GO terms enrichment test
+	go_enrichment_results <- run_list_of_go_term_enrichment_tests(  som_cluster_names, list_of_de_genes, 
+																	ontologies_list,
+																	go_dictionary, universe,  
+																	pvalueCutoff ,
+																	gostat_pvalue_cutoff ,
+																	testDirection , 
+												  					condition_on_child_terms 
+																 )
+
+	return( go_enrichment_results)
+}
+```
+
+
+

@@ -1,0 +1,89 @@
+---
+title: "collate_gene_annotation_info.Rmd"
+output: html_notebook
+---
+
+
+## Load libraies and scripts
+```{r}
+library(knitr)
+
+source( '../Common/global_parameters.R')
+source( '../Common/helper_functions.R')
+sessionInfo()
+```
+
+
+## Read files 
+```{r}
+
+curated_data_dir <- file.path( data_directory, "Curated_Data" )
+
+kinases <- read.table ( file.path( curated_data_dir, "Kinases.tab"), sep="\t", header=TRUE, quote="")
+transcription_factors <- read.table ( file.path( curated_data_dir, "Transcription_Factors.tab"), sep="\t", 
+									  header=TRUE, quote="", comment.char = "")
+cell_cycle_regulated_genes <- read.table ( file.path( curated_data_dir, "Cell_Cycle.tab" ), sep="\t", header=TRUE, quote="")
+virulence_genes <- read.table ( file.path( curated_data_dir, "Virulence.tab"), sep="\t", header=TRUE, quote="")
+cneo_gene_annotation <- read.table ( file.path( data_directory, 'Gene_Annotation/cneo_gene_names.txt' ) , 
+								header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
+
+scer_gene_annotation <- read.table ( file.path( data_directory, 'Gene_Annotation/scer_gene_names.txt' ) , 
+								header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE) %>%
+                dplyr::rename( scer_oln_id = "oln_id", 
+                               scer_gene_name = "gene_name",
+                               scer_uniprot_description = "uniprot_description")
+
+
+
+orthologs <- read.table ( file.path( curated_data_dir, "scer_cneo_orthologs.tab") , 
+								header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
+
+
+
+```
+
+## Generate C. neoformans annotation summary table 
+```{r}
+
+transcription_factors_summary <- transcription_factors %>%
+	dplyr::select(one_of (c("orf_id"))) %>%
+	dplyr::mutate( is_tf=TRUE)
+
+kinases_summary <- kinases %>%
+	dplyr::select(one_of (c("orf_id"))) %>%
+	dplyr::mutate( is_kinases=TRUE)
+
+virulence_genes_summary <- virulence_genes  %>%
+	dplyr::select(one_of (c("orf_id"))) %>%
+	dplyr::mutate( is_virulence_gene=TRUE)
+
+orthologs_summary <- orthologs %>%
+						dplyr::left_join ( scer_gene_annotation, by= "scer_oln_id") %>%
+						dplyr::arrange(scer_gene_name ) %>%
+						dplyr::group_by( cneo_orf_id) %>%
+						dplyr::summarise( scer_orthologs = paste(scer_gene_name, collapse="; " ), 
+										  scer_ortholog_descriptions = paste(scer_uniprot_description, collapse="; " ) ) %>%
+						dplyr::ungroup() 
+
+cneo_gene_annotation_updated <- cneo_gene_annotation %>% 
+	dplyr::left_join ( transcription_factors_summary, by="orf_id") %>%
+	dplyr::left_join ( kinases_summary, by="orf_id") %>%
+		dplyr::left_join ( virulence_genes_summary, by="orf_id") %>%
+		dplyr::left_join ( cell_cycle_regulated_genes, by="orf_id") %>%
+		dplyr::left_join( orthologs_summary, by =c("orf_id" = "cneo_orf_id") )
+
+
+write.table ( cneo_gene_annotation_updated, 
+              file=file.path(data_directory, "Gene_Annotation", "cneo_gene_annotation_summary.txt" ),
+			  	row.names = FALSE, quote=FALSE, sep="\t", na="" )
+
+```
+
+
+
+
+
+
+
+
+

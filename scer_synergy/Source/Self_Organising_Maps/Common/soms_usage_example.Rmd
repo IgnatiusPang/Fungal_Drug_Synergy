@@ -1,0 +1,69 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+#### SOMs for 'AMB only' treatment
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+# scer_compare_A_down_reg = list of genes that with significantly decreased expression in 'AMB only' treatment
+# scer_compare_A_up_reg = list of genes that with significantly increased expression in 'AMB only' treatment
+scer_compare_A_list_of_de_genes <-  c( scer_compare_A_down_reg, scer_compare_A_up_reg) 
+
+# A label for the experiment, used for data source identification in data frame and for output files
+expt_label <- "AMB_only_treatment"
+
+# scer_log_rpkm = the log rpkm values for each gene for the 12 different samples
+scer_compare_A_data_matrix <- scer_log_rpkm[scer_compare_A_list_of_de_genes,]
+
+# Run a 5 x 5 SOMs analysis for S. cerevisiae (scer)
+scer_compare_compare_A_som <- run_soms_analysis( scer_compare_A_data_matrix, "scer", expt_label, 5, 5, results_directory_soms, my_som_random_number_seed )
+
+# Draw the SOMs plot, each cluster a different colour for the lines
+draw_soms_xyplot ( scer_compare_compare_A_som$pivot, 5, 5  ) 
+```
+
+**Figure 1.** The SOM for 'AMB only' treatment . Each cluster in the 5 x 5 map represents a group of differentially expressed genes with similar expression profile. For each cluster, the y-axis represents the scaled gene expression level (scaled log RPKM) and the x-axis represents the 12 samples arranged from left to right, starting with three matched controls for AMB only, three samples for AMB only treatment, three control samples for the AMB + LF treatment, and three samples for the AMB + LF treatment. The clusters were numbered from bottom to top and left to right in the self-organizing map, such that the bottom-left cluster is number 1 and the top-right cluster is number 25.  
+
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+# For each gene, record the cluster ID and whether the gene is has significnat up- or down-regulated expression
+cluster_for_each_gene_AMB_only <- unique(scer_compare_compare_A_som$pivot[,c("id_a", "id_b", "cluster")])
+compare_A_up_or_down <- rep(NA, length( cluster_for_each_gene_AMB_only[,1] ) )
+compare_A_up_or_down[which ( cluster_for_each_gene_AMB_only[,1] %in% scer_compare_A_down_reg ) ] <- "down"
+compare_A_up_or_down[which ( cluster_for_each_gene_AMB_only[,1] %in% scer_compare_A_up_reg ) ] <- "up"
+compare_A_soms_de <- data.frame( expt_label, "scer", cluster_for_each_gene_AMB_only[,c(1,3)], compare_A_up_or_down )
+write.table (compare_A_soms_de, paste( results_directory_soms, "som_clusters_compare_A_scer.txt", sep="")  )
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# Obtain the code book vector for each cluster in the SOM (i.e. average expression profile that is representative of each cluster)
+compare_A_codebook_vector <- scer_compare_compare_A_som$som$codes
+
+# Plot the codebook vector for the 'AMB only' treatment 
+heatmap.2(compare_A_codebook_vector,  symm = FALSE, col = my_colour_palette, Colv=NA,  #distfun = function(c) as.dist(1 - c),
+		  dendrogram = "row", hclustfun=function(h)hclust(h,method="average"),  density.info="none", 
+		  trace="none", # main = "Clustering miRNA with low to medium CV",
+		  #labRow=,
+		  xlab="Samples",
+		  ylab="Clusters",
+		  labCol= heatmap_column_labels, 
+		  cexCol= 0.0 + 1/log(length(compare_A_codebook_vector[1,]), texts_size_factor_col), 
+		  cexRow= 0.0 + 1/log(length(compare_A_codebook_vector[,1]), texts_size_factor_row),
+		  margins = c(margins_size_factor, margins_size_factor),
+		  offsetRow = 0.02,
+		  offsetCol = 0.02 )
+```
+
+**Figure 2.** The average gene expression pattern for each cluster of the 'AMB only' treatments. The x-axis represents the 12 samples and the y-axis represents the 25 clusters. The four treatment types are labelled in the x-axis with the biological triplicates numbered; A = AMB only, AL = AMB + LF, CA = matched control for AMB only, CAL = matched control for AMB + LF. The colour of the heat map represents the log rpkm value scaled to standard normal per gene using Pareto scaling. The colour scale is shown at the bottom left of the panel. The dendrogram on the left divide the clusters into two large groups, which contains genes with significantly up- or down-regulated expression, respectively. For the AMB only treatment, genes with increased expression were found in clusters 16-25, genes with decreased expression were found in clusters 1-15.  
+
+
+
+### Saving the results 
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+save(cluster_for_each_gene_AMB_only,
+          file=paste(results_directory,  "edgeR_scer_SOMs_results_AMB_only_AMB_n_LF.Rdata", sep="") )
+```

@@ -1,0 +1,533 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+## Load libraries and scripts
+```{r}
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+p_load(GO.db)
+p_load(furrr)
+
+source( '../Common/global_parameters.R')
+source( '../Common/helper_functions.R')
+
+plan(multiprocess)
+
+sessionInfo()
+
+```
+
+## Global parameters
+```{r}
+
+gaf_headers <- c("DB",
+"DB Object ID",
+"SYMBOL", # "DB Object Symbol",
+"Qualifier",
+"GO.TERM", # "GO ID"
+"DB:Reference (|DB:Reference)",
+"GO.EVIDENCE.CODE", # "Evidence Code",
+"With (or) From",
+"GO.ASPECT", #  "Aspect"
+"DB Object Name",
+"DB Object Synonym (|Synonym)",
+"DB Object Type",
+"Taxon(|taxon)",
+"Date",
+"ASSIGNED.BY",  # "Assigned By",
+"Annotation Extension",
+"Gene Product Form ID" ) 
+
+```
+
+
+
+## Old GO term files 
+```{r}
+
+old_bp  <- read.table( file.path( data_directory, "Gene_Ontology_Annotation/old/cneo_goframeData_bp.tab" ), header=TRUE )
+old_cc  <- read.table( file.path( data_directory, "Gene_Ontology_Annotation/old/cneo_goframeData_cc.tab" ), header=TRUE )
+old_mf  <- read.table( file.path( data_directory, "Gene_Ontology_Annotation/old/cneo_goframeData_mf.tab" ), header=TRUE )
+
+```
+
+## QuickGO
+```{r}
+quickgo <- read.table(file.path( data_directory, "QuickGO/QuickGO-annotations-1554894162403-20190410.tsv"  ), sep="\t",
+                       stringsAsFactors = FALSE, header=TRUE, quote = "", strip.white=TRUE)
+
+dim(quickgo)
+
+gaf_colnames <- colnames( quickgo )
+
+
+quickgo_cleaned <- quickgo %>% 
+  dplyr::select(  one_of ( c("SYMBOL", "GO.TERM", "GO.NAME", "GO.EVIDENCE.CODE", "ASSIGNED.BY", "GO.ASPECT" )) ) %>%
+  distinct()
+
+
+dim(quickgo_cleaned)
+
+quickgo_cleaned %>%
+  distinct( GO.EVIDENCE.CODE)
+
+```
+
+## FungiDB
+```{r}
+
+fungidb <- read.table(file.path( data_directory, "FungiDB/GenesByTaxon_GOTerms.csv"  ), sep=",",
+                       stringsAsFactors = FALSE, header=TRUE, quote = "\"", strip.white=TRUE)
+
+
+
+fungidb_cleaned <- fungidb %>% 
+  dplyr::select(  one_of ( c("Gene.ID", "GO.ID", "GO.Term.Name", "Evidence.Code", "Source", "Ontology" )) ) %>%
+  dplyr::mutate( Ontology = case_when( Ontology  == "Biological Process" ~ 'P',
+                                         Ontology== "Cellular Component" ~ 'C',
+                                         Ontology == "Molecular Function" ~ 'M',
+                                         TRUE ~ NA_character_
+                                       )) %>%
+  distinct()
+
+colnames(fungidb_cleaned) <-  c("SYMBOL", "GO.TERM", "GO.NAME", "GO.EVIDENCE.CODE", "ASSIGNED.BY", "GO.ASPECT" )
+
+
+fungidb_cleaned %>%
+  distinct( GO.EVIDENCE.CODE)
+
+```
+
+
+## Merge all GO annotation from other fungi together 
+```{r}
+
+aspgd_go <- read.table ( file.path( data_directory, "Gene_Ontology_Raw/Species_annotation/New/aspgd.gaf" ) , sep="\t",
+                       stringsAsFactors = FALSE, header=FALSE, strip.white=TRUE, quote="", comment.char="!"  ) 
+colnames( aspgd_go) <- c(gaf_headers )
+
+# Aspergillus fumigatus
+aspgd_go_cleaned <- aspgd_go %>%
+                      dplyr::mutate( GO.NAME = Term( GO.TERM)    )  %>%
+                    dplyr::select(SYMBOL, GO.TERM,   GO.NAME, GO.EVIDENCE.CODE, ASSIGNED.BY,  GO.ASPECT )  %>%
+                    distinct()
+
+# length( which( aspgd_go_cleaned$SYMBOL %in% orthologs_mapping$speciesID  ))
+
+
+pombase_go <- read.table ( file.path( data_directory, "Gene_Ontology_Raw/Species_annotation/New/pombase.gaf" ) , sep="\t",
+                       stringsAsFactors = FALSE, header=FALSE, strip.white=TRUE, quote="", comment.char="!"  ) 
+colnames( pombase_go) <- c(gaf_headers )
+
+## S. pombe
+pombase_go_cleaned <- pombase_go %>%
+                      dplyr::mutate( GO.NAME = Term( GO.TERM)    )  %>%
+                    dplyr::select(SYMBOL, GO.TERM,   GO.NAME, GO.EVIDENCE.CODE, ASSIGNED.BY,  GO.ASPECT )  %>%
+                    distinct()
+
+# length( which( pombase_go_cleaned$SYMBOL %in% orthologs_mapping$speciesID  ))
+
+
+sgd_go <- read.table ( file.path( data_directory, "Gene_Ontology_Raw/Species_annotation/New/sgd.gaf" ) , sep="\t",
+                       stringsAsFactors = FALSE, header=FALSE, strip.white=TRUE, quote="", comment.char="!"   ) 
+colnames( sgd_go) <- c(gaf_headers )
+
+## Yeast
+sgd_go_cleaned <- sgd_go %>%
+  dplyr::mutate( SYMBOL = str_split( `DB Object Synonym (|Synonym)`, "\\|" ) %>% purrr::map_chr( ~.[1])  ) %>%
+                      dplyr::mutate( GO.NAME = Term( GO.TERM)    )  %>%
+                    dplyr::select(SYMBOL, GO.TERM,   GO.NAME, GO.EVIDENCE.CODE, ASSIGNED.BY,  GO.ASPECT )  %>%
+                    distinct()
+  
+# length( which( sgd_go_cleaned$SYMBOL %in% orthologs_mapping$speciesID  ))
+
+## Mushroom
+avar_go <- read.table ( file.path( data_directory, "Gene_Ontology_Raw/Species_annotation/New/Abisporus_varbisporusH97.v2.goinfo_FilteredModels3.tab" ) ,
+                        sep="\t",  stringsAsFactors = FALSE, header=TRUE, strip.white=TRUE, quote="", comment.char  =""  ) 
+
+colnames(avar_go)
+
+
+avar_go_cleaned <-  avar_go %>%
+                    dplyr::rename(  SYMBOL = "proteinId",
+                                    GO.TERM = "goAcc",
+                                    GO.NAME = "goName",
+                                    GO.ASPECT = "gotermType" ) %>%
+                    dplyr::mutate( GO.EVIDENCE.CODE = "ND",
+                                   ASSIGNED.BY = "JGI" ) %>%
+                    dplyr::mutate( GO.ASPECT = case_when( GO.ASPECT  == "biological_process" ~ 'P',
+                                         GO.ASPECT== "cellular_component" ~ 'C',
+                                         GO.ASPECT == "molecular_function" ~ 'M',
+                                         TRUE ~ NA_character_
+                                       )  ) %>% 
+  dplyr::select(  one_of ( c("SYMBOL", "GO.TERM", "GO.NAME", "GO.EVIDENCE.CODE", "ASSIGNED.BY", "GO.ASPECT" )) ) %>%
+  distinct() %>%
+  dplyr::mutate( SYMBOL = as.character(SYMBOL))
+                        
+  
+  
+# length( which( avar_go_cleaned$SYMBOL %in% orthologs_mapping$speciesID  ))
+```
+
+## Use OrthoMCL to map GO terms from other fungi to C. neoformans H99
+```{r}
+
+orthologs_mapping <-  read.table ( file.path( data_directory, "Gene_Ontology_Raw/Species_annotation/Old/Final_orthologs.txt" ) , sep="\t",
+                       stringsAsFactors = FALSE, header=TRUE, strip.white=TRUE, quote=""  ) 
+
+
+fungi_go_cleaned <- avar_go_cleaned %>%
+  bind_rows(sgd_go_cleaned) %>%
+  bind_rows(pombase_go_cleaned) %>%
+  bind_rows(aspgd_go_cleaned)
+
+all_cneo_groups <- orthologs_mapping %>%
+  filter ( species == "cneo") %>%
+  dplyr::select(speciesID, ortoMCLID) %>%
+  dplyr::rename( CNEO_SYMBOL  = "speciesID" )
+
+other_fungi_groups <- orthologs_mapping %>%
+  filter ( species != "cneo") %>%
+  dplyr::select(speciesID, ortoMCLID) %>%
+  dplyr::rename( OTHER_SYMBOL  = "speciesID" )
+
+other_fungi_groups_go <- other_fungi_groups %>%
+                         inner_join( fungi_go_cleaned, by=c("OTHER_SYMBOL" = "SYMBOL"))
+
+
+orthomcl_cleaned <-  all_cneo_groups %>%
+  inner_join( other_fungi_groups_go, by="ortoMCLID" ) %>%
+  dplyr::select(-ortoMCLID, -OTHER_SYMBOL) %>%
+  dplyr::rename(  SYMBOL =  "CNEO_SYMBOL") %>%
+  distinct()
+```
+
+
+## Blast2GO
+```{r}
+
+# http://geneontology.org/docs/go-annotation-file-gaf-format-2.0/
+
+
+
+blast2go   <- read.table( file.path(results_directory, "Blast2GO/blast2go_gaf.txt") , sep="\t",
+                       stringsAsFactors = FALSE, header=FALSE, skip=4, strip.white=TRUE) %>%
+            as_tibble()
+
+
+colnames( blast2go) <- gaf_headers
+
+
+blast2go_temp <- blast2go %>%
+                      dplyr::mutate( GO.NAME = Term( GO.TERM)    )  %>%
+                    dplyr::select(SYMBOL, GO.TERM,   GO.NAME, GO.EVIDENCE.CODE, ASSIGNED.BY,  GO.ASPECT )  %>%
+                    dplyr::mutate( SYMBOL = str_replace(SYMBOL,"(CNAG_\\d{5})T\\d*$", "\\1")) %>%
+                    distinct()
+
+
+all_quickgo_fungidb_terms <- quickgo_cleaned %>% 
+                      bind_rows( fungidb_cleaned) %>%
+                      # bind_rows( orthomcl_cleaned) %>%
+                      distinct(GO.TERM)
+
+
+blast2go_cleaned <- blast2go_temp %>%
+                     inner_join( all_quickgo_fungidb_terms, by="GO.TERM")
+ 
+
+```
+
+
+
+
+```{r}
+get_ancestors <- function(GO.ASPECT, GO.TERM) {
+  
+ if( GO.ASPECT == "F") {
+    return( GOMFANCESTOR[[GO.TERM]] )
+ }  else if ( GO.ASPECT == "C" ) {
+     return( GOCCANCESTOR[[GO.TERM]] )
+ } else if ( GO.ASPECT == "P" ) {
+     return( GOBPANCESTOR[[GO.TERM]] )
+ } else {
+   return( c())
+ }
+}
+
+remove_ancestors <- function( input_table ) {
+  
+  ## Get a distinct list of GO terms and then get all their GO term ancestors 
+ ancestors_list <- input_table %>%
+                   distinct(  GO.ASPECT, GO.TERM) %>%
+                   dplyr::mutate( ancestors = purrr::map2(  GO.ASPECT, GO.TERM, get_ancestors  ) )
+
+ ancestors_unnested <- ancestors_list %>%
+                       mutate( ancestors = ifelse( is.null( ancestors) , list(), ancestors  )   ) %>%
+                       unnest(ancestors)
+
+ ## Merge all the ancestors back to the main table 
+ to_clean_ancestors <-  input_table  %>%
+    left_join( ancestors_unnested, by=c( "GO.ASPECT", "GO.TERM")) %>%
+    dplyr::distinct( SYMBOL,  ancestors, GO.ASPECT) %>%
+    dplyr::filter ( ancestors != "all")  %>%
+    dplyr::mutate ( to_remove = 1) 
+  
+ ## Identify all the ancestors which needs to be removed and then remove them
+ input_cleaned <- input_table %>%
+                  left_join(to_clean_ancestors, by=c("SYMBOL" = "SYMBOL",
+                                                     "GO.TERM" = "ancestors",
+                                                     "GO.ASPECT" = "GO.ASPECT") )%>% 
+                  filter ( is.na(to_remove ) ) %>%
+                  dplyr::select( - to_remove )
+
+  return( input_cleaned)
+}
+
+```
+
+## Remove the ancestors whenever it is possible 
+```{r}
+
+all_tables_merged <- blast2go_cleaned %>%
+  bind_rows( quickgo_cleaned ) %>%
+  bind_rows( fungidb_cleaned ) %>%
+  bind_rows( orthomcl_cleaned )
+
+all_tables_ancestors_cleaned <- remove_ancestors ( all_tables_merged ) %>%
+                                distinct()
+
+write.table(all_tables_ancestors_cleaned,  file.path( data_directory, "Gene_Ontology_Annotation", 
+                                                      "Ancestor_Cleaned", "all_gene_ontology_db_merged.tab" ),
+            sep="\t", row.names = FALSE, col.names = TRUE, quote=FALSE)
+
+
+# all_tables_ancestors_cleaned
+# 
+# 
+# all_tables_ancestors_cleaned_old <- read_tsv ( file.path(data_directory, "Gene_Ontology_Annotation/Ancestor_Cleaned/old/all_gene_ontology_db_merged.tab")) %>%
+#                                     distinct()
+# 
+# 
+# dplyr::setdiff( all_tables_ancestors_cleaned_old, all_tables_ancestors_cleaned)
+# dplyr::setdiff( all_tables_ancestors_cleaned, all_tables_ancestors_cleaned_old)
+# 
+# nrow(all_tables_ancestors_cleaned_old)
+# nrow( all_tables_ancestors_cleaned)
+
+list_of_go_aspects <- c("P", "C", "F")
+
+list_of_tables <- purrr::map( list_of_go_aspects, function(go_aspect) {
+all_tables_ancestors_cleaned %>% 
+  dplyr::filter( GO.ASPECT == go_aspect) %>%
+  dplyr::distinct( GO.TERM, GO.EVIDENCE.CODE, SYMBOL ) %>%
+  dplyr::rename (  go_id = "GO.TERM",
+            evidence = "GO.EVIDENCE.CODE",
+            orf_id = "SYMBOL") } )
+
+names( list_of_tables) <- list_of_go_aspects
+
+list_of_output_files <- c( "cneo_goframeData_bp.tab",
+                           "cneo_goframeData_cc.tab",
+                           "cneo_goframeData_mf.tab")
+
+create_directory_if_not_exists(file.path( data_directory, "Gene_Ontology_Annotation", "Ancestor_Cleaned"))
+
+purrr::walk2(list_of_tables, list_of_output_files, 
+             function( x, y){ write.table( x, 
+                                           file.path( data_directory, "Gene_Ontology_Annotation", "Ancestor_Cleaned", y ),
+                                           sep="\t", row.names = FALSE, col.names = TRUE, quote=FALSE) } )
+
+
+```
+
+
+## Othe other methods, give database priority
+```{r}
+
+
+blast2go_for_compare <-  blast2go_cleaned %>% 
+                         dplyr::select ( -GO.NAME, -GO.EVIDENCE.CODE, -ASSIGNED.BY ) %>%
+                         dplyr::mutate( SOURCE = "B2G", VALUE = 1 ) %>%
+                         distinct()
+
+quickgo_for_compare <- quickgo_cleaned %>% 
+                       dplyr::select ( -GO.NAME, -GO.EVIDENCE.CODE, -ASSIGNED.BY ) %>%
+                         dplyr::mutate( SOURCE= "QG", VALUE = 1) %>%
+                         distinct()
+
+
+fungidb_for_compare <- fungidb_cleaned %>% 
+                       dplyr::select ( -GO.NAME, -GO.EVIDENCE.CODE, -ASSIGNED.BY ) %>%
+                         dplyr::mutate( SOURCE= "FDB", VALUE = 1) %>%
+                         distinct()
+
+
+orthomcl_for_compare <- orthomcl_cleaned %>% 
+                       dplyr::select ( -GO.NAME, -GO.EVIDENCE.CODE, -ASSIGNED.BY ) %>%
+                         dplyr::mutate( SOURCE= "MCL", VALUE = 1) %>%
+                         distinct()
+
+
+
+
+
+## GO terms level comparison
+compare_b2g_qg_terms <- blast2go_for_compare %>%
+  bind_rows(quickgo_for_compare) %>%
+  bind_rows( fungidb_for_compare) %>%
+  bind_rows( orthomcl_for_compare) %>%
+  spread( SOURCE,  VALUE, fill=0 ) %>%
+  group_by ( SYMBOL, GO.TERM, GO.ASPECT) %>%
+  summarise( B2G = sum(B2G), QG = sum(QG), FDB = sum(FDB), MCL  = sum(MCL)  ) %>%
+  ungroup %>%
+  mutate( B2G = ifelse(B2G == 0, 0, 1),
+          QG = ifelse(QG == 0, 0, 1),
+          FDB  = ifelse(FDB == 0, 0, 1),
+          MCL = ifelse(MCL == 0, 0, 1)) 
+
+
+## Protein level comparison
+compare_b2g_qg_proteins <- compare_b2g_qg_terms %>%
+  dplyr::select( -GO.TERM) %>%
+  distinct( ) %>%
+  group_by ( SYMBOL, GO.ASPECT) %>%
+  summarise( B2G = sum(B2G), QG = sum(QG), FDB = sum(FDB), MCL  = sum(MCL)     ) %>%
+  ungroup %>%
+  mutate( B2G = ifelse(B2G == 0, 0, 1),
+          QG = ifelse(QG == 0, 0, 1),
+          FDB  = ifelse(FDB == 0, 0, 1),
+          MCL = ifelse(MCL == 0, 0, 1) ) 
+
+compare_go_terms_venn_diagram <- compare_b2g_qg_proteins %>%
+  group_by(GO.ASPECT, B2G, QG, FDB, MCL) %>%
+  summarise( counts = n())
+
+compare_go_terms_venn_diagram
+
+
+b2g_only_proteins_terms <- blast2go_cleaned %>%
+  dplyr::mutate( SOURCE = "B2G", VALUE = 1 ) %>%
+  bind_rows( quickgo_cleaned %>%
+             dplyr::mutate( SOURCE = "QG", VALUE = 1 ))  %>%
+  bind_rows( fungidb_cleaned %>%
+             dplyr::mutate( SOURCE = "FDB", VALUE = 1 ))  %>%
+  bind_rows( orthomcl_for_compare %>%
+             dplyr::mutate( SOURCE = "MCL", VALUE = 1 ))  %>%  
+  spread( SOURCE,  VALUE, fill=0 ) %>%
+  dplyr::select( SYMBOL, GO.TERM, GO.NAME, GO.ASPECT, B2G, FDB, QG, MCL) %>%
+  group_by( SYMBOL, GO.TERM, GO.NAME, GO.ASPECT ) %>%
+  summarise( B2G = sum(B2G), QG = sum(QG), FDB = sum(FDB), MCL = sum(MCL)    ) %>%
+  ungroup %>%
+  mutate( B2G = ifelse(B2G == 0, 0, 1),
+          QG = ifelse(QG == 0, 0, 1),
+          FDB  = ifelse(FDB == 0, 0, 1),
+          MCL = ifelse(MCL == 0, 0, 1) )  %>%
+  inner_join( compare_b2g_qg_proteins, by = c("SYMBOL", "GO.ASPECT", "B2G", "QG", "FDB", "MCL")) %>%
+  filter( B2G == 1 & QG == 0 & FDB == 0 & MCL==0)
+
+
+
+
+```
+
+## Select GO terms required
+
+Annotation for Protein from QuickGO, then annotation for protein from FungiDB, then annotation for protein from Blast2GO
+
+
+```{r}
+
+selected_proteins <- compare_b2g_qg_proteins %>%
+                          dplyr::filter( QG == 1 | 
+                                      (FDB == 1 & QG == 0) |
+                                      (MCL == 1 & FDB == 0 & QG == 0)  |
+                                      (B2G == 1 & MCL == 0 & FDB ==0 & QG==0 ) ) %>%
+                          dplyr::select( SYMBOL,  GO.ASPECT)
+```                              
+     
+## Get the final cleaned list of GO terms                     
+```{r}
+go_terms_join_and_spread <- blast2go_cleaned  %>%
+  dplyr::mutate( SOURCE = "B2G", VALUE = 1 ) %>%
+  bind_rows( quickgo_cleaned %>%
+             dplyr::mutate( SOURCE = "QG", VALUE = 1 ))  %>%
+  bind_rows( fungidb_cleaned %>%
+             dplyr::mutate( SOURCE = "FDB", VALUE = 1 ))  %>%
+  bind_rows( orthomcl_cleaned %>%
+             dplyr::mutate( SOURCE = "MCL", VALUE = 1 ))  %>%
+  tidyr::spread( SOURCE,  VALUE, fill=0 ) %>%
+  dplyr::select( SYMBOL, GO.TERM, GO.NAME, 	
+                 GO.EVIDENCE.CODE, GO.ASPECT, B2G, FDB, QG, MCL)
+
+go_terms_merge_source <- go_terms_join_and_spread %>%
+  group_by( SYMBOL, GO.TERM, GO.NAME, GO.ASPECT ) %>%
+  summarise(   GO.EVIDENCE.CODE = paste( sort(unique(GO.EVIDENCE.CODE)), collapse=";"), 
+               B2G = sum(B2G), QG = sum(QG), FDB = sum(FDB), MCL = sum(MCL)    ) %>%
+  ungroup %>%
+  mutate( B2G = ifelse(B2G == 0, 0, 1),
+          QG  = ifelse(QG  == 0, 0, 1),
+          FDB = ifelse(FDB == 0, 0, 1),
+          MCL = ifelse(MCL == 0, 0, 1))  
+
+## Merge with selected proteins 
+go_terms_get_selected_proteins <-   go_terms_merge_source %>%
+  inner_join( selected_proteins, by = c("SYMBOL", "GO.ASPECT"))  
+   
+## Clean evidence code    
+selected_go_terms <-  go_terms_get_selected_proteins %>%
+  dplyr::select( SYMBOL, GO.TERM, GO.NAME, GO.EVIDENCE.CODE, GO.ASPECT ) %>%
+  dplyr::mutate( GO.EVIDENCE.CODE = str_replace( GO.EVIDENCE.CODE, ";ND", "")) %>%
+  dplyr::mutate( GO.EVIDENCE.CODE = str_replace( GO.EVIDENCE.CODE, "ND;", "")) %>%
+  dplyr::mutate( GO.EVIDENCE.CODE = 
+                   ifelse(GO.EVIDENCE.CODE %in% c( "IEA", "ND"), GO.EVIDENCE.CODE,
+                      
+                            str_replace(GO.EVIDENCE.CODE, "IEA;", "") %>%  
+                            str_split( ";") %>% purrr::map_chr( ~.[1]) ))
+  
+
+
+```
+
+
+
+### Write 
+```{r}
+
+
+list_of_go_aspects <- c("P", "C", "F")
+
+list_of_tables <- purrr::map( list_of_go_aspects, function(go_aspect) {
+selected_go_terms %>% 
+  dplyr::filter( GO.ASPECT == go_aspect) %>%
+  dplyr::select( GO.TERM, GO.EVIDENCE.CODE, SYMBOL ) %>%
+  dplyr::rename (  go_id = "GO.TERM",
+            evidence = "GO.EVIDENCE.CODE",
+            orf_id = "SYMBOL") } )
+
+names( list_of_tables) <- list_of_go_aspects
+
+list_of_output_files <- c( "cneo_goframeData_bp.tab",
+                           "cneo_goframeData_cc.tab",
+                           "cneo_goframeData_mf.tab")
+
+purrr::walk2(list_of_tables, list_of_output_files, 
+             function( x, y){ write.table( x, 
+                                           file.path( data_directory, "Gene_Ontology_Annotation", y ),
+                                           sep="\t", row.names = FALSE, col.names = TRUE, quote=FALSE) } )
+
+
+
+```
+
+
+
+
+

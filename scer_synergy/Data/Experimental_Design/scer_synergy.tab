@@ -1,0 +1,13 @@
+Sample	File_Order	Replicate	Experiment	Group	A	L	Lane	Date
+1b	1	2	CAL	2	0	0	L1	07/06/13
+2f	1	2	AL	2	1	1	L1	31/05/13
+2i	1	1	A	1	1	0	L1	02/05/13
+3f	1	2	CA	1	0	0	L1	31/05/13
+3g	2	1	CAL	2	0	0	L1	02/05/13
+4e	2	3	A	1	1	0	L1	07/06/13
+4i	3	3	CAL	2	0	0	L1	07/06/13
+5c	2	1	AL	2	1	1	L2	02/05/13
+5g	2	1	CA	1	0	0	L2	02/05/13
+8a	3	3	CA	1	0	0	L2	31/05/13
+9d	3	3	AL	2	1	1	L2	07/06/13
+9e	3	2	A	1	1	0	L2	31/05/13

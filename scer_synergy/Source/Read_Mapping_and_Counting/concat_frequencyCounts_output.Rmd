@@ -1,0 +1,155 @@
+---
+title: "concat_frequencyCounts_output.Rmd"
+output:
+  html_document: default
+  html_notebook: default
+---
+# Concatenate read counts output from frequencyCounts
+
+## Load libraries
+
+```{r}
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+
+sessionInfo()
+```
+
+## Global parameters
+```{r}
+
+source( "../Common/global_parameters.R")
+
+```
+
+## Read Design Matrix
+```{r}
+
+design_matrix <- read.table(scer_design_matrix_file, header=TRUE, sep="\t", stringsAsFactors = TRUE)
+
+design_matrix_cleaned <- design_matrix %>%
+                         mutate( File_Order_Name = paste( Experiment, File_Order, sep="_") )  %>%
+                         mutate( Replicate_Name = paste( Experiment, Replicate, sep="_") ) %>%
+                         mutate( Sample = toupper(Sample))
+
+
+convert_file_name_to_sample_name <- design_matrix_cleaned$Sample
+
+names(convert_file_name_to_sample_name) <- design_matrix_cleaned$File_Order_Name
+
+
+```
+
+
+## Grep the list of files for read countss
+```{r}
+read_counts_files <- list.files (scer_original_read_counts_dir, pattern="_featurecounts.txt$" )
+
+# read_counts_files
+
+experiment_names <- sub ( "_featurecounts.txt", "", read_counts_files)
+
+bam_file_names <-    sub ( "_featurecounts.txt", ".sorted.bam", read_counts_files) 
+
+list_of_read_counts_table <- purrr::map ( read_counts_files , function(x) {  read.table (file.path( scer_original_read_counts_dir, x ), header=TRUE)}  )
+
+list_of_read_counts_column <- map2( list_of_read_counts_table, bam_file_names , function(x, y) { x[y]  })
+
+read_counts <- bind_cols(list_of_read_counts_column )
+
+# Assign column and row names
+rownames( read_counts) <- list_of_read_counts_table[[1]][,1] 
+
+colnames(read_counts ) <- sub ( ".sorted.bam", "", colnames( read_counts) )
+
+clean_col_names <- function(.x){ 
+            case_when( str_detect(.x, "scer_AMB_only_control_rep") ~ str_replace(.x, "scer_AMB_only_control_rep", "CA_"),
+           str_detect(.x, "scer_AMB_only_rep") ~ str_replace(.x, "scer_AMB_only_rep", "A_"),
+           str_detect(.x, "scer_AMB_LF_control_rep") ~ str_replace(.x, "scer_AMB_LF_control_rep", "CAL_"),
+           str_detect(.x, "scer_AMB_LF_rep") ~ str_replace(.x, "scer_AMB_LF_rep", "AL_"),
+
+           TRUE ~ NA_character_
+            ) }
+
+
+colnames(read_counts ) <- purrr::map_chr( colnames(read_counts ), clean_col_names)
+
+colnames( read_counts ) <- convert_file_name_to_sample_name[colnames( read_counts ) ]
+
+read_counts <- read_counts[ ,  sort(colnames( read_counts)) ]
+
+read_counts_with_columns <- tibble::rownames_to_column( read_counts, var="orf_id")
+
+write.table( read_counts_with_columns, file=scer_read_counts_file, 
+			 quote=FALSE, sep="\t", row.names = FALSE, col.names = TRUE)
+
+
+```
+
+## Grep the list of summary data files 
+
+```{r}
+
+read_counts_summary_files <- list.files (scer_original_read_counts_dir, pattern="_featurecounts.txt.summary$" )
+
+bam_file_names <-    sub ( "_featurecounts.txt.summary", ".sorted.bam", read_counts_summary_files) 
+
+list_of_summary_table <- purrr::map ( read_counts_summary_files , 
+                               function(x) {  read.table (file.path( scer_original_read_counts_dir, x ), header=TRUE)}  )
+
+list_of_summary_column <- purrr::map2( list_of_summary_table, bam_file_names , function(x, y) { x[y]  })
+
+read_counts_summary <- bind_cols(list_of_summary_column )
+
+
+# Assign column and row names
+rownames( read_counts_summary) <- list_of_summary_table[[1]][,1] 
+
+colnames(read_counts_summary ) <- sub ( ".sorted.bam", "", colnames( read_counts_summary) )
+
+
+colnames(read_counts_summary ) <- purrr::map_chr( colnames(read_counts_summary ), clean_col_names)
+
+## Convert file order name to actual replicate name
+colnames( read_counts_summary ) <- convert_file_name_to_sample_name[colnames( read_counts_summary ) ]
+
+
+read_counts_summary <- read_counts_summary[ , sort(colnames(read_counts_summary)) ]
+
+read_counts_summary_with_row_id <- rownames_to_column(read_counts_summary, var="Category")
+
+
+write.table( read_counts_summary_with_row_id, file=file.path( read_counts_directory, "scer/scer_synergy_read_counts_summary_concat.txt" ), 
+			 quote=FALSE, sep="\t", row.names = FALSE, col.names = TRUE)
+
+
+list_of_total_reads <- apply ( read_counts_summary, 2, sum)
+minimum_num_reads <- min ( list_of_total_reads )
+mean_num_reads <- mean ( list_of_total_reads)
+median_num_reads <- median ( list_of_total_reads )
+max_num_reads <- max( list_of_total_reads)
+
+paste( "minimum_num_reads =", minimum_num_reads) 
+paste( "mean_num_reads =", mean_num_reads) 
+paste( "median_num_reads =", median_num_reads ) 
+paste( "max_num_reads =", max_num_reads) 
+
+
+min_coverage <- ( minimum_num_reads * 100  * 2) / (19 * 10^6)
+mean_coverage <- ( mean_num_reads * 100  * 2) / (19 * 10^6)
+median_coverage <- ( median_num_reads * 100  * 2) / (19 * 10^6)
+max_coverage <- ( max_num_reads * 100  * 2) / (19 * 10^6)
+
+paste( "min_coverage =", min_coverage) 
+paste( "mean_coverage =", mean_coverage) 
+paste( "median_coverage =", median_coverage ) 
+paste( "max_coverage =", max_coverage) 
+
+```
+
+

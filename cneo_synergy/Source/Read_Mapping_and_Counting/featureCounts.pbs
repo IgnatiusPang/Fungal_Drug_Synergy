@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#PBS -l nodes=1:ppn=12
+#PBS -l vmem=6GB
+#PBS -l walltime=12:00:00
+#PBS -j oe
+#PBS -M i.pang@unsw.edu.au
+#PBS -m ae
+
+cd $PBS_O_WORKDIR
+
+GENOME_DIR=/srv/scratch/z3371724/Fungal/Data/C_neoformans_genome
+GTF_FILE=$GENOME_DIR/c.neoformans.gtf
+FEATURE_COUNT_EXE=/srv/scratch/z3371724/Fungal/Programs/subread-1.6.4-Linux-x86_64/bin/featureCounts
+
+$FEATURE_COUNT_EXE -s 0 -T 12 -p -a $GTF_FILE -t CDS -g gene_id -o ${job_name}_featurecounts.txt ${job_name}.sorted.bam
+
+#-a (name of annotation file), -T (number of threads), -p (is paired end), -B (use with paired ent, requires both ends for fragment to be mapped), 
+# -s (indicates if strand specific, 0=unstranded,  1=stranded, 2= reversely stranded), 
+# -t (feature type, default is exon), -g (attribute type to group features) -o (output file)
+

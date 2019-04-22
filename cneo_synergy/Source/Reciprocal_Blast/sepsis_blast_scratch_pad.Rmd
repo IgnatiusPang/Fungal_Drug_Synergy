@@ -1,0 +1,158 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+# if(!require(pacman)) {
+#   install.packages("pacman")
+#   library(pacman)
+# }
+library(tidyverse)
+
+```
+
+## Directory management 
+```{r}
+
+base_dir <- "/home/ignatius/PostDoc/2018/Sepsis"
+data_dir <- file.path(base_dir, "Data")
+genome_dir <- file.path( data_dir, "bpa-arp-genomics-analysed-a5a997fb3204e06bf1740edad90ea979")
+proteome_sequences_dir <- file.path( data_dir,  "Proteome_Sequences")
+genome_annotation_dir <- file.path(data_dir, "Genome_Annotations")
+
+if(!dir.exists(genome_annotation_dir)) {
+	dir.create(genome_annotation_dir, recursive = TRUE)
+}
+
+```
+
+## Output the concatenated files into a directory
+```{r}
+
+list_of_strains_dir <- Sys.glob( file.path(genome_dir, "*", "*")) %>% as.list %>% purrr::keep ( dir.exists)
+
+list_of_strains <- purrr::map_chr( list_of_strains_dir, basename)
+
+list_of_faa_files_per_strain <- purrr::map (  list_of_strains_dir,   ~Sys.glob(file.path(., "*", "*.faa")) )
+
+list_of_cat_files_strings <- purrr::map_chr ( list_of_faa_files_per_strain, paste, collapse=" ")
+
+get_cat_sys_call_string <- function( cat_files_string, strain) {
+  
+    result_string <- paste("cat", cat_files_string, ">", file.path(proteome_sequences_dir, paste(strain, ".faa", sep="") ) )
+  
+    return(result_string )
+}
+
+list_of_concat_commands <- purrr::map2(  list_of_cat_files_strings,  list_of_strains,  ~get_cat_sys_call_string(.x, .y)  )
+
+
+purrr::walk(  list_of_concat_commands , system)
+```
+
+
+## Concatenate the tsv genome annotation file 
+```{r}
+
+list_of_genome_annotation_files <- Sys.glob( file.path(genome_dir, "*", "*", "*", "*.tsv"))  %>% purrr::keep ( file.exists)
+
+list_of_annotations_tables <- purrr::map( list_of_genome_annotation_files, read_tsv, comment="#", col_names = TRUE ) 
+
+array_position_of_strain_name <- 10
+ec_number_regexp_pattern <- "(\\d|-)+\\.(\\d|-)+\\.(\\d|-)+\\.(\\d|-)+"
+
+names( list_of_annotations_tables) <- purrr::map( list_of_genome_annotation_files, ~strsplit(., "/")[[1]][array_position_of_strain_name] )
+
+master_annotation_table <-   bind_rows(list_of_annotations_tables, .id="Source") 
+
+cleaned_master_annotation_table <- master_annotation_table %>%
+	mutate( cleaned_ec_number = ifelse(  str_detect(EC_number, 
+												    ec_number_regexp_pattern), EC_number, NA_character_ )) %>%
+	mutate( cleaned_product = ifelse(  str_detect(EC_number, 
+												  ec_number_regexp_pattern) | is.na(EC_number), product, 
+									   EC_number)) %>%
+	select( -EC_number, -product  ) %>%
+	rename( EC_number= "cleaned_ec_number", 
+			product = "cleaned_product") %>%
+	mutate( copy_strain = Source) %>%
+	separate( col="copy_strain", into=c("bpa_id", "genus", "species", "strain", "date"), sep="\\." ) %>%
+	mutate( full_species = paste(genus, species))
+
+write.table ( cleaned_master_annotation_table, file=file.path(genome_annotation_dir, "cleaned_master_annotation_table.tsv" ),
+			  sep="\t", row.names = FALSE, quote = FALSE, na="") 
+
+```
+
+## Test the pattern
+```{r}
+pattern <- 	"(\\d|-)+\\.(\\d|-)+\\.(\\d|-)+\\.(\\d|-)+"
+str_detect("2.4.51.1", 	pattern)
+str_detect("2.4.51.-", 	pattern)
+str_detect("2.4.3.-", 	pattern)
+str_detect("2.4.-.-",  pattern)
+str_detect("2.-.-.-",  pattern)
+str_detect("-.-.-.-",  pattern)
+
+str_detect("2.4.a.-", 	pattern)
+
+
+```
+
+
+##  Run make blast db for one file (test only)
+```{bash}
+
+data_dir=/home/ignatius/PostDoc/2018/Sepsis/Data/Proteome_Sequences
+list_of_files=( $(find $data_dir/*.faa) )
+
+array_index=5
+file_name=${list_of_files[$array_index]}
+temp_name=${list_of_files[$array_index]##*/}
+strain_name=${temp_name%.*}
+
+echo $file_name
+echo $strain_name
+
+makeblastdb -in $file_name -input_type fasta -dbtype prot \
+  -title $strain_name -hash_index  
+
+
+#for i in "${list_of_files[@]}"
+#do
+#   echo $i
+#done
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

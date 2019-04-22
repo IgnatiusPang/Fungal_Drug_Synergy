@@ -1,0 +1,250 @@
+---
+title, #: "R Notebook"
+output, #: html_notebook
+---
+
+## Import libraries
+```{r}
+if(!require(pacman)) {
+	install.packages("pacman")
+	library(pacman)
+}
+
+p_load(tidyverse)
+```
+
+## Directory Management
+```{r}
+
+base_dir <- "/home/ignatius/PostDoc/2019/cneo_synergy"
+data_dir <- file.path(base_dir, "Data")
+results_dir <- file.path(base_dir, "Results")
+OUTPUT_DIR <- file.path( results_dir, "BlastP" )
+reciprocal_best_hits_dir <- file.path( results_dir, "ReciprocalBestHits")
+
+if(!dir.exists(reciprocal_best_hits_dir)) {
+	dir.create(reciprocal_best_hits_dir, recursive = TRUE)
+}
+```
+
+## Global parameters
+```{r}
+BLASTP_EVALUE_THRESHOLD <- 1e-6
+
+blast_output_col_names <- c( "query_id", "database_id", "perc_identity", "alignment_length", 
+							 "mismatches", "gap_opens", "q_start", "q_end", "s_start", "s_end", "evalue", "bit_score")
+
+	
+```
+
+
+## Read in reciprocal blast hit results (blastp)
+```{r, echo=FALSE}
+
+
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+
+
+list_of_all_blastp_output_files <- Sys.glob(file.path( OUTPUT_DIR, "*.tab"))
+
+
+list_of_all_results_tables <- purrr::map( list_of_all_blastp_output_files, read_tsv, comment="#", col_names = FALSE )
+```
+
+## Format the table properly and bind rows together, then apply E-value threshold
+```{r}
+
+
+table_names <- purrr::map_chr( list_of_all_blastp_output_files, basename)  %>%
+	purrr::map_chr(  ~str_replace(., ".tab$", ""))
+ 
+ 
+ names( list_of_all_results_tables) <- table_names
+ 
+ 
+ list_of_all_results_tables_filtered <- purrr::map( list_of_all_results_tables, function(x) {  colnames(x) <- blast_output_col_names
+                                       return(x) }) %>%
+ 									   bind_rows( .id="query_vs_db") %>%
+ 									   separate( col="query_vs_db", into=c("query", "database"), sep="_") %>%
+ 									   filter(evalue < BLASTP_EVALUE_THRESHOLD) %>%
+ 									   filter( query != database)
+ 
+
+
+ head( list_of_all_results_tables_filtered)
+ 
+```
+
+
+
+
+```{r}
+sgd_feature_table <- read.table( file.path(data_dir, "SGD/SGD_features.tab"), sep="\t", stringsAsFactors = FALSE, quote = "", header=FALSE  )
+                                  
+colnames( sgd_feature_table)   <-  c( "sgd_id" 
+, "feature_type" 
+, "feature_qualifier" 
+, "oln_id"
+, "standard_gene_name" 
+, "alias" 
+, "parent_feature_name" 
+, "secondary_sgd_id" 
+, "chromosome" 
+, "start" 
+, "stop" 
+, "strand" 
+, "genetic_position" 
+, "coordinate_version" 
+, "sequence_version" 
+, "description"  ) 
+
+oln_id_list <- sgd_feature_table %>%
+                distinct( oln_id) %>%
+                filter ( !is.na(oln_id))
+
+
+
+cneo_part1 <- read_tsv(  file.path( data_dir, "Broad_C_neoformans_Mar_2014/cryptococcus_neoformans_var._grubii_h99__cna3__3_genome_summary_per_gene.txt" )  )
+cneo_part2 <- read_tsv( file.path( data_dir, "Broad_C_neoformans_Mar_2014/cryptococcus_neoformans_var._grubii_h99_mitochondria_2_genome_summary_per_gene.txt" )  )
+
+cneo_orf_id_list <-  cneo_part1 %>%
+  bind_rows(cneo_part2) %>%
+  dplyr::distinct(LOCUS)
+
+
+```
+
+
+```{r}
+cneo_uniprot_annot <- read.table( file.path(data_dir, "Uniprot/cneo/uniprot-cryptococcus+neoformans+h99.tab") , sep="\t", stringsAsFactors = FALSE, quote = "", header=TRUE ) 
+scer_uniprot_annot <- read.table( file.path(data_dir, "Uniprot/scer/uniprot-proteome_UP000002311.tab") , sep="\t", stringsAsFactors = FALSE, quote = "", header=TRUE  ) 
+
+
+cneo_uniprot_annot_cleaned <- cneo_uniprot_annot %>% 
+  mutate( gene_names = str_split( Gene.names, " ")  ) %>%
+  unnest() %>%
+  dplyr::select( Entry, gene_names) %>%
+  inner_join(cneo_orf_id_list, by=c("gene_names" = "LOCUS") )
+
+
+scer_uniprot_annot_cleaned <- scer_uniprot_annot %>% 
+  mutate( gene_names = str_split( Gene.names, " ")  ) %>%
+  unnest() %>%
+  dplyr::select( Entry, gene_names) %>%
+  inner_join( oln_id_list, by= c( "gene_names" = "oln_id"))
+
+```
+
+
+
+```{r}
+
+reciprocal_blastp_orthologs <- list_of_all_results_tables_filtered %>%
+	dplyr::inner_join( list_of_all_results_tables_filtered, by=c( "query_id" = "database_id",
+																 "database_id" = "query_id"),
+					   suffix=c(".a_is_query", ".b_is_query"))  %>%
+  dplyr::mutate( cneo_uniprot_acc = str_replace( query_id, ".*\\|(.*)\\|.*", "\\1")  ) %>%
+  dplyr::mutate( scer_uniprot_acc = str_replace( database_id, ".*\\|(.*)\\|.*", "\\1")  ) %>%
+  dplyr::inner_join( cneo_uniprot_annot_cleaned, by=c( "cneo_uniprot_acc" = "Entry" ) ) %>%
+  dplyr::inner_join( scer_uniprot_annot_cleaned, by=c( "scer_uniprot_acc" = "Entry" ) ) %>%
+  dplyr::distinct( gene_names.x, gene_names.y) %>%
+  dplyr::rename( cneo_orf_id = "gene_names.x",
+                 scer_oln_id = "gene_names.y")
+
+head( reciprocal_blastp_orthologs)
+
+nrow(reciprocal_blastp_orthologs)
+
+
+#  7208
+```
+
+
+
+
+```{r}
+write.table( reciprocal_blastp_orthologs, file=file.path( reciprocal_best_hits_dir, "reciprocal_best_hits_evalue_10e-6.txt"), 
+			 sep="\t", row.names = FALSE, col.names = TRUE,
+			 quote=FALSE)
+```
+
+
+```{r}
+orthologs_mapping <-  read.table ( file.path( data_dir, "Gene_Ontology_Raw/Species_annotation/Old/Final_orthologs.txt" ) , sep="\t",
+                       stringsAsFactors = FALSE, header=TRUE, strip.white=TRUE, quote=""  ) 
+
+
+
+all_cneo_groups <- orthologs_mapping %>%
+  filter ( species == "cneo") %>%
+  dplyr::select(speciesID, ortoMCLID) %>%
+  dplyr::rename( cneo_orf_id  = "speciesID" )
+
+all_scer_groups <- orthologs_mapping %>%
+  filter ( species == "sce") %>%
+  dplyr::select(speciesID, ortoMCLID) %>%
+  dplyr::rename( scer_oln_id  = "speciesID" )
+
+cneo_scer_orthologs <- all_cneo_groups %>%
+                         inner_join( all_scer_groups, by=c("ortoMCLID" = "ortoMCLID")) %>% 
+                          dplyr::select( -ortoMCLID) %>%
+                          mutate( reliability_class = 2) 
+
+
+```
+
+
+## scer and cneo orthologs list
+```{r}
+
+scer_cneo_orthologs_class_1 <- reciprocal_blastp_orthologs %>%
+  mutate( reliability_class = 1) 
+
+
+scer_cneo_orthologs_class_2 <- cneo_scer_orthologs %>%
+                               anti_join (scer_cneo_orthologs_class_1, by=c("cneo_orf_id", "scer_oln_id") )
+
+scer_cneo_orthologs <- scer_cneo_orthologs_class_1 %>%
+                        bind_rows(scer_cneo_orthologs_class_2)
+
+  write.table(scer_cneo_orthologs,
+              file=file.path( "/home/ignatius/PostDoc/2019/cneo_synergy/Data/Curated_Data", 
+                              "scer_cneo_orthologs.tab"), 
+			 sep="\t", row.names = FALSE, col.names = TRUE,
+			 quote=FALSE)
+
+
+```
+
+
+```{r, eval=FALSE}
+cytoscape_reciprocal_blastp <- reciprocal_blastp_orthologs %>%
+	select( gene_id.a, gene_id.b)  %>%
+	distinct() 
+
+
+blastp_left <- cytoscape_reciprocal_blastp %>%
+	filter( gene_id.a >= gene_id.b)
+
+
+blastp_right <- cytoscape_reciprocal_blastp %>%
+	rename( temp= gene_id.a) %>%
+	rename( gene_id.a=gene_id.b) %>%
+	rename( gene_id.b = temp) %>%
+	filter( gene_id.a > gene_id.b)
+
+cytoscape_reciprocal_blastp_cleaned <- blastp_left %>%
+	bind_rows( blastp_right) %>%
+	distinct()
+
+
+dim(cytoscape_reciprocal_blastp_cleaned)
+dim( cytoscape_reciprocal_blastp)
+
+reciprocal_blastp_orthologs %>%
+	filter ( gene_id.a == gene_id.b) %>%
+	distinct(source.a, source.b)
+
+
+```
+

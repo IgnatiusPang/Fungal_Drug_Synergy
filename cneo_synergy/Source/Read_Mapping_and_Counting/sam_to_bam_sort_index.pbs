@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#PBS -l nodes=1:ppn=4
+#PBS -l vmem=10GB
+#PBS -l walltime=12:00:00
+#PBS -j oe
+#PBS -M i.pang@unsw.edu.au
+#PBS -m ae
+
+cd $PBS_O_WORKDIR
+
+module add samtools/1.9
+
+GENOME_DIR=/srv/scratch/z3371724/Fungal/Data/C_neoformans_genome
+GENOME_FILE=$GENOME_DIR/c.neoformans.fa
+
+#samtools view -@ 4 -bT $GENOME_FILE ${job_name}.sam > ${job_name}.bam
+samtools sort -@ 4  ${job_name}.bam -o ${job_name}.sorted.bam
+samtools index -@ 4 -b ${job_name}.sorted.bam
+
+
+#[bam_sort_core] merging from 9 files and 1 in-memory blocks...
+#[E::hts_idx_push] Unsorted positions on sequence #5: 331527 followed by 331516
+# samtools index: failed to create index for "cneo_VOR_control_rep1.sorted.bam"
+
+
+

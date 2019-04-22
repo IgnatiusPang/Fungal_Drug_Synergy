@@ -1,0 +1,197 @@
+---
+title, #: "R Notebook"
+output, #: html_notebook
+---
+
+## Import libraries
+```{r}
+if(!require(pacman)) {
+	install.packages("pacman")
+	library(pacman)
+}
+
+p_load(tidyverse)
+```
+
+## Directory Management
+```{r}
+
+base_dir <- "/home/ignatius/PostDoc/2019/cneo_synergy"
+data_dir <- file.path(base_dir, "Data")
+results_dir <- file.path(base_dir, "Results")
+
+```
+
+
+```{r}
+sgd_feature_table <- read.table( file.path(data_dir, "SGD/SGD_features.tab"), sep="\t", stringsAsFactors = FALSE, quote = "", header=FALSE  )
+                                  
+colnames( sgd_feature_table)   <-  c( "sgd_id" 
+, "feature_type" 
+, "feature_qualifier" 
+, "oln_id"
+, "standard_gene_name" 
+, "alias" 
+, "parent_feature_name" 
+, "secondary_sgd_id" 
+, "chromosome" 
+, "start" 
+, "stop" 
+, "strand" 
+, "genetic_position" 
+, "coordinate_version" 
+, "sequence_version" 
+, "description"  ) 
+
+oln_id_list <- sgd_feature_table %>%
+                distinct( oln_id) %>%
+                filter ( !is.na(oln_id))
+
+
+
+
+
+cneo_part1 <- read_tsv(  file.path( data_dir, "Broad_C_neoformans_Mar_2014/cryptococcus_neoformans_var._grubii_h99__cna3__3_genome_summary_per_gene.txt" )  )
+cneo_part2 <- read_tsv( file.path( data_dir, "Broad_C_neoformans_Mar_2014/cryptococcus_neoformans_var._grubii_h99_mitochondria_2_genome_summary_per_gene.txt" )  )
+
+cneo_orf_id_list <-  cneo_part1 %>%
+  bind_rows(cneo_part2) %>%
+  dplyr::distinct(LOCUS)
+
+
+```
+
+
+```{r}
+cneo_uniprot_annot <- read.table( file.path(data_dir, "Uniprot/cneo/uniprot-cryptococcus+neoformans+h99.tab") , sep="\t", stringsAsFactors = FALSE, quote = "", header=TRUE ) 
+scer_uniprot_annot <- read.table( file.path(data_dir, "Uniprot/scer/uniprot-proteome_UP000002311.tab") , sep="\t", stringsAsFactors = FALSE, quote = "", header=TRUE  ) 
+
+
+cneo_uniprot_acc_to_orf_id <- cneo_uniprot_annot %>% 
+  mutate( gene_names = str_split( Gene.names, " ")  ) %>%
+  unnest() %>%
+  dplyr::select( Entry,  gene_names)  %>%
+  inner_join(cneo_orf_id_list, by=c("gene_names" = "LOCUS") ) %>%
+  dplyr::rename ( orf_id = "gene_names")
+
+cneo_uniprot_annot_cleaned <- cneo_uniprot_annot %>% 
+  mutate( gene_names = str_split( Gene.names, " ")  ) %>%
+  unnest() %>%
+  dplyr::select( gene_names, Protein.names) %>%
+  inner_join(cneo_orf_id_list, by=c("gene_names" = "LOCUS") ) %>%
+  dplyr::rename ( uniprot_gene_name = "Protein.names")
+
+
+cneo_gene_symbols <- cneo_uniprot_annot %>% 
+  mutate( gene_names = str_split( Gene.names, " ")  ) %>%
+  unnest() %>%
+  dplyr::select( Entry, gene_names) %>%
+  left_join( cneo_uniprot_annot_cleaned, by = "gene_names") %>%
+  dplyr::rename( id_type = "uniprot_gene_name" ) %>%
+  mutate( id_type = ifelse( is.na(id_type), "gene_symbol", "orf_id") ) %>%
+  filter( id_type == "gene_symbol" & str_length(gene_names) < 5 ) %>%
+  dplyr::select( -id_type) %>%
+  left_join(cneo_uniprot_acc_to_orf_id, by ="Entry" ) %>%
+  filter ( !is.na(orf_id)) %>%
+  dplyr::rename( uniprot_acc = "Entry")
+
+
+
+scer_uniprot_annot_cleaned <- scer_uniprot_annot %>% 
+  mutate( gene_names = str_split( Gene.names, " ")  ) %>%
+  unnest() %>%
+  dplyr::select( Entry, gene_names, Protein.names) %>%
+  inner_join( oln_id_list, by= c( "gene_names" = "oln_id")) %>%
+  dplyr::rename( uniprot_acc = "Entry",
+                 oln_id = "gene_names",
+                 uniprot_description = "Protein.names")
+
+
+
+
+```
+
+
+```{r}
+blast2go_annot <- read_tsv( file.path( results_dir, "Blast2GO/blast2go_annotation_descriptions.txt" ))
+blast2go_annot_cleaned <- blast2go_annot %>%
+                          mutate( SeqName = str_replace(SeqName, "T\\d+$", "")) %>%
+                          dplyr::rename( orf_id = "SeqName") %>%
+                          dplyr::select ( orf_id, SeqDesc) %>%
+                          dplyr::filter( ! str_detect( SeqDesc, "---NA---" ) ) %>%
+                          dplyr::rename( blast2go_annotation = "SeqDesc"   ) %>%
+                          dplyr::mutate( blast2go_annotation = str_replace( blast2go_annotation, 
+                                                                            "([A-Z\\d]+_[A-Z\\d]+)([A-Z]{1}.*)",
+                                                                            "\\1\\|\\2") )
+ 
+```
+
+
+```{r}
+"Product Description"
+
+fungidb_alias <- read_csv( file.path( data_dir, "FungiDB/GenesByTaxon_Alias.csv" )  ) 
+fungidb_summary <- read_csv( file.path( data_dir, "FungiDB/GenesByTaxon_Summary.csv" )  ) 
+
+colnames( fungidb_summary)
+
+fungidb_summary_cleaned <- fungidb_summary %>%
+                            dplyr::select ( one_of( c( "Gene ID", "Product Description"))) %>%
+                            dplyr::rename( orf_id = "Gene ID",
+                                           fungidb_gene_name = "Product Description")
+```
+
+
+## /home/ignatius/PostDoc/2019/cneo_synergy/Data/Gene_Annotation/cneo_gene_names.txt
+```{r}
+
+cneo_gene_names_step1 <- cneo_part1 %>%
+  bind_rows(cneo_part2)  %>%
+  dplyr::select( LOCUS, NAME) %>%
+  dplyr::rename( orf_id = "LOCUS",
+                 broad_gene_name = "NAME") %>%
+  dplyr::left_join( cneo_uniprot_annot_cleaned, by = c( "orf_id" = "gene_names")) %>%
+  dplyr::left_join( cneo_gene_symbols, by="orf_id" )  %>%
+  dplyr::left_join( fungidb_summary_cleaned, by="orf_id" ) %>%
+  dplyr::left_join( blast2go_annot_cleaned, by="orf_id") %>%
+  dplyr::select( one_of( c( "orf_id",  "gene_names",   "uniprot_acc",  
+                            "broad_gene_name",     "uniprot_gene_name",   
+                            "fungidb_gene_name",
+                            "blast2go_annotation"))) %>%
+  dplyr::filter( !str_detect(uniprot_gene_name, "variant")) %>%
+  distinct()
+
+
+cneo_gene_names <- cneo_gene_names_step1 %>%
+  left_join( fungidb_alias, by = c( "orf_id" = "Gene ID" )) %>%
+  dplyr::filter( Type == "name" | is.na(Type)) %>%
+  dplyr::mutate( gene_names = ifelse( is.na(gene_names) & !is.na( `Name/ID/Alias`), `Name/ID/Alias`, gene_names) ) %>%
+  dplyr::select( -Type, -`Name/ID/Alias`) %>%
+  distinct( )
+
+colnames( cneo_gene_names)
+
+
+write.table(cneo_gene_names,  file=file.path(data_dir, "Gene_Annotation/cneo_gene_names.txt"),
+            sep="\t", quote=FALSE, row.names = FALSE, na="") 
+
+```
+
+
+
+```{r}
+scer_gene_names <- sgd_feature_table %>%
+  dplyr::select( oln_id,  standard_gene_name,  description ) %>%
+  dplyr::rename( gene_name = "standard_gene_name",
+                 sgd_description = "description") %>%
+  dplyr::left_join( scer_uniprot_annot_cleaned, by= "oln_id") %>%
+  dplyr::select( oln_id, gene_name, sgd_description, uniprot_description, uniprot_acc)
+
+
+write.table(scer_gene_names,  file=file.path(data_dir, "Gene_Annotation/scer_gene_names.txt"),
+            sep="\t", quote=FALSE, row.names = FALSE, na="") 
+```
+
+
+
+

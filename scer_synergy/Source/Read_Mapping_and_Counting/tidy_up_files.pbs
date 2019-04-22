@@ -1,0 +1,63 @@
+#!/bin/bash
+
+#PBS -l nodes=1:ppn=1
+#PBS -l vmem=3GB
+#PBS -l walltime=3:00:00
+#PBS -j oe
+#PBS -M i.pang@unsw.edu.au
+#PBS -m ae
+
+RESULTS_DIR=/srv/scratch/z3371724/Fungal/Results/Synergy
+READ_COUNTS_DIR=$RESULTS_DIR/Read_Counts
+BAM_FILES_DIR=$RESULTS_DIR/BAM_Files
+
+if [ ! -d $RESULTS_DIR/ ]
+then 
+	mkdir $RESULTS_DIR/
+fi 
+
+if [ ! -d $READ_COUNTS_DIR/ ]
+then 
+	mkdir $READ_COUNTS_DIR/
+fi 
+
+if [ ! -d $BAM_FILES_DIR/ ]
+then 
+	mkdir $BAM_FILES_DIR/
+fi 
+
+cd $PBS_O_WORKDIR
+
+
+if [  -f ${job_name}.sam ]
+then 
+	rm ${job_name}.sam
+fi
+
+
+if [  -f ${job_name}.bam ]
+then 
+	rm ${job_name}.bam
+fi
+
+
+if [  -f ${job_name}.sorted.bam ]
+then 
+	mv ${job_name}.sorted.bam $BAM_FILES_DIR/
+
+fi
+
+
+if [  -f ${job_name}_featurecounts.txt ]
+then 
+	mv ${job_name}_featurecounts.txt $READ_COUNTS_DIR/
+fi
+
+
+if [  -f ${job_name}_featurecounts.txt.summary ]
+then 
+	mv ${job_name}_featurecounts.txt.summary $READ_COUNTS_DIR/
+fi
+
+
+

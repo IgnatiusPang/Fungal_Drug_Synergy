@@ -1,0 +1,48 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+p_load(GO.db)
+p_load(GOstats)
+p_load(AnnotationDbi)
+p_load(knitr)
+p_load(lemon)
+```
+
+
+```{r}
+blast2go_results  <- read_tsv( "/home/ignatius/PostDoc/2018/Sepsis/Results/Blast2Go/20181031/blast2go_annot_clean_newline.annot") 
+
+head( blast2go_results)
+
+blast2go_results %>%
+	filter ( is.na(`GO ID`) )
+
+```
+
+
+```{r}
+list_of_id <-   purrr::map_chr( as.list(GOTERM), GOID) 
+list_of_term <- purrr::map_chr( as.list(GOTERM), Term) 
+list_of_ontology <- purrr::map_chr( as.list(GOTERM), Ontology) 
+
+go_id_to_term_table <- data.frame( go_id =list_of_id, go_term=list_of_term, go_type=list_of_ontology  )
+
+blast2go_results_updated <- blast2go_results %>%
+	left_join ( go_id_to_term_table , by =c("GO ID" = "go_id")) 
+	
+
+write.table( blast2go_results_updated, file="/home/ignatius/PostDoc/2018/Sepsis/Results/Blast2Go/20181031/blast2go_annot_with_term_name.annot",
+			 sep="\t", col.names = TRUE, row.names = FALSE, quote=FALSE)
+```
+
+

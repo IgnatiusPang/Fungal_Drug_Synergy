@@ -1,0 +1,358 @@
+---
+title: "edgeR_go_enrichment.Rmd"
+output: html_notebook
+---
+
+```{r}
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(knitr)
+p_load(limma)
+p_load(tidyverse)
+
+source( '../../Common/global_parameters.R')
+source( '../../Common/helper_functions.R')
+source_rmd_file( file.path(source_directory, "Functional_Enrichment/Common/functional_enrichment_functions.Rmd" ) )
+sessionInfo()
+```
+
+## Global parameters
+```{r}
+
+command_line_args <-  commandArgs(trailingOnly=T)
+
+print( command_line_args)
+
+#### This is a parameter to change #### *******************
+base_results_dir <- base::get(command_line_args[2]) # base::get("edger_results_dir") 
+
+print( base_results_dir)
+
+##### This is a parameter to change #### *******************
+de_method_label <- command_line_args[3]   #  "EdgeR" 
+
+####################################################
+
+# No need to change this parameter
+input_data_for_go_analysis_dir <- file.path( base_results_dir, "Gene_Lists")
+
+# Set directory for results
+##### This is a parameter to change #### *******************8
+camera_go_terms_results_dir <- file.path( results_directory, "Functional_Enrichment", de_method_label, "Camera")
+
+# No need to change this parameter
+create_directory_if_not_exists(camera_go_terms_results_dir)
+
+# No need to change this parameter
+possible_matches  <- Sys.glob( file.path(input_data_for_go_analysis_dir,  "*up_and_down_significant_DE_genes.Rdata" )  ) 
+
+list_of_up_and_down_genes <- readRDS( possible_matches[1] )
+
+# No need to change this parameter
+experiment_label_and_logFC_FDR_table <- read.table (file=file.path(input_data_for_go_analysis_dir,
+				  			 										"experiment_label_and_logFC_FDR_table.tab" ), 
+													 sep="\t", header=TRUE)
+```
+
+
+# Read in RUVSeq normalised read counts
+```{r}
+
+# write.table ( logCPM, file=file.path( rna_seq_results_directory, "log_normalised_counts_after_calcNormFactors.txt" ), col.names = TRUE, row.names = TRUE)
+
+
+possible_matches  <- Sys.glob( file.path(base_results_dir, "edger_ruvs_log_normalised_counts_cpm.txt"  ) )
+
+ruv.norm.expr <- read.table( file=file.path(possible_matches[1]),
+					header=TRUE, sep="\t")
+
+```
+
+# Load design matrix
+```{r}
+
+possible_matches  <- Sys.glob( file.path(base_results_dir, "*design_matrix.Rdata"  ) )
+
+design_matrix <- readRDS( file=file.path(  possible_matches[1]) ) 
+
+design_matrix <- design_matrix[, c("A", "AL", "CA", "CAL")]
+
+
+```
+
+# Read in gene annotation for C. neoformans
+```{r}
+gene_annotation <- read.table ( file.path( data_directory, 'Gene_Annotation/scer_gene_annotation_summary.txt' ) , header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
+```
+
+## Biological Process Index
+```{r}
+
+
+format_go_dictionary_for_camera_analysis <- function( goframeData, normalized_read_counts ) { 
+
+	goframeData <- goframeData %>% dplyr::arrange( go_id)
+		
+		
+	list_of_go_id <- goframeData %>% 
+					 dplyr::select( one_of( c("go_id"))) %>%
+					 dplyr::distinct() %>%
+					 t() %>%
+					 as.vector()
+	
+	list_of_oln_id <- goframeData %>% 
+					 dplyr::select( one_of( c("oln_id"))) %>%
+					 dplyr::distinct() %>%
+					 t() %>%
+					 as.vector()
+	
+	## Get the genes in the gene sets
+	list_of_gene_sets_v2 <- goframeData %>%
+							dplyr::filter( oln_id %in% rownames( normalized_read_counts)  )  %>% ## Only get GO terms for genes of relevance
+	 						dplyr::select( one_of( c("go_id", "oln_id"))) %>%
+							dplyr::group_by (go_id) %>%
+							dplyr::summarise ( gene_set  = list(purrr::reduce( as.character(oln_id), c)) ) %>%
+							dplyr::select( one_of( c("gene_set"))) %>%
+							as.list() 
+	
+	list_of_gene_sets_v2 <- list_of_gene_sets_v2$gene_set
+	
+	
+	# Get the GO ID associated with each gene set 
+	list_of_gene_sets_v2_names <- goframeData %>%
+							dplyr::filter( oln_id %in% rownames( normalized_read_counts)  )  %>% ## Only get GO terms for genes of relevance
+	 						dplyr::select( one_of( c("go_id", "oln_id"))) %>%
+							dplyr::group_by (go_id) %>%
+							dplyr::summarise ( gene_set  = list(purrr::reduce( as.character(oln_id), c)) ) %>%
+							dplyr::select( one_of( c("go_id"))) %>%
+							t() %>%
+							as.vector()
+	
+	# Assign the GO ID to each gene set
+	names(list_of_gene_sets_v2) <- list_of_gene_sets_v2_names
+	
+	# Format into an index / GO dictionary used by the 'camera' function 
+	go_idx <- ids2indices(list_of_gene_sets_v2, rownames(normalized_read_counts))
+
+   return( list( go_idx=go_idx, raw_list=list_of_gene_sets_v2)  )
+}	
+
+```
+
+
+```{r}
+
+fix_deprecated_go_terms <- function (go_frameData, deprecated_go_terms) {
+	
+	updated_table <- go_frameData %>%
+					 dplyr::left_join (  deprecated_go_terms , by="go_id") %>%
+					 dplyr::mutate( go_id = ifelse( is.na(replacement_term) , go_id, replacement_term  ))
+		
+	#	print(head( updated_table))
+	
+	updated_table <-  updated_table %>%
+					  dplyr::filter( is.na( replacement_term) == TRUE |  replacement_term != "deleted")  %>%
+					 dplyr::select ( -replacement_term)
+	
+	return(updated_table)
+}
+
+```
+
+
+
+```{r}
+go_bp_file_name  <- "scer_goframeData_bp.tab"
+go_bp_frameData <- read.table ( file.path( gene_ontology_directory, go_bp_file_name),  sep="\t", header=TRUE, stringsAsFactors = FALSE) 
+head( go_bp_frameData)
+
+go_cc_file_name  <- "scer_goframeData_cc.tab"
+go_cc_frameData <- read.table ( file.path( gene_ontology_directory, go_cc_file_name),  sep="\t", header=TRUE, stringsAsFactors = FALSE) 
+
+
+go_mf_file_name  <- "scer_goframeData_mf.tab"
+go_mf_frameData <- read.table ( file.path( gene_ontology_directory, go_mf_file_name),  sep="\t", header=TRUE, stringsAsFactors = FALSE) 
+
+deprecated_go_terms_file  <-  "go_ids_not_found.tab"
+deprecated_go_terms <- read.table ( file.path( gene_ontology_directory, deprecated_go_terms_file),  
+														sep="\t", header=TRUE, stringsAsFactors = FALSE) 
+head( deprecated_go_terms)
+
+
+## Replace deprecated GO terms with updated ones or delete the entry
+go_bp_frameData_fixed <- fix_deprecated_go_terms(go_bp_frameData, deprecated_go_terms)
+go_cc_frameData_fixed <- fix_deprecated_go_terms(go_cc_frameData, deprecated_go_terms)
+go_mf_frameData_fixed <- fix_deprecated_go_terms(go_mf_frameData, deprecated_go_terms)
+
+
+dim(go_bp_frameData)
+dim(go_bp_frameData_fixed)
+
+
+bp_idx <- format_go_dictionary_for_camera_analysis( go_bp_frameData_fixed, ruv.norm.expr )  
+cc_idx <- format_go_dictionary_for_camera_analysis( go_cc_frameData_fixed, ruv.norm.expr )  
+mf_idx <- format_go_dictionary_for_camera_analysis( go_mf_frameData_fixed, ruv.norm.expr )  
+
+go_idx_list <- list ( BP= bp_idx$go_idx, CC= cc_idx$go_idx,  MF=mf_idx$go_idx)
+
+go_idx_raw_list <- list ( BP= bp_idx$raw_list, CC= cc_idx$raw_list,  MF=mf_idx$raw_list)
+
+```
+
+
+## Camera Analysis
+
+## Set up list of contrasts
+```{r}
+
+# design_matrix
+# A AL CA CAL
+lists_of_contrasts <- list ( compare_A       = c(1, 0, -1, 0 ),   
+							 compare_AL       = c( 0, 1, 0, -1 )						) 
+
+```
+
+## Run camera on the list of contrasts
+```{r}
+
+my_param_list <- purrr::cross2 ( go_idx_list, lists_of_contrasts) 
+
+my_names_list <- purrr::cross2 ( names(go_idx_list), names(lists_of_contrasts)  )
+
+## Run camera 
+my_carmera_function <- purrr::partial ( limma::camera, y=ruv.norm.expr,  design=design_matrix)
+
+camera_results <- purrr::map (my_param_list, function(element) { my_carmera_function( index=element[[1]], 
+																					  contrast=element[[2]] ) })
+
+## filter for GO terms with FDR < 0.05 and then add the GO terms as additional column 
+filter_and_add_go_terms_helper <- function(x, FDR_cutoff = 0.05 ) { 
+	result_table <- tibble::rownames_to_column(x ) 
+		
+   if( "FDR" %in% colnames(result_table)) {
+   		result_table <- result_table %>% dplyr::filter( FDR < FDR_cutoff )
+   }											   
+
+	result_table <- result_table %>% dplyr::mutate( go_term = Term( GOTERM[rowname] )) 
+	
+	return( result_table )
+}
+
+
+head( camera_results)
+
+filter_and_add_GO_terms <- purrr::map(  camera_results, filter_and_add_go_terms_helper)
+
+filter_and_add_GO_terms_with_extra_columns <-   purrr::map2( filter_and_add_GO_terms,  my_names_list, function( input_table, element) {
+                           	
+                           			 my_table <- input_table %>% dplyr::mutate( GO_type = element[[1]], Contrast = element[[2]])
+                           			
+                           			 return( my_table)
+                           	
+                           } ) 
+
+reduced_camera_results <- dplyr::bind_rows( filter_and_add_GO_terms_with_extra_columns ) 
+
+reduced_camera_results <- reduced_camera_results %>% dplyr::rename( GO_ID = rowname  )
+
+
+```
+
+
+## Read in all de genes list 
+```{r}
+
+read_one_de_genes_file <- function(contrast_name) {
+	
+	read.table( file=file.path( input_data_for_go_analysis_dir, paste(contrast_name, ".tab", sep="" )), sep="\t", header = TRUE, quote="") 
+}
+
+list_of_de_genes_table <- purrr::map(  names( lists_of_contrasts ),  read_one_de_genes_file)
+   
+names( list_of_de_genes_table) <- names( lists_of_contrasts )
+
+```
+
+## Get list of DE genes associated with Enriched GO term 
+```{r}
+colnames(reduced_camera_results)
+
+
+get_list_of_de_genes <-  function(GO_type, GO_ID, Contrast) {
+	
+	my_results <- 	list_of_de_genes_table[[Contrast]] 
+		
+	if(  "FDR" %in%  colnames(my_results )){
+		my_results <- my_results %>% dplyr::filter ( FDR < 0.05) 
+	} else if( "adj.P.Val" %in% colnames(my_results )){
+		my_results <- my_results %>% dplyr::filter ( adj.P.Val < 0.05) 
+	}
+	
+		
+	my_results <- my_results %>%	 dplyr::filter (genes %in% 	go_idx_raw_list[[GO_type]][[GO_ID]])
+	
+	list_of_de_genes <- my_results %>%
+						dplyr::select ( one_of ( c( "genes"))) %>%
+						as.data.frame() %>% 
+						t() %>%
+						as.vector()
+						
+	
+	return(list_of_de_genes)
+}
+
+# paste( get_list_of_de_genes( "BP", "GO:0007010", "FLBvsCTRL.12vs6"), collapse=", ")
+
+camera_results_with_genes <- reduced_camera_results %>%
+							  dplyr::mutate( list_of_de_genes = purrr::pmap( list(GO_type, GO_ID, Contrast) , 
+							  											   get_list_of_de_genes) ) %>%
+							  dplyr::mutate( num_of_de_genes = purrr::map( list_of_de_genes, length) %>% unlist()  ) %>%
+							  dplyr::mutate( list_of_de_genes = purrr::map(list_of_de_genes, 
+							  											    function(x) {paste(x, collapse=", ") }) %>% unlist())
+
+
+columns_to_select <- c(  "Contrast",   "GO_type" , "go_term" ,        "GO_ID" ,           
+							 						    "NGenes" ,          "Direction",        "PValue" ,          
+							 						    "num_of_de_genes" ,    
+							 						    "list_of_de_genes" )	
+
+if ( "FDR" %in% colnames( camera_results_with_genes)) {
+columns_to_select <- c(  "Contrast",   "GO_type" , "go_term" ,        "GO_ID" ,           
+							 						    "NGenes" ,          "Direction",        "PValue" ,          
+							 						    "FDR",       "num_of_de_genes" ,    
+							 						    "list_of_de_genes" )	
+}
+
+
+camera_results_with_genes <- camera_results_with_genes %>%
+							 dplyr::select( one_of(columns_to_select ))
+
+write.table(camera_results_with_genes, file=file.path(camera_go_terms_results_dir, "camera_results_enriched_go_terms.txt"), 
+			row.names = FALSE, sep="\t", quote=FALSE) 
+
+```
+
+## Merge gene annotation with the results 
+```{r}
+
+camear_results_genes_detailed <- camera_results_with_genes %>% 
+								 dplyr::mutate( list_of_de_genes =  strsplit(list_of_de_genes, split=", ")  ) %>%
+								 tidyr::unnest(list_of_de_genes) %>%
+								 dplyr::left_join ( gene_annotation, by=c("list_of_de_genes" = "oln_id"))
+
+write.table(camear_results_genes_detailed, file=file.path(camera_go_terms_results_dir, "camera_results_enriched_genes.txt"), 
+			row.names = FALSE, sep="\t", quote=FALSE) 
+
+```
+
+
+
+
+
+
+
+
+

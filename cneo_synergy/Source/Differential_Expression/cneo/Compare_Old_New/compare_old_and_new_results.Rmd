@@ -1,0 +1,187 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load( tidyverse)
+```
+
+```{r}
+diff_exp_results_dir <- "/home/ignatius/PostDoc/2019/cneo_synergy/Results/Differential_Expression"
+data_set_to_use <- "To_Use_k_0_Remove_5a"
+compare_results_dir <-  file.path( diff_exp_results_dir, "Compare_Old_New", data_set_to_use ) 
+
+if ( !dir.exists(compare_results_dir)) {
+   dir.create(compare_results_dir)
+}
+
+```
+
+```{r}
+
+load( file.path( diff_exp_results_dir, "Old_Results/20150609/edgeR_cneo_compare_delete_sample_5A.Rdata") )
+
+compare_A_CA_old   <- topTags(cneo.lrt_compare_del_A, n=7000)  %>% as.data.frame %>% arrange( desc(logFC) )
+compare_AL_CAL_old <- topTags(cneo.lrt_compare_del_AL, n=7000) %>% as.data.frame %>% arrange( desc(logFC) )
+
+
+write.table(  compare_A_CA_old, 
+           file.path( diff_exp_results_dir, "Old_Results/20150609/cneo_delete_sample_compare_A_fc_p_values.tab" ),
+           sep="\t", row.names = FALSE, quote = FALSE, na="")
+write.table(  compare_AL_CAL_old, 
+           file.path( diff_exp_results_dir, "Old_Results/20150609/cneo_delete_sample_compare_AL_fc_p_values.tab" ),
+           sep="\t", row.names = FALSE, quote = FALSE, na="")
+
+# compare_A_CA_old   <- read_tsv( file.path( diff_exp_results_dir, "Old_Results/20150609/cneo_delete_sample_compare_A_fc_p_values.tab" ) )
+# compare_AL_CAL_old <- read_tsv( file.path( diff_exp_results_dir, "Old_Results/20150609/cneo_delete_sample_compare_AL_fc_p_values.tab" )  )
+
+compare_A_CA_new   <- read_tsv( file.path( diff_exp_results_dir, "EdgeR_RUVs_QL/cneo", data_set_to_use, "Gene_Lists/compare_A.tab" )  )
+compare_AL_CAL_new <- read_tsv( file.path( diff_exp_results_dir, "EdgeR_RUVs_QL/cneo", data_set_to_use, "Gene_Lists/compare_AL.tab" )  )
+ 
+```
+
+```{r}
+compare_A_CA_old_clean <- compare_A_CA_old %>%
+  distinct ( genes, logFC, FDR)
+
+
+compare_A_CA_new_clean <- compare_A_CA_new %>%
+  distinct ( genes, logFC, FDR)
+
+
+compare_A_CA_old_new <- compare_A_CA_old_clean %>%
+  full_join( compare_A_CA_new_clean, by="genes", suffix=c(".old", ".new")) %>%
+  mutate( `Is significant` = case_when( FDR.old < 0.05 & FDR.new < 0.05 ~ "Both Old and New",
+                                         FDR.old < 0.05 & ( is.na(FDR.new ) | FDR.new >= 0.05  )  ~ "Old only",
+                                         (is.na(FDR.old) | FDR.old >= 0.05  ) & FDR.new < 0.05 ~ "New only",
+                                         TRUE ~ "Not Old or New" ) )  %>%
+  mutate( FDR.old = ifelse(is.na(FDR.old), 1, FDR.old ),
+          FDR.new = ifelse(is.na(FDR.new), 1, FDR.new ),
+          logFC.old = ifelse(is.na(logFC.old), 0, logFC.old ),
+          logFC.new = ifelse(is.na(logFC.new), 0, logFC.new )
+          ) %>%
+  mutate( sign_new = ifelse( !is.na(logFC.new) & FDR.new < 0.05 , sign( logFC.new), 0)  , 
+          sign_old = ifelse( !is.na(logFC.old) & FDR.old < 0.05, sign( logFC.old), 0))
+
+
+
+
+compare_A_CA_scatterplot <- compare_A_CA_old_new %>%
+  filter ( `Is significant` != "Not Old or New") %>%
+  ggplot( aes(logFC.old, logFC.new, col=`Is significant`)) +
+  geom_point() +
+  facet_grid ( . ~ `Is significant`)
+
+compare_A_CA_scatterplot
+
+ggsave( file.path(compare_results_dir, "compare_A_CA_scatterplot.png" ), plot=compare_A_CA_scatterplot)
+
+
+compare_A_CA_num_sde_genes <-  compare_A_CA_old_new %>% 
+  # filter( FDR.old < 0.05 & FDR.new < 0.05 ) %>%
+  mutate( sign_old = case_when ( sign_old == -1 ~ "Significant Down", 
+                                 sign_old == 1 ~ "Significant Up", 
+                                 TRUE ~ "Not significant"
+                                 )) %>%
+  mutate( sign_new = case_when ( sign_new == -1 ~ "Significant Down", 
+                                 sign_new == 1 ~ "Significant Up", 
+                                 TRUE ~ "Not significant"
+                                 )) %>%
+  rename( Count_New_SDE_Genes = "sign_new",
+          Count_Old_SDE_Genes = "sign_old") %>%
+  group_by( Count_New_SDE_Genes, Count_Old_SDE_Genes) %>%
+  summarise( counts =n())
+
+compare_A_CA_num_sde_genes
+
+write.table( compare_A_CA_num_sde_genes, file.path( compare_results_dir, "compare_A_CA_num_sde_genes.tsv" ),
+             sep = "\t", row.names = FALSE, quote = FALSE, na="")
+
+  
+filtered_A_CA <- compare_A_CA_old_new %>%
+  filter( `Is significant` != "Old only") 
+
+cor.test( filtered_A_CA$logFC.old, filtered_A_CA$logFC.new )
+
+
+
+```
+
+
+
+```{r}
+compare_AL_CAL_old_clean <- compare_AL_CAL_old %>%
+  distinct ( genes, logFC, FDR)
+
+
+compare_AL_CAL_new_clean <- compare_AL_CAL_new %>%
+  distinct ( genes, logFC, FDR)
+
+
+compare_AL_CAL_old_new <- compare_AL_CAL_old_clean %>%
+  full_join( compare_AL_CAL_new_clean, by="genes", suffix=c(".old", ".new")) %>%
+  mutate( `Is significant` = case_when( FDR.old < 0.05 & FDR.new < 0.05 ~ "Both Old and New",
+                                         FDR.old < 0.05 & ( is.na(FDR.new ) | FDR.new >= 0.05  )  ~ "Old only",
+                                         (is.na(FDR.old) | FDR.old >= 0.05  ) & FDR.new < 0.05 ~ "New only",
+                                         TRUE ~ "Not Old or New" ) ) %>%
+  mutate( FDR.old = ifelse(is.na(FDR.old), 1, FDR.old ),
+          FDR.new = ifelse(is.na(FDR.new), 1, FDR.new ),
+          logFC.old = ifelse(is.na(logFC.old), 0, logFC.old ),
+          logFC.new = ifelse(is.na(logFC.new), 0, logFC.new )
+          ) %>% 
+  mutate( sign_new = ifelse( !is.na(logFC.new) & FDR.new < 0.05 , sign( logFC.new), 0)  , 
+          sign_old = ifelse( !is.na(logFC.old) & FDR.old < 0.05, sign( logFC.old), 0))
+
+compare_AL_CAL_old_new %>%
+  filter ( `Is significant` != "Not Old or New") %>%
+  ggplot( aes(logFC.old, logFC.new, col=`Is significant`)) +
+  geom_point() +
+  facet_grid ( . ~ `Is significant`)
+
+
+
+compare_AL_CAL_scatterplot <- compare_AL_CAL_old_new %>%
+  filter ( `Is significant` != "Not Old or New") %>%
+  ggplot( aes(logFC.old, logFC.new, col=`Is significant`)) +
+  geom_point() +
+  facet_grid ( . ~ `Is significant`)
+
+compare_AL_CAL_scatterplot
+
+ggsave( file.path(compare_results_dir, "compare_AL_CAL_scatterplot.png" ), plot=compare_AL_CAL_scatterplot)
+
+
+
+compare_AL_CAL_num_sde_genes <- compare_AL_CAL_old_new %>% 
+  mutate( sign_old = case_when ( sign_old == -1 ~ "Significant Down", 
+                                 sign_old == 1 ~ "Significant Up", 
+                                 TRUE ~ "Not significant"
+                                 )) %>%
+  mutate( sign_new = case_when ( sign_new == -1 ~ "Significant Down", 
+                                 sign_new == 1 ~ "Significant Up", 
+                                 TRUE ~ "Not significant"
+                                 )) %>%
+  rename( Count_New_SDE_Genes = "sign_new",
+          Count_Old_SDE_Genes = "sign_old") %>%
+  group_by( Count_New_SDE_Genes, Count_Old_SDE_Genes) %>%
+  summarise( counts =n())
+
+compare_AL_CAL_num_sde_genes
+
+write.table( compare_AL_CAL_num_sde_genes, file.path( compare_results_dir, "compare_AL_CAL_num_sde_genes.tsv" ),
+             sep = "\t", row.names = FALSE, quote = FALSE, na="")
+
+
+
+filtered_AL_CAL <- compare_AL_CAL_old_new %>%
+  filter( `Is significant` != "Old only") 
+
+cor.test( filtered_AL_CAL$logFC.old, filtered_AL_CAL$logFC.new )
+
+```
