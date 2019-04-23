@@ -1,0 +1,210 @@
+---
+title: "Compare C. neoformans and S. cerevisiae global GO terms for AMB + LF drug synergy project"
+output: html_notebook
+---
+
+
+## Load libraries and scripts
+```{r}
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+p_load(GO.db)
+		
+source( '../Common/global_parameters.R')
+source( '../Common/helper_functions.R')
+
+sessionInfo()
+
+```
+
+# Directory Management
+```{r}
+
+compare_go_terms_results_dir <- file.path( compare_results_dir,  "Compare_Global_Enrichment" ) 
+create_dir_if_not_exists( compare_go_terms_results_dir)
+
+```
+
+
+## Read in data 
+```{r}
+
+cneo_enriched_go <- read_tsv(file.path(cneo_results_dir, "Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat/enriched_go_terms_global.txt"))
+scer_enriched_go <- read_tsv(file.path(scer_results_dir, "Functional_Enrichment/To_Use_k_1/GOStat/enriched_go_terms_global.txt" ) )
+
+list_of_selected_go_terms <- read_tsv( file.path( compare_data_dir, "Selected_GO_Terms/list_of_selected_GO_terms.txt"), col_names = FALSE)
+
+colnames(list_of_selected_go_terms) <- "gobpid"
+
+```
+
+
+## 
+```{r}
+
+cneo_enriched_go_cleaned <- cneo_enriched_go %>%
+                            separate( query_list_id, c("query_list_id", "direction"), sep="\\.") %>%
+                            dplyr::select(  query_list_id, direction, term, bh, oddsratio, gobpid, ontology) 
+
+scer_enriched_go_cleaned <- scer_enriched_go %>%
+                            separate( query_list_id, c("query_list_id", "direction"), sep="\\.")  %>%
+                            dplyr::select(  query_list_id, direction, term, bh, oddsratio, gobpid, ontology)
+
+
+```
+
+
+
+
+
+
+```{r}
+compare_enriched_go <- scer_enriched_go_cleaned %>%
+                        full_join(cneo_enriched_go_cleaned, by=c("gobpid" = "gobpid",
+                                                                 "term" = "term",
+                                                                 "ontology" = "ontology",
+                                                                 "direction" = "direction",
+                                                                 "query_list_id" = "query_list_id"), suffix=c(".scer", ".cneo") ) 
+
+
+
+
+
+compare_enriched_go_long <- compare_enriched_go %>%
+                          gather( key="score_type", value = "value", c("bh.scer", "bh.cneo", "oddsratio.scer", "oddsratio.cneo") ) %>%
+                          separate( score_type,  c("score_type", "organism"),   sep="\\."  ) %>%
+                          mutate( query_label = paste(organism, query_list_id, direction, sep=",") )  %>%
+                          dplyr::select( -organism, -query_list_id, -direction )  
+
+
+compare_enriched_go_bh <- compare_enriched_go_long %>%
+                          filter( score_type == "bh") %>%
+                          dplyr::select( -score_type) %>%
+                          spread( query_label, value )
+
+compare_enriched_go_oddsratio <- compare_enriched_go_long %>%
+                          filter( score_type == "oddsratio") %>%
+                          dplyr::select( -score_type) %>%
+                          spread( query_label, value )
+
+
+compare_enriched_go_spread <- compare_enriched_go_long %>%
+  spread( score_type, value )
+
+
+```
+
+
+
+```{r}
+
+thesis_results_recreate <- list_of_selected_go_terms  %>%
+  left_join(compare_enriched_go_bh, by="gobpid" ) %>%
+  #mutate( term = purrr::map_chr(gobpid, ~GOTERM[[.]]@Term    ))
+   mutate( term =  purrr::map2_chr( term, gobpid,  ~ifelse( is.na(.x), GOTERM[[.y]]@Term, .x)) ) %>%
+   mutate(    )
+
+write.table(thesis_results_recreate, file=file.path( compare_results_dir, "Compare_Global_Enrichment/thesis_results_recreate.tab"  ),
+            sep="\t", row.names = FALSE, quote = FALSE)
+
+
+# setdiff( list_of_selected_go_terms$gobpid , compare_enriched_go_bh$gobpid) %>%
+#   purrr::map( ~GOTERM[[.]]  )
+
+
+```
+
+
+
+```{r}
+data_plot_odds_ratio_temp <- compare_enriched_go_spread %>%
+                          separate( query_label, c("organism", "query_lists_id", "direction"), sep=",") %>%
+                          filter( ontology == "BP" & !is.na(oddsratio)) %>%
+                          dplyr::select( -ontology)
+
+
+rows_to_remove <-  data_plot_odds_ratio_temp %>%
+  inner_join( list_of_selected_go_terms)   %>%
+  group_by(gobpid, query_lists_id, organism) %>%
+  summarise( counts = n()) %>%
+  filter( counts > 1) %>%
+  ungroup 
+
+data_plot_odds_ratio <-  data_plot_odds_ratio_temp  %>%
+  anti_join( rows_to_remove, by =c("organism", "query_lists_id", "gobpid" )  ) %>%
+  mutate( organism = case_when (  organism == "scer" ~ "S. cerevisiae",
+                                  organism == "cneo" ~ "C. neoformans",
+                                  TRUE ~ NA_character_ )) %>%
+  mutate( query_lists_id = case_when( query_lists_id == "compare_A" ~ "AMB only",
+                                      query_lists_id == "compare_AL" ~ "AMB + LF",
+                                      TRUE ~ NA_character_) ) %>%
+  mutate( x_labels =   paste( organism, query_lists_id, sep=" " )) %>%
+  mutate( Odds_Ratio_Score =  ifelse( direction == "down", -1, 1)*oddsratio ) %>%
+  mutate( direction = factor ( ifelse( direction== "up", "Up", "Down"), levels = c("Up", "Down"))) %>%
+  dplyr::rename( p.adjust = "bh") %>%
+  mutate( x_labels = factor( x_labels, 
+                             levels = c( "C. neoformans AMB only",
+                                         "C. neoformans AMB + LF",
+                                         "S. cerevisiae AMB only",
+                                         "S. cerevisiae AMB + LF")) ) 
+
+
+subset_to_plot <- data_plot_odds_ratio %>%
+    right_join( list_of_selected_go_terms, by="gobpid") %>%
+  mutate( term =  purrr::map2_chr( as.character(term), gobpid,  ~ifelse( is.na(.x), GOTERM[[.y]]@Term, .x)) ) %>%
+  mutate( organism = ifelse(  is.na(organism  ), "scer", organism  ),
+          query_lists_id = ifelse( is.na( query_lists_id),  "compare_A", query_lists_id)) %>%
+    mutate( term = factor( term, levels =  rev(unique(term))) ) 
+
+
+odds_ratio_ggplot <- subset_to_plot  %>%
+  ggplot( aes(  x_labels,  term,
+                color = direction,
+                shape = direction, 
+                fill = Odds_Ratio_Score, 
+                size = -log10(p.adjust)  )) +
+  geom_point() + 
+    scale_shape_manual(values = c(24,25)) +
+    scale_fill_gradient2(high = "coral3", low = "deepskyblue3", mid = "white") + 
+    scale_color_manual(values = c( "coral3", "deepskyblue3")) + 
+    ggtitle("Enriched GO terms (P.adj < 0.05)") +
+    theme_bw() +
+    guides(size = guide_legend(override.aes = list(shape=17))) +
+    theme(plot.title = element_text(hjust = 0.5), 
+          axis.title.y =  element_blank(), 
+          axis.title.x = element_blank(),
+          axis.text.x = element_text(angle = 45, hjust = 1, face = "bold"), 
+          axis.text.y = element_text(face = "bold"))
+
+odds_ratio_ggplot
+
+
+ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.png"))
+
+
+write.table( data_plot_odds_ratio, file=file.path( compare_go_terms_results_dir, "data_plot_odds_ratio.txt"),
+            sep="\t", row.names = FALSE, quote = FALSE)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -14,28 +14,184 @@ if(!require(pacman)) {
 }
 
 p_load(tidyverse)
-p_load(edgeR)
-p_load(limma)
-p_load(mixOmics)
-p_load(RUVSeq)
-p_load(EDASeq)
-p_load(RColorBrewer)
-p_load(lazyeval)
 		
-source( '../Common/edgeR_common_functions.R')
-source( '../../../Common/global_parameters.R')
-source( '../../../Common/helper_functions.R')
+source( '../Common/global_parameters.R')
+source( '../Common/helper_functions.R')
 
 sessionInfo()
 
 ```
 
-
-
+# Directory Management
 ```{r}
 
+compare_orthologs_results_dir <- file.path( compare_results_dir,  "Compare_Orthologs" ) 
+create_dir_if_not_exists( compare_orthologs_results_dir)
+```
 
 
+# Read Data
+```{r}
+
+scer_cneo_orthologs <- read_tsv( file.path( cneo_data_dir, "Curated_Data/scer_cneo_orthologs.tab" )  ) 
+
+cneo_compare_A_CA   <- read_tsv( file.path( cneo_results_dir, "Differential_Expression/EdgeR_RUVs_QL/cneo/To_Use_k_0_Remove_5a/Gene_Lists/compare_A.tab" ))
+cneo_compare_AL_CAL <- read_tsv( file.path( cneo_results_dir, "Differential_Expression/EdgeR_RUVs_QL/cneo/To_Use_k_0_Remove_5a/Gene_Lists/compare_AL.tab" ))
+scer_compare_A_CA   <- read_tsv( file.path( scer_results_dir, "Differential_Expression/EdgeR_RUVs_QL/scer/To_Use_k_1/Gene_Lists/compare_A.tab" ))
+scer_compare_AL_CAL <- read_tsv( file.path( scer_results_dir, "Differential_Expression/EdgeR_RUVs_QL/scer/To_Use_k_1/Gene_Lists/compare_AL.tab" ))
 
 ```
+
+## Clean columns for SDE genes data
+```{r}
+
+cneo_compare_A_CA_clean   <- cneo_compare_A_CA %>%
+                             dplyr::select( one_of( c( "genes", "logFC", "FDR"))   )
+cneo_compare_AL_CAL_clean <- cneo_compare_AL_CAL %>%
+                             dplyr::select( one_of( c( "genes", "logFC", "FDR"))   )
+scer_compare_A_CA_clean   <- scer_compare_A_CA %>%
+                             dplyr::select( one_of( c( "genes", "logFC", "FDR"))   )
+scer_compare_AL_CAL_clean <- scer_compare_AL_CAL %>%
+                             dplyr::select( one_of( c( "genes", "logFC", "FDR"))   )
+
+```
+
+
+## Get all 1 to 1 orthologs
+```{r}
+
+single_match_to_cneo <- scer_cneo_orthologs %>%
+  group_by(cneo_orf_id) %>%
+  summarise( counts = n()) %>%
+  ungroup %>%
+  dplyr::filter( counts == 1)  %>%
+  dplyr::select( -counts)
+
+
+single_match_to_scer <- scer_cneo_orthologs %>%
+  group_by(scer_oln_id) %>%
+  summarise( counts = n()) %>%
+  ungroup %>%
+  dplyr::filter( counts == 1) %>%
+  dplyr::select( -counts)
+
+one_to_one_orthologs_helper <- scer_cneo_orthologs %>%
+                        inner_join(single_match_to_cneo , by="cneo_orf_id" ) %>%
+                        inner_join(single_match_to_scer , by="scer_oln_id" ) 
+
+one_to_one_orthologs <- one_to_one_orthologs_helper %>%
+  inner_join( one_to_one_orthologs_helper, by =c( "scer_oln_id" = "scer_oln_id")) %>%
+  dplyr::filter( cneo_orf_id.x == cneo_orf_id.y)  %>%
+  dplyr::select( -cneo_orf_id.y,  -reliability_class.y ) %>%
+  dplyr::rename( cneo_orf_id = "cneo_orf_id.x",
+                 reliability_class = "reliability_class.x" )
+ 
+one_to_one_orthologs_cleaned <- one_to_one_orthologs %>%
+                                dplyr::select( -reliability_class)
+```
+
+## Compare A and CA
+```{r}
+
+compare_A_CA_orthologs <- one_to_one_orthologs_cleaned %>%
+                          left_join(cneo_compare_A_CA_clean, by=c("cneo_orf_id" = "genes") ) %>%
+                          left_join(scer_compare_A_CA_clean, by=c("scer_oln_id" = "genes"), suffix = c(".cneo", ".scer")) 
+
+
+compare_A_CA_orthologs_clean <- compare_A_CA_orthologs %>%
+                          dplyr::filter( ! is.na(logFC.cneo) &  !is.na(logFC.scer) )
+
+
+
+compare_A_CA_ggplot <- compare_A_CA_orthologs_clean %>%
+  dplyr::mutate( is_significant = factor( case_when( FDR.cneo < 0.05  & FDR.scer < 0.05  ~ "Both significant",
+                                    FDR.cneo < 0.05  & FDR.scer >= 0.05 ~ "C. neoformans Only",
+                                    FDR.cneo >= 0.05 & FDR.scer < 0.05  ~ "S. cerevisiae Only",
+                                    TRUE ~ "Not sigificant"
+                                    ), levels=c( "Both significant", "C. neoformans Only", "S. cerevisiae Only", "Not sigificant")  )  ) %>%
+  ggplot( aes( logFC.cneo, logFC.scer, col=is_significant)) +
+  geom_point()  + 
+  # This is how to get part of the legend text into italic fact
+  scale_color_discrete( labels=c( "Both significant", 
+                                  expression(paste(italic("C. neoformans")," Only", sep=" ")), 
+                                  expression(paste(italic("S. cerevisiae")," Only", sep=" ")), 
+                                  "Not sigificant") ) +
+  guides( color=guide_legend(title="Is Significant")) +
+  xlab ( expression( paste(italic("C. neoformans"), "log fold-change", sep=" ") ) ) +
+  ylab ( expression( paste(italic("S. cerevisiae"), "log fold-change", sep=" ") ) ) +
+  theme(legend.text.align = 0) # Align legend text to the left
+
+compare_A_CA_ggplot
+
+ggsave( filename = file.path(compare_orthologs_results_dir, "compare_A_CA_ggplot.png"), plot=compare_A_CA_ggplot)
+
+
+compare_A_CA_orthologs_sig <- compare_A_CA_orthologs %>% 
+  filter( logFC.cneo < 0.05 & logFC.scer < 0.05)
+
+
+sink( file.path(compare_orthologs_results_dir, "compare_A_CA_pearson.txt"))
+cat("Compare A and CA significant genes log FC in S. cerevisiae and C. neoformans, Pearson's test")
+cor.test( compare_A_CA_orthologs_sig$logFC.cneo, 
+          compare_A_CA_orthologs_sig$logFC.scer, method="pearson" )
+sink()
+
+```
+
+
+
+
+## Compare AL and CAL
+```{r}
+
+compare_AL_CAL_orthologs <- one_to_one_orthologs_cleaned %>%
+                          left_join(cneo_compare_AL_CAL_clean, by=c("cneo_orf_id" = "genes") ) %>%
+                          left_join(scer_compare_AL_CAL_clean, by=c("scer_oln_id" = "genes"), suffix = c(".cneo", ".scer")) 
+
+
+compare_AL_CAL_orthologs_clean <- compare_AL_CAL_orthologs %>%
+                          dplyr::filter( ! is.na(logFC.cneo) &  !is.na(logFC.scer) )
+
+
+
+compare_AL_CAL_ggplot <- compare_AL_CAL_orthologs_clean %>%
+  dplyr::mutate( is_significant = factor( case_when( FDR.cneo < 0.05  & FDR.scer < 0.05  ~ "Both significant",
+                                    FDR.cneo < 0.05  & FDR.scer >= 0.05 ~ "C. neoformans Only",
+                                    FDR.cneo >= 0.05 & FDR.scer < 0.05  ~ "S. cerevisiae Only",
+                                    TRUE ~ "Not sigificant"
+                                    ), levels=c( "Both significant", "C. neoformans Only", "S. cerevisiae Only", "Not sigificant") )  ) %>%
+  ggplot( aes( logFC.cneo, logFC.scer, col=is_significant)) +
+  geom_point()  + 
+  # This is how to get part of the legend text into italic fact
+  scale_color_discrete( labels=c( "Both significant", 
+                                  expression(paste(italic("C. neoformans")," Only", sep=" ")), 
+                                  expression(paste(italic("S. cerevisiae")," Only", sep=" ")), 
+                                  "Not sigificant") ) + 
+  guides( color=guide_legend(title="Is Significant")) +
+  xlab ( expression( paste(italic("C. neoformans"), "log fold-change", sep=" ") ) ) +
+  ylab ( expression( paste(italic("S. cerevisiae"), "log fold-change", sep=" ") ) ) +
+  theme(legend.text.align = 0) # Align legend text to the left
+
+compare_AL_CAL_ggplot
+
+ggsave( filename = file.path(compare_orthologs_results_dir, "compare_AL_CAL_ggplot.png"), plot=compare_AL_CAL_ggplot)
+
+
+compare_AL_CAL_orthologs_sig <- compare_AL_CAL_orthologs %>% 
+  filter( logFC.cneo < 0.05 & logFC.scer < 0.05)
+
+
+sink( file.path(compare_orthologs_results_dir, "compare_AL_CAL_pearson.txt"))
+cat("Compare AL and CAL significant genes log FC in S. cerevisiae and C. neoformans, Pearson's test")
+cor.test( compare_AL_CAL_orthologs_sig$logFC.cneo, 
+          compare_AL_CAL_orthologs_sig$logFC.scer, method="pearson" )
+sink()
+
+# grep ':' list_of_go_terms.txt  | sed -e "s/\(GO:[[:digit:]]\+\)/\n\1\n/g" | grep 'GO:' > list_of_selected_GO_terms.txt
+
+```
+
+
+
+
 

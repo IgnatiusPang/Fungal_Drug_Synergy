@@ -1,0 +1,12 @@
+Compare AL and CAL significant genes log FC in S. cerevisiae and C. neoformans, Pearson's test
+	Pearson's product-moment correlation
+
+data:  compare_AL_CAL_orthologs_sig$logFC.cneo and compare_AL_CAL_orthologs_sig$logFC.scer
+t = -0.78976, df = 1016, p-value = 0.4298
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.08608082  0.03672873
+sample estimates:
+       cor 
+-0.0247695 
+

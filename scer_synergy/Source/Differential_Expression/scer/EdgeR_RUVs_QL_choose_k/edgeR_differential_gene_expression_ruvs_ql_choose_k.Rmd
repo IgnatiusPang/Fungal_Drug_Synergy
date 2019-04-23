@@ -48,7 +48,7 @@ organism <-  as.character( command_line_args[5]  ) # RUVg, RUVs, RUVr
 		
 } else {
 	
-	num_unwanted_variables <- 5
+	num_unwanted_variables <- 1
 	
 	is_quasi_likelihood_test <- TRUE
 	
@@ -183,8 +183,14 @@ get_top_tags_baseed_on_group <- function ( group,  fit_by_group ) {
 	
 	top <- rownames_to_column(top)
 	
-	colnames( top) <-  c("genes", "logFC", "logCPM", "LR", "PValue", "FDR") 
+	print(colnames( top))
     
+	if ( is_quasi_likelihood_test == TRUE ) {
+	    colnames( top) <-  c("genes", "logFC", "logCPM", "F", "PValue", "FDR")
+	} else   {
+	    colnames( top) <-  c("genes", "logFC", "logCPM", "LR", "PValue", "FDR")
+	}
+	
 	is.de <- decideTestsDGE(lrt)
 
 	plotMD(

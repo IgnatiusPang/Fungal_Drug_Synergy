@@ -1,0 +1,49 @@
+Table 4.8. Major GO enrichments in T A and T AL for C. neoformans H99 and S. cerevisiae S288C
+H99
+GO term enrichments
+S288C
+GO ID T A T AL T A T AL
+Nitrogen compound metabolic process GO:0006807 1.65 1.71 0 4.88
+Nucleic acid metabolic process GO:0090304 2.07 2.07 2.01 Nucleobase-containing compound catabolic process GO:0034655 0 0 1.88 0
+Purine-containing compound metabolic process GO:0072521 0 0 1.86 0
+Pyridine-containing compound metabolic process GO:0072524 2.76 0 2.47 0
+Cellular amino acid metabolic process GO:0006520 0 0 3.69 8.44
+Cellular component biogenesis GO:0044085 2.55 2.65 2.69 0
+DNA replication GO:0006260 4.09 4.91 Cell division GO:0051301 2.26 2.6 Microtubule-based process GO:0007017 5.53 6.33 Actin polymerisation or depolymerisation GO:0008154 0 4.44 Tricarboxylic acid cycle GO:0006099 9.69 11.67 3.27 0
+Mitochondrial electron transport, ubiquinol to cytochrome c GO:0006122 0 0 7.43 0
+Generation of precursor metabolites and energy GO:0006091 0 0 2.06 0
+Nucleic acid and amino acid related
+Cell organisation and replication related
+Energy related
+129Oxidation-reduction process GO:0055114 2.23 1.98 Carbohydrate catabolic process GO:0016052 3.2 2.45 Ribonucleoprotein complex biogenesis GO:0022613 4.57 4.36 Ribosome biogenesis GO:0042254 6.61 RNA processing GO:0006396 2.05 Translational initiation GO:0006413 1.92 0 Regulation of translational initiation GO:0006446 0 0 4.83 Transcription of nuclear large rRNA transcript from RNA
+polymerase I promoter GO:0042790 8.43 6.63 5.42 Cellular protein metabolic process GO:0044267 1.38 0 Protein folding GO:0006457 2.54 0 2.18 3.77
+Post-translational protein targeting to membrane,
+translocation GO:0031204 0 0 0 16.65
+Ubiquitin-dependent protein catabolic process GO:0006511 0 0 0 2.51
+ER-associated ubiquitin-dependent protein catabolic process GO:0030433 0 0 0 6.65
+Ergosterol biosynthetic process GO:0006696 3.03 4.16 4.03 4.84
+Cellular lipid catabolic process GO:0044242 4.22 3.41 0 0
+Phospholipid biosynthetic process GO:0008654 0 0 0 2.52
+Fatty acid catabolic process GO:0009062 5.77 0 Stress related
+Hydrogen peroxide catabolic process GO:0042744 0 16.98 Response to oxidative stress GO:0006979 0 2.04 Cellular response to oxidative stress GO:0034599 0 0 2.26
+Cellular response to DNA damage stimulus GO:0006974 1.9 2.39 0
+Response to misfolded protein GO:0051788 0 0 9.99
+ER-associated misfolded protein catabolic process GO:0071712 0 0 33.21
+Cellular iron ion homeostasis GO:0006879 0 0 3.24 0
+Iron-sulphur cluster assembly GO:0016226 0 0 0 5
+Siderophore transport GO:0015891 0 0 18.59 0
+Cellular metal ion homeostasis GO:0006875 0 0 2.48 0
+CVT pathway GO:0032258 0 0 3.11 0
+Autophagy GO:0006914 0 2.13 0 0
+Mitochondrion degradation GO:0000422 0 0 5.86 0
+2.31 2.09
+6.96 5.36 3.88
+1.51 2.71 0
+Transcription and translation related
+Protein related
+Lipid related
+Inf*
+Metal related
+Autophagy related
+Odds ratios for each GO term are included, with regulation of GO terms colour coded. Red: up-regulated. Green: down-
+regulated. *Inf = all genes contributing to enrichment of this GO term are present.
