@@ -46,8 +46,8 @@ channel <- odbcDriverConnect( conn_string)
 
 set_encoding <- sqlQuery(channel,"SET client_encoding='LATIN1'")
 
-results_directory <- "/media/babs/Systemsbiology/Igy/2013/Fungal_Shared/Results/v1.01/EdgeR/cneo/"
-results_directory_de_list <- paste( results_directory, "de_list/", sep="")
+results_dir <- "/media/babs/Systemsbiology/Igy/2013/Fungal_Shared/Results/v1.01/EdgeR/cneo/"
+results_dir_de_list <- paste( results_dir, "de_list/", sep="")
 
 
 sessionInfo()
@@ -67,9 +67,9 @@ cneo_dgelist_del <- get_normalized_factors("/media/babs/Systemsbiology/Igy/2013/
 ##################################################################################################################
 
 #### Perform data quality checks
-print_diagnostic_plots( cneo_dgelist_del, results_directory, "mds_plot_cneo_delete_5A_data_synergy.pdf" )
+print_diagnostic_plots( cneo_dgelist_del, results_dir, "mds_plot_cneo_delete_5A_data_synergy.pdf" )
 
-#print_diagnostic_plots( cneo_dgelist, results_directory, "mds_plot_cneo_synergy.pdf" )
+#print_diagnostic_plots( cneo_dgelist, results_dir, "mds_plot_cneo_synergy.pdf" )
 
 ##################################################################################################################
 
@@ -198,7 +198,7 @@ summary(cneo.de_compare_del_synergy)
 
 #### Plot the Biological Variation and the log-fold change versus log-counts per million plot
 
-pdf( paste ( results_directory, "cneo_edgeR_diagnostic_plots_delete_5A_data.pdf", sep=""))
+pdf( paste ( results_dir, "cneo_edgeR_diagnostic_plots_delete_5A_data.pdf", sep=""))
 
 #### plot biological variation
 plotBCV(cneo_dgelist_del)
@@ -236,7 +236,7 @@ orf_id=rownames( cneo.lrt_compare_del_A$table) )
 
 
 write.table(data.frame(de_list_A_CA_del), 
-                file=paste(results_directory_de_list, "cneo_de_list_A_CA_del.tab", sep="" ), row.names=FALSE, quote=TRUE, col.names=FALSE )
+                file=paste(results_dir_de_list, "cneo_de_list_A_CA_del.tab", sep="" ), row.names=FALSE, quote=TRUE, col.names=FALSE )
 
 
 de_list_AL_CAL_del <- cbind ( experiment=rep("AL - CAL" , length(cneo.lrt_compare_del_AL$table[,1]) ),
@@ -246,7 +246,7 @@ orf_id=rownames( cneo.lrt_compare_del_AL$table))
 
                 
 write.table(data.frame(de_list_AL_CAL_del), 
-                file=paste(results_directory_de_list, "cneo_de_list_AL_CAL_del.tab", sep="" ), row.names=FALSE, quote=TRUE, col.names=FALSE )
+                file=paste(results_dir_de_list, "cneo_de_list_AL_CAL_del.tab", sep="" ), row.names=FALSE, quote=TRUE, col.names=FALSE )
                 
 
 ################################################################################################
@@ -257,8 +257,8 @@ cneo_delete_sample_A_down_reg <- rownames(cneo_dgelist_del)[cneo.de_compare_del_
 cneo_delete_sample_A_no_change <- rownames(cneo_dgelist_del)[cneo.de_compare_del_A == 0] # no change
 cneo_delete_sample_A_up_reg <- rownames(cneo_dgelist_del)[cneo.de_compare_del_A == 1]    # up regulated genes  
 
-write.table(data.frame(cneo_delete_sample_A_down_reg=cneo_delete_sample_A_down_reg), file=paste(results_directory_de_list, "cneo_delete_sample_A_down_reg.tab", sep="" ) )
-write.table(data.frame(cneo_delete_sample_A_up_reg=cneo_delete_sample_A_up_reg), file=paste(results_directory_de_list,  "cneo_delete_sample_A_up_reg.tab", sep="" ))
+write.table(data.frame(cneo_delete_sample_A_down_reg=cneo_delete_sample_A_down_reg), file=paste(results_dir_de_list, "cneo_delete_sample_A_down_reg.tab", sep="" ) )
+write.table(data.frame(cneo_delete_sample_A_up_reg=cneo_delete_sample_A_up_reg), file=paste(results_dir_de_list,  "cneo_delete_sample_A_up_reg.tab", sep="" ))
 
 
 # cneo Ampotericin B and lactoferrin experiment 
@@ -266,8 +266,8 @@ cneo_delete_sample_AL_down_reg  <- rownames(cneo_dgelist_del)[cneo.de_compare_de
 cneo_delete_sample_AL_no_change <- rownames(cneo_dgelist_del)[cneo.de_compare_del_AL == 0]  # no change  
 cneo_delete_sample_AL_up_reg    <- rownames(cneo_dgelist_del)[cneo.de_compare_del_AL == 1]   # up regulated genes  
 
-write.table(data.frame(cneo_delete_sample_AL_down_reg=cneo_delete_sample_AL_down_reg), file=paste(results_directory_de_list,  "cneo_delete_sample_AL_down_reg.tab", sep="" ))
-write.table(data.frame(cneo_delete_sample_AL_up_reg=cneo_delete_sample_AL_up_reg), file=paste(results_directory_de_list,  "cneo_delete_sample_AL_up_reg.tab", sep="" ))
+write.table(data.frame(cneo_delete_sample_AL_down_reg=cneo_delete_sample_AL_down_reg), file=paste(results_dir_de_list,  "cneo_delete_sample_AL_down_reg.tab", sep="" ))
+write.table(data.frame(cneo_delete_sample_AL_up_reg=cneo_delete_sample_AL_up_reg), file=paste(results_dir_de_list,  "cneo_delete_sample_AL_up_reg.tab", sep="" ))
 
 
 # Compare Control CA and Control CAL
@@ -275,8 +275,8 @@ cneo_delete_sample_controls_down_reg  <- rownames(cneo_dgelist_del)[cneo.de_comp
 cneo_delete_sample_controls_no_change <- rownames(cneo_dgelist_del)[cneo.de_compare_del_controls == 0]  # no change
 cneo_delete_sample_controls_up_reg    <- rownames(cneo_dgelist_del)[cneo.de_compare_del_controls == 1]   # up regulated genes  
 
-write.table(data.frame(cneo_delete_sample_controls_down_reg=cneo_delete_sample_controls_down_reg), file=paste(results_directory_de_list,  "cneo_delete_sample_controls_down_reg.tab", sep="" ))
-write.table(data.frame(cneo_delete_sample_controls_up_reg=cneo_delete_sample_controls_up_reg), file=paste(results_directory_de_list,  "cneo_delete_sample_controls_up_reg.tab", sep="" ))
+write.table(data.frame(cneo_delete_sample_controls_down_reg=cneo_delete_sample_controls_down_reg), file=paste(results_dir_de_list,  "cneo_delete_sample_controls_down_reg.tab", sep="" ))
+write.table(data.frame(cneo_delete_sample_controls_up_reg=cneo_delete_sample_controls_up_reg), file=paste(results_dir_de_list,  "cneo_delete_sample_controls_up_reg.tab", sep="" ))
 
 
 # cneo Amphotericin B and lactoferrin compared to Amphotericin B, adjusted by the controls. 
@@ -286,9 +286,9 @@ cneo_delete_sample_synergy_no_change <- rownames(cneo_dgelist_del)[cneo.de_compa
 cneo_delete_sample_synergy_up_reg   <- rownames(cneo_dgelist_del)[cneo.de_compare_del_synergy == 1]   # up regulated genes
 
 #write.table(data.frame(cneo_delete_sample_synergy_down_reg=cneo_delete_sample_synergy_down_reg),
-#                file=paste(results_directory_de_list,  "cneo_delete_sample_synergy_down_reg.tab", sep="" ), row.names=FALSE, quote=FALSE, col.names=FALSE)
+#                file=paste(results_dir_de_list,  "cneo_delete_sample_synergy_down_reg.tab", sep="" ), row.names=FALSE, quote=FALSE, col.names=FALSE)
 write.table(data.frame(cneo_delete_sample_synergy_up_reg=cneo_delete_sample_synergy_up_reg), 
-                file=paste(results_directory_de_list,  "cneo_delete_sample_synergy_up_reg.tab", sep="" ), row.names=FALSE, quote=FALSE, col.names=FALSE)
+                file=paste(results_dir_de_list,  "cneo_delete_sample_synergy_up_reg.tab", sep="" ), row.names=FALSE, quote=FALSE, col.names=FALSE)
 
 
 ################################################################################################
@@ -358,11 +358,11 @@ all_de_list <- rbind(de_list_part_1
 #,de_list_part_9
 ,de_list_part_10 )
 
-# write.table(all_de_list, file=paste(results_directory_de_list,  "cneo_delete_sample_all_de_genes.tab", sep=""), row.names=FALSE, sep="\t" )
+# write.table(all_de_list, file=paste(results_dir_de_list,  "cneo_delete_sample_all_de_genes.tab", sep=""), row.names=FALSE, sep="\t" )
 
 
 ### Save the DE gene list into an SQL table
-save_table_into_sql_using_file( channel, all_de_list, "edger_de_genes_cneo_compare_delete_sample_5A", FALSE, results_directory_de_list, "cneo_delete_sample_all_de_genes.tab", 
+save_table_into_sql_using_file( channel, all_de_list, "edger_de_genes_cneo_compare_delete_sample_5A", FALSE, results_dir_de_list, "cneo_delete_sample_all_de_genes.tab", 
 	    " create table edger_de_genes_cneo_compare_delete_sample_5A (
 	    experiment varchar(255)
 	    ,model varchar(255)
@@ -375,7 +375,7 @@ save_table_into_sql_using_file( channel, all_de_list, "edger_de_genes_cneo_compa
 
 
 ### Predicted RPKM values
-write.table(predFC_rpkm, file=paste(results_directory_de_list, "cneo_delete_sample_log_rpkm_predFC_all_genes.tab", sep="" ),  sep="\t" ) 
+write.table(predFC_rpkm, file=paste(results_dir_de_list, "cneo_delete_sample_log_rpkm_predFC_all_genes.tab", sep="" ),  sep="\t" ) 
 
 
 ################################################################################################
@@ -425,7 +425,7 @@ gene_length <- gene_length[rownames(aveLogCPM_results), c('orf_id','gene_length'
 aveLogRPKM_results <- aveLogCPM_results - log2(gene_length[,'gene_length'])
 
 ### Write the table
-write.table(aveLogRPKM_results , file=paste(results_directory_de_list, "cneo_delete_sample_average_log_rpkm_all_genes.tab", sep="" ),  sep="\t" ) 
+write.table(aveLogRPKM_results , file=paste(results_dir_de_list, "cneo_delete_sample_average_log_rpkm_all_genes.tab", sep="" ),  sep="\t" ) 
 
 #####################################################################################################
 
@@ -464,7 +464,7 @@ save( cneo_delete_sample_A_down_reg, cneo_delete_sample_A_no_change, cneo_delete
       cneo.de_compare_del_treatment,
       cneo.de_compare_del_controls,
       cneo.de_compare_del_synergy,      
-      file=paste(results_directory_de_list,  "edgeR_cneo_compare_delete_sample_5A.Rdata", sep="") )
+      file=paste(results_dir_de_list,  "edgeR_cneo_compare_delete_sample_5A.Rdata", sep="") )
 
 #####################################################################################################
 
@@ -473,8 +473,8 @@ save( cneo_delete_sample_A_down_reg, cneo_delete_sample_A_no_change, cneo_delete
 compare_del_A_fc_p_values  <- topTags( cneo.lrt_compare_del_A, p.value = 0.05, n=8000)
 compare_del_AL_fc_p_values <- topTags( cneo.lrt_compare_del_AL, p.value = 0.05, n=8000)
 
-write.table(compare_del_A_fc_p_values,  file=paste(results_directory, "de_list/cneo_delete_sample_compare_A_fc_p_values.tab", sep="" ),   sep="\t", row.names = FALSE, quote=FALSE ) 
-write.table(compare_del_AL_fc_p_values, file=paste(results_directory, "de_list/cneo_delete_sample_compare_AL_fc_p_values.tab", sep="" ),  sep="\t", row.names = FALSE, quote=FALSE ) 
+write.table(compare_del_A_fc_p_values,  file=paste(results_dir, "de_list/cneo_delete_sample_compare_A_fc_p_values.tab", sep="" ),   sep="\t", row.names = FALSE, quote=FALSE ) 
+write.table(compare_del_AL_fc_p_values, file=paste(results_dir, "de_list/cneo_delete_sample_compare_AL_fc_p_values.tab", sep="" ),  sep="\t", row.names = FALSE, quote=FALSE ) 
    
 #####################################################################################################   
 

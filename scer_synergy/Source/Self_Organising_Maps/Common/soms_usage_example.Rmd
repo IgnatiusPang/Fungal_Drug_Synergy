@@ -18,7 +18,7 @@ expt_label <- "AMB_only_treatment"
 scer_compare_A_data_matrix <- scer_log_rpkm[scer_compare_A_list_of_de_genes,]
 
 # Run a 5 x 5 SOMs analysis for S. cerevisiae (scer)
-scer_compare_compare_A_som <- run_soms_analysis( scer_compare_A_data_matrix, "scer", expt_label, 5, 5, results_directory_soms, my_som_random_number_seed )
+scer_compare_compare_A_som <- run_soms_analysis( scer_compare_A_data_matrix, "scer", expt_label, 5, 5, results_dir_soms, my_som_random_number_seed )
 
 # Draw the SOMs plot, each cluster a different colour for the lines
 draw_soms_xyplot ( scer_compare_compare_A_som$pivot, 5, 5  ) 
@@ -36,7 +36,7 @@ compare_A_up_or_down <- rep(NA, length( cluster_for_each_gene_AMB_only[,1] ) )
 compare_A_up_or_down[which ( cluster_for_each_gene_AMB_only[,1] %in% scer_compare_A_down_reg ) ] <- "down"
 compare_A_up_or_down[which ( cluster_for_each_gene_AMB_only[,1] %in% scer_compare_A_up_reg ) ] <- "up"
 compare_A_soms_de <- data.frame( expt_label, "scer", cluster_for_each_gene_AMB_only[,c(1,3)], compare_A_up_or_down )
-write.table (compare_A_soms_de, paste( results_directory_soms, "som_clusters_compare_A_scer.txt", sep="")  )
+write.table (compare_A_soms_de, paste( results_dir_soms, "som_clusters_compare_A_scer.txt", sep="")  )
 ```
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
@@ -65,5 +65,5 @@ heatmap.2(compare_A_codebook_vector,  symm = FALSE, col = my_colour_palette, Col
 ### Saving the results 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 save(cluster_for_each_gene_AMB_only,
-          file=paste(results_directory,  "edgeR_scer_SOMs_results_AMB_only_AMB_n_LF.Rdata", sep="") )
+          file=paste(results_dir,  "edgeR_scer_SOMs_results_AMB_only_AMB_n_LF.Rdata", sep="") )
 ```

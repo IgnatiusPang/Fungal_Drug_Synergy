@@ -124,7 +124,7 @@ read_counts_summary <- read_counts_summary[ , sort(colnames(read_counts_summary)
 read_counts_summary_with_row_id <- rownames_to_column(read_counts_summary, var="Category")
 
 
-write.table( read_counts_summary_with_row_id, file=file.path( read_counts_directory, "cneo/cneo_synergy_read_counts_summary_concat.txt" ), 
+write.table( read_counts_summary_with_row_id, file=file.path( read_counts_dir, "cneo/cneo_synergy_read_counts_summary_concat.txt" ), 
 			 quote=FALSE, sep="\t", row.names = FALSE, col.names = TRUE)
 
 

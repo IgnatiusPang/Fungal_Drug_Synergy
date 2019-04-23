@@ -40,7 +40,7 @@ library(gplots)
 
 
 # Load results from EdgeR computation
-#load( paste(results_directory, "edgeR_scer_compare.Rdata", sep="") )
+#load( paste(results_dir, "edgeR_scer_compare.Rdata", sep="") )
 
 # Seed for random number generator used in Self-organizing map (SOM)
 my_som_random_number_seed <- 7
@@ -270,8 +270,8 @@ draw_soms_xyplot <- function ( som_data_pivot, som_size_x, som_size_y  ) {
 Draw SOMs plot into the PDF.
 ```{r run6, echo=TRUE, message=FALSE, warning=FALSE}
 
-draw_soms_xyplot_pdf <- function ( som_data_pivot,  som_size_x, som_size_y, results_directory ) { 
-	my_pdf_file <- file.path(results_directory, paste("SOMs_", som_size_x, "_by_", som_size_y, ".pdf", sep="")) 
+draw_soms_xyplot_pdf <- function ( som_data_pivot,  som_size_x, som_size_y, results_dir ) { 
+	my_pdf_file <- file.path(results_dir, paste("SOMs_", som_size_x, "_by_", som_size_y, ".pdf", sep="")) 
 	
 	pdf(file= my_pdf_file )
 	

@@ -1,0 +1,41 @@
+---
+title: "Compare the differential expression of orthologs"
+output: html_notebook
+---
+
+
+
+## Load libraries and scripts
+```{r}
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+p_load(edgeR)
+p_load(limma)
+p_load(mixOmics)
+p_load(RUVSeq)
+p_load(EDASeq)
+p_load(RColorBrewer)
+p_load(lazyeval)
+		
+source( '../Common/edgeR_common_functions.R')
+source( '../../../Common/global_parameters.R')
+source( '../../../Common/helper_functions.R')
+
+sessionInfo()
+
+```
+
+
+
+```{r}
+
+
+
+
+```
+

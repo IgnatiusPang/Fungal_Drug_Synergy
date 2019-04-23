@@ -107,13 +107,13 @@ if( "5a" %in% samples_to_remove) {
   num_samples_dir <- "Remove_5a"
 } 
 
-choose_k_results_directory <- file.path(results_directory, "Differential_Expression",  
+choose_k_results_dir <- file.path(results_dir, "Differential_Expression",  
 										paste(  "EdgeR",  type_of_ruv,  type_of_hypothesis_test, sep="_" ),  
 										organism , 
 										num_samples_dir, 
 										paste("k_", num_unwanted_variables, sep="") ) 
 
-create_directory_if_not_exists( choose_k_results_directory ) 
+create_dir_if_not_exists( choose_k_results_dir ) 
 
 ```
 
@@ -243,7 +243,7 @@ cneo_dgelist <- estimateGLMTagwiseDisp(cneo_dgelist, design)
 norm.expr <- cpm(cneo_dgelist, log=TRUE)
 
 
-write.table(norm.expr, file=file.path(choose_k_results_directory, "edger_without_ruvs_normalised_counts.txt"),
+write.table(norm.expr, file=file.path(choose_k_results_dir, "edger_without_ruvs_normalised_counts.txt"),
 						row.names=T, quote=F, sep="\t")
 ```
 
@@ -371,7 +371,7 @@ set2 <- NULL
 plot_RLE_before_and_after_ruv_version_edgeR( set, set2, 
 											 "After upper quartile normalisation but no batch effects removal", 
 											  "After upper quartile normalisation + RUVs", expt_group_list, treatment_type_list,
-											 choose_k_results_directory,
+											 choose_k_results_dir,
 											 "before_and_after_RLE_plots.pdf")
 
 ```
@@ -385,7 +385,7 @@ unwanted_factors_vector <- purrr::map_chr ( 1:num_unwanted_variables,  function(
 
 colnames( ruvs_design) <- c( levels(design_matrix$Experiment), unwanted_factors_vector ) 
 
-saveRDS( ruvs_design, file=file.path( choose_k_results_directory, "ruvs_design_matrix.Rdata") ) 
+saveRDS( ruvs_design, file=file.path( choose_k_results_dir, "ruvs_design_matrix.Rdata") ) 
 
 equation_string <- paste( "~ 0 + A + CA + AL + CAL + " , 
 						  paste( unwanted_factors_vector, collapse=" + "), sep=" + ") 
@@ -402,11 +402,11 @@ cneo_deg_ruv <- estimateGLMTagwiseDisp(cneo_deg_ruv, ruvs_design)
 
 plotBCV(cneo_deg_ruv)
 
-png( file = file.path( choose_k_results_directory, "edger_ruvs_bcv_plot.png"))
+png( file = file.path( choose_k_results_dir, "edger_ruvs_bcv_plot.png"))
 plotBCV(cneo_deg_ruv)
 dev.off()
 
-saveRDS( cneo_deg_ruv, file=file.path( choose_k_results_directory, "cneo_deg_ruv.Rdata") ) 
+saveRDS( cneo_deg_ruv, file=file.path( choose_k_results_dir, "cneo_deg_ruv.Rdata") ) 
 
 
 ```
@@ -421,7 +421,7 @@ plotMDS(calc.norm.expr, col=c("blue", "green")[as.numeric(as.factor(treatment_ty
 plotRLE(calc.norm.expr, outline=FALSE, ylim=c(-0.1, 0.1), col=brewer.pal(6, "Set2")[as.numeric(as.factor(expt_group_list))], 
         main="RLE after calcNormFactors", las=3)
 
-pdf(file = file.path( choose_k_results_directory, "RLE_after_calcNormFactors.pdf")) 
+pdf(file = file.path( choose_k_results_dir, "RLE_after_calcNormFactors.pdf")) 
 plotMDS(calc.norm.expr, col=c("blue", "green")[as.numeric(as.factor(treatment_type_list))], main="RLE after calcNormFactors") 
 plotRLE(calc.norm.expr, outline=FALSE, ylim=c(-0.1, 0.1), col=brewer.pal(6, "Set2")[as.numeric(as.factor(expt_group_list))], 
         main="RLE after calcNormFactors", las=3)
@@ -443,13 +443,13 @@ plotRLE(ruv.norm.expr, outline=FALSE, ylim=c(-0.1, 0.1), col=brewer.pal(6, "Set2
         main="RLE after calcNormFactors and adjusting for unwanted variaions", las=3)
 
 
-pdf(file = file.path( choose_k_results_directory, "RLE_after_calcNormFactors_and_RUV.pdf")) 
+pdf(file = file.path( choose_k_results_dir, "RLE_after_calcNormFactors_and_RUV.pdf")) 
 plotMDS(ruv.norm.expr, col=c("blue", "green")[as.numeric(as.factor(treatment_type_list))], main="RLE after calcNormFactors and adjusting for unwanted variaions") 
 plotRLE(ruv.norm.expr, outline=FALSE, ylim=c(-0.1, 0.1), col=brewer.pal(6, "Set2")[as.numeric(as.factor(expt_group_list))], 
         main="RLE after calcNormFactors and adjusting for unwanted variaions", las=3)
 dev.off()
 
-write.table(ruv.norm.expr, file=file.path(choose_k_results_directory, "edger_ruvs_log_normalised_counts_cpm.txt"),
+write.table(ruv.norm.expr, file=file.path(choose_k_results_dir, "edger_ruvs_log_normalised_counts_cpm.txt"),
 						row.names=T, quote=F, sep="\t")
 
 ```

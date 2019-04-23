@@ -53,15 +53,15 @@ gaf_headers <- c("DB",
 ## Old GO term files 
 ```{r}
 
-old_bp  <- read.table( file.path( data_directory, "Gene_Ontology_Annotation/old/cneo_goframeData_bp.tab" ), header=TRUE )
-old_cc  <- read.table( file.path( data_directory, "Gene_Ontology_Annotation/old/cneo_goframeData_cc.tab" ), header=TRUE )
-old_mf  <- read.table( file.path( data_directory, "Gene_Ontology_Annotation/old/cneo_goframeData_mf.tab" ), header=TRUE )
+old_bp  <- read.table( file.path( data_dir, "Gene_Ontology_Annotation/old/cneo_goframeData_bp.tab" ), header=TRUE )
+old_cc  <- read.table( file.path( data_dir, "Gene_Ontology_Annotation/old/cneo_goframeData_cc.tab" ), header=TRUE )
+old_mf  <- read.table( file.path( data_dir, "Gene_Ontology_Annotation/old/cneo_goframeData_mf.tab" ), header=TRUE )
 
 ```
 
 ## QuickGO
 ```{r}
-quickgo <- read.table(file.path( data_directory, "QuickGO/QuickGO-annotations-1554894162403-20190410.tsv"  ), sep="\t",
+quickgo <- read.table(file.path( data_dir, "QuickGO/QuickGO-annotations-1554894162403-20190410.tsv"  ), sep="\t",
                        stringsAsFactors = FALSE, header=TRUE, quote = "", strip.white=TRUE)
 
 dim(quickgo)
@@ -84,7 +84,7 @@ quickgo_cleaned %>%
 ## FungiDB
 ```{r}
 
-fungidb <- read.table(file.path( data_directory, "FungiDB/GenesByTaxon_GOTerms.csv"  ), sep=",",
+fungidb <- read.table(file.path( data_dir, "FungiDB/GenesByTaxon_GOTerms.csv"  ), sep=",",
                        stringsAsFactors = FALSE, header=TRUE, quote = "\"", strip.white=TRUE)
 
 
@@ -110,7 +110,7 @@ fungidb_cleaned %>%
 ## Merge all GO annotation from other fungi together 
 ```{r}
 
-aspgd_go <- read.table ( file.path( data_directory, "Gene_Ontology_Raw/Species_annotation/New/aspgd.gaf" ) , sep="\t",
+aspgd_go <- read.table ( file.path( data_dir, "Gene_Ontology_Raw/Species_annotation/New/aspgd.gaf" ) , sep="\t",
                        stringsAsFactors = FALSE, header=FALSE, strip.white=TRUE, quote="", comment.char="!"  ) 
 colnames( aspgd_go) <- c(gaf_headers )
 
@@ -123,7 +123,7 @@ aspgd_go_cleaned <- aspgd_go %>%
 # length( which( aspgd_go_cleaned$SYMBOL %in% orthologs_mapping$speciesID  ))
 
 
-pombase_go <- read.table ( file.path( data_directory, "Gene_Ontology_Raw/Species_annotation/New/pombase.gaf" ) , sep="\t",
+pombase_go <- read.table ( file.path( data_dir, "Gene_Ontology_Raw/Species_annotation/New/pombase.gaf" ) , sep="\t",
                        stringsAsFactors = FALSE, header=FALSE, strip.white=TRUE, quote="", comment.char="!"  ) 
 colnames( pombase_go) <- c(gaf_headers )
 
@@ -136,7 +136,7 @@ pombase_go_cleaned <- pombase_go %>%
 # length( which( pombase_go_cleaned$SYMBOL %in% orthologs_mapping$speciesID  ))
 
 
-sgd_go <- read.table ( file.path( data_directory, "Gene_Ontology_Raw/Species_annotation/New/sgd.gaf" ) , sep="\t",
+sgd_go <- read.table ( file.path( data_dir, "Gene_Ontology_Raw/Species_annotation/New/sgd.gaf" ) , sep="\t",
                        stringsAsFactors = FALSE, header=FALSE, strip.white=TRUE, quote="", comment.char="!"   ) 
 colnames( sgd_go) <- c(gaf_headers )
 
@@ -150,7 +150,7 @@ sgd_go_cleaned <- sgd_go %>%
 # length( which( sgd_go_cleaned$SYMBOL %in% orthologs_mapping$speciesID  ))
 
 ## Mushroom
-avar_go <- read.table ( file.path( data_directory, "Gene_Ontology_Raw/Species_annotation/New/Abisporus_varbisporusH97.v2.goinfo_FilteredModels3.tab" ) ,
+avar_go <- read.table ( file.path( data_dir, "Gene_Ontology_Raw/Species_annotation/New/Abisporus_varbisporusH97.v2.goinfo_FilteredModels3.tab" ) ,
                         sep="\t",  stringsAsFactors = FALSE, header=TRUE, strip.white=TRUE, quote="", comment.char  =""  ) 
 
 colnames(avar_go)
@@ -180,7 +180,7 @@ avar_go_cleaned <-  avar_go %>%
 ## Use OrthoMCL to map GO terms from other fungi to C. neoformans H99
 ```{r}
 
-orthologs_mapping <-  read.table ( file.path( data_directory, "Gene_Ontology_Raw/Species_annotation/Old/Final_orthologs.txt" ) , sep="\t",
+orthologs_mapping <-  read.table ( file.path( data_dir, "Gene_Ontology_Raw/Species_annotation/Old/Final_orthologs.txt" ) , sep="\t",
                        stringsAsFactors = FALSE, header=TRUE, strip.white=TRUE, quote=""  ) 
 
 
@@ -218,7 +218,7 @@ orthomcl_cleaned <-  all_cneo_groups %>%
 
 
 
-blast2go   <- read.table( file.path(results_directory, "Blast2GO/blast2go_gaf.txt") , sep="\t",
+blast2go   <- read.table( file.path(results_dir, "Blast2GO/blast2go_gaf.txt") , sep="\t",
                        stringsAsFactors = FALSE, header=FALSE, skip=4, strip.white=TRUE) %>%
             as_tibble()
 
@@ -304,7 +304,7 @@ all_tables_merged <- blast2go_cleaned %>%
 all_tables_ancestors_cleaned <- remove_ancestors ( all_tables_merged ) %>%
                                 distinct()
 
-write.table(all_tables_ancestors_cleaned,  file.path( data_directory, "Gene_Ontology_Annotation", 
+write.table(all_tables_ancestors_cleaned,  file.path( data_dir, "Gene_Ontology_Annotation", 
                                                       "Ancestor_Cleaned", "all_gene_ontology_db_merged.tab" ),
             sep="\t", row.names = FALSE, col.names = TRUE, quote=FALSE)
 
@@ -312,7 +312,7 @@ write.table(all_tables_ancestors_cleaned,  file.path( data_directory, "Gene_Onto
 # all_tables_ancestors_cleaned
 # 
 # 
-# all_tables_ancestors_cleaned_old <- read_tsv ( file.path(data_directory, "Gene_Ontology_Annotation/Ancestor_Cleaned/old/all_gene_ontology_db_merged.tab")) %>%
+# all_tables_ancestors_cleaned_old <- read_tsv ( file.path(data_dir, "Gene_Ontology_Annotation/Ancestor_Cleaned/old/all_gene_ontology_db_merged.tab")) %>%
 #                                     distinct()
 # 
 # 
@@ -338,11 +338,11 @@ list_of_output_files <- c( "cneo_goframeData_bp.tab",
                            "cneo_goframeData_cc.tab",
                            "cneo_goframeData_mf.tab")
 
-create_directory_if_not_exists(file.path( data_directory, "Gene_Ontology_Annotation", "Ancestor_Cleaned"))
+create_dir_if_not_exists(file.path( data_dir, "Gene_Ontology_Annotation", "Ancestor_Cleaned"))
 
 purrr::walk2(list_of_tables, list_of_output_files, 
              function( x, y){ write.table( x, 
-                                           file.path( data_directory, "Gene_Ontology_Annotation", "Ancestor_Cleaned", y ),
+                                           file.path( data_dir, "Gene_Ontology_Annotation", "Ancestor_Cleaned", y ),
                                            sep="\t", row.names = FALSE, col.names = TRUE, quote=FALSE) } )
 
 
@@ -520,7 +520,7 @@ list_of_output_files <- c( "cneo_goframeData_bp.tab",
 
 purrr::walk2(list_of_tables, list_of_output_files, 
              function( x, y){ write.table( x, 
-                                           file.path( data_directory, "Gene_Ontology_Annotation", y ),
+                                           file.path( data_dir, "Gene_Ontology_Annotation", y ),
                                            sep="\t", row.names = FALSE, col.names = TRUE, quote=FALSE) } )
 
 

@@ -46,8 +46,8 @@ p_load(genefilter)
 
 source( '../../Common/global_parameters.R')
 source( '../../Common/helper_functions.R')
-source_rmd_file( file.path(source_directory, "Functional_Enrichment/Common/functional_enrichment_functions.Rmd" ) )
-source_rmd_file( file.path(source_directory, "Self_Organising_Maps/Common/soms_functions.Rmd" ) )
+source_rmd_file( file.path(source_dir, "Functional_Enrichment/Common/functional_enrichment_functions.Rmd" ) )
+source_rmd_file( file.path(source_dir, "Self_Organising_Maps/Common/soms_functions.Rmd" ) )
 
 sessionInfo()
 ```
@@ -56,7 +56,7 @@ sessionInfo()
 ## Directories Management 
 ```{r run4}
 
-EdgeR_RUVs_QL_de_genes_dir <- file.path( results_directory, "Differential_Expression/EdgeR_RUVs_QL/cneo", results_to_use_dir)
+EdgeR_RUVs_QL_de_genes_dir <- file.path( results_dir, "Differential_Expression/EdgeR_RUVs_QL/cneo", results_to_use_dir)
 
 if( ! dir.exists(EdgeR_RUVs_QL_de_genes_dir)) {
     stop( paste( "Output directory does not exists:", EdgeR_RUVs_QL_de_genes_dir))
@@ -66,27 +66,27 @@ EdgeR_RUVs_QL_gene_lists_dir <- file.path( EdgeR_RUVs_QL_de_genes_dir, "Gene_Lis
 list_of_top_tags_table <- readRDS( file.path( EdgeR_RUVs_QL_gene_lists_dir,  "list_of_top_tags_table.Rdata" ) )
 
 
-EdgeR_RUVs_QL_soms_results_dir  <- file.path( results_directory, "Self_Organising_Maps/EdgeR_RUVs_QL", results_to_use_dir, "Condition_on_child_terms_false") 
+EdgeR_RUVs_QL_soms_results_dir  <- file.path( results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL", results_to_use_dir, "Condition_on_child_terms_false") 
 
 if( condition_on_child_terms_param == TRUE ) {
   
-  EdgeR_RUVs_QL_soms_results_dir  <- file.path( results_directory, "Self_Organising_Maps/EdgeR_RUVs_QL", results_to_use_dir, "Condition_on_child_terms_true") 
+  EdgeR_RUVs_QL_soms_results_dir  <- file.path( results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL", results_to_use_dir, "Condition_on_child_terms_true") 
 
 }
 
-create_directory_if_not_exists(EdgeR_RUVs_QL_soms_results_dir)
+create_dir_if_not_exists(EdgeR_RUVs_QL_soms_results_dir)
 ```
 
 
 ## Obtain the GO annotation dictionaries
 ```{r run5}
 
-go_dictionary <- get_crypto_go_dictionary_of_choice  ( "Cryptococcus neoformans H99", gene_ontology_directory, 
+go_dictionary <- get_crypto_go_dictionary_of_choice  ( "Cryptococcus neoformans H99", gene_ontology_dir, 
 									  bp_file_name="cneo_goframeData_bp.tab", 
 									  mf_file_name="cneo_goframeData_mf.tab", 
 									  cc_file_name="cneo_goframeData_cc.tab"  ) 
 
-gene_annotation <- read.table ( file.path( data_directory, 'Gene_Annotation/cneo_gene_annotation_summary.txt' ) , header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
+gene_annotation <- read.table ( file.path( data_dir, 'Gene_Annotation/cneo_gene_annotation_summary.txt' ) , header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
 
 
 universe <- unique( gene_annotation[, "orf_id"])
@@ -95,7 +95,7 @@ universe <- unique( gene_annotation[, "orf_id"])
 
 ## Read in the gene annotations
 ```{r run6}
-gene_annotation_table <- read_tsv( file.path( data_directory, "Gene_Annotation/cneo_gene_annotation_summary.txt"  ) )
+gene_annotation_table <- read_tsv( file.path( data_dir, "Gene_Annotation/cneo_gene_annotation_summary.txt"  ) )
 
 ```
 
@@ -221,29 +221,29 @@ get_up_down_label_soms_clusters <- function( cluster_map, sde_genes) {
 run_one_soms_and_go_experiment_large_scale <- function( data_matrix, list_of_top_tags_table, 
                                                         list_of_genes, expt_label, size_x, size_y, 
 
-														ontologies_list = c("BP", "CC", "MF"), results_directory) { 
+														ontologies_list = c("BP", "CC", "MF"), results_dir) { 
 		
 		counts_data_matrix <- data_matrix[list_of_genes,]
 		
-		soms_results_directory <-  file.path(results_directory, expt_label,
+		soms_results_dir <-  file.path(results_dir, expt_label,
 		 			  			      paste( size_x, "x", size_y, sep="" ) ) 
 		
-		create_directory_if_not_exists(soms_results_directory)
+		create_dir_if_not_exists(soms_results_dir)
 		
 		# Run a 5 x 5 SOMs analysis for S. cerevisiae (scer)
 		soms_results <- run_soms_analysis( counts_data_matrix, size_x, size_y, 
 										   my_som_random_number_seed )
 		
 		saveRDS( soms_results, 
-		 			  file=file.path(soms_results_directory,
+		 			  file=file.path(soms_results_dir,
 		 			  			    paste("soms_results", ".RDS", sep="") ) )
 		
 		write.table( soms_results$pivot, 
-		 			  file=file.path(soms_results_directory,
+		 			  file=file.path(soms_results_dir,
 		 			  			    paste("cluster_for_each_gene", ".tab", sep="") ) ) 
 		 
 		# Draw the SOMs plot, each cluster a different colour for the lines
-		draw_soms_xyplot_pdf ( soms_results$pivot, size_x, size_y, soms_results_directory  ) 
+		draw_soms_xyplot_pdf ( soms_results$pivot, size_x, size_y, soms_results_dir  ) 
 		
 		cluster_for_each_gene <- unique(soms_results$pivot[,c("id_a", "id_b", "cluster")])
 		
@@ -256,8 +256,8 @@ run_one_soms_and_go_experiment_large_scale <- function( data_matrix, list_of_top
 		 															 condition_on_child_terms = condition_on_child_terms_param )
 		
 		## Save the results into file tables 
-		enriched_genes_file_name <- file.path( soms_results_directory, "enriched_genes_SOMs.txt" )
-		enriched_go_terms_file_name <- file.path( soms_results_directory, "enriched_go_terms_SOMs.txt" )
+		enriched_genes_file_name <- file.path( soms_results_dir, "enriched_genes_SOMs.txt" )
+		enriched_go_terms_file_name <- file.path( soms_results_dir, "enriched_go_terms_SOMs.txt" )
 		
 		updated_enriched_genes <- go_enrichment_results$enriched_genes %>%
 		                          left_join( gene_annotation_table, by=c("gene_id" = "orf_id")) 
@@ -277,7 +277,7 @@ run_one_soms_and_go_experiment_large_scale <- function( data_matrix, list_of_top
 		## Work out directionality of each cluster
 		directionality_of_each_cluster <- get_up_down_label_soms_clusters( cluster_for_each_gene, list_of_top_tags_table[[expt_label]] )
 		
-		write.table( directionality_of_each_cluster, file.path( soms_results_directory, "soms_clusters_mapping.txt"), sep="\t",
+		write.table( directionality_of_each_cluster, file.path( soms_results_dir, "soms_clusters_mapping.txt"), sep="\t",
              row.names = FALSE, quote = FALSE ) 
 		
 }
@@ -296,11 +296,11 @@ run_one_soms_and_go_experiment_large_scale <- function( data_matrix, list_of_top
 # list_of_genes <- list_of_gene_sets[[expt_label]]
 # size_x <- 6
 # size_y <- 7
-# results_directory <- paste( EdgeR_RUVs_QL_soms_results_dir, "_testing", sep="")
+# results_dir <- paste( EdgeR_RUVs_QL_soms_results_dir, "_testing", sep="")
 # 
 # run_one_soms_and_go_experiment_large_scale( data_matrix, list_of_genes, expt_label, size_x, size_y,
 # 														ontologies_list = c("BP", "CC", "MF"),
-# 											results_directory)
+# 											results_dir)
 
 ```
 
@@ -430,14 +430,14 @@ list_of_clusters <- purrr::map ( list_of_clusters, function(my_table) { dplyr::m
 head( list_of_clusters[[1]]) 
 
 list_to_redraw_soms <- list( pivoted_table=list_of_clusters, size_x=list_of_x, size_y=list_of_y,
-							soms_results_directory=directory_cleaning)
+							soms_results_dir=directory_cleaning)
 
 purrr::map ( list_to_redraw_soms, length)
 
 purrr::pwalk ( list_to_redraw_soms, 
-			   function ( pivoted_table, size_x, size_y, soms_results_directory) {
+			   function ( pivoted_table, size_x, size_y, soms_results_dir) {
 			
-			   	my_pdf_file <- file.path(soms_results_directory, 
+			   	my_pdf_file <- file.path(soms_results_dir, 
 			   							 paste("updated_SOMs_", size_x, "_by_", size_y, ".pdf", sep="")) 
 	
 				pdf(file= my_pdf_file )
@@ -446,7 +446,7 @@ purrr::pwalk ( list_to_redraw_soms,
 							
 				dev.off() 
 				
-				 my_updated_pivot_file <- file.path(soms_results_directory, 
+				 my_updated_pivot_file <- file.path(soms_results_dir, 
 			   							 paste("updated_cluster_for_each_gene_", size_x, "_by_", size_y, ".txt", sep="")) 
 				 
 				 
@@ -459,7 +459,7 @@ purrr::pwalk ( list_to_redraw_soms,
 
 ## Prototype drawing SOMs using ggplot
 ```{r}
-# compare_A_soms <- read.table(file.path(results_directory, "compare_A/5x5/updated_SOMs_data_5_by_5.txt"), header=TRUE,
+# compare_A_soms <- read.table(file.path(results_dir, "compare_A/5x5/updated_SOMs_data_5_by_5.txt"), header=TRUE,
 #                              sep="\t", stringsAsFactors = FALSE)
 # 
 # 

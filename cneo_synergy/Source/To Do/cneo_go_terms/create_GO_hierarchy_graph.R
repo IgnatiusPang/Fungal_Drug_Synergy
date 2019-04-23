@@ -44,15 +44,15 @@ sessionInfo()
 ##################################################################################################################
 ### Input Parameters
 
-input_directory <- "/media/babs/Systemsbiology/Igy/2013/Fungal_Shared/Results/v1.01/BLAST/GO_terms_annotation/cneo/GO_graph_analysis/"
+input_dir <- "/media/babs/Systemsbiology/Igy/2013/Fungal_Shared/Results/v1.01/BLAST/GO_terms_annotation/cneo/GO_graph_analysis/"
 
-results_directory <- "/media/babs/Systemsbiology/Igy/2013/Fungal_Shared/Results/v1.01/BLAST/GO_terms_annotation/cneo/GO_graph_analysis/"
+results_dir <- "/media/babs/Systemsbiology/Igy/2013/Fungal_Shared/Results/v1.01/BLAST/GO_terms_annotation/cneo/GO_graph_analysis/"
 
-process_file   <- paste( input_directory, "go_basic_is_a_relationships_formatted_process.txt", sep="")
+process_file   <- paste( input_dir, "go_basic_is_a_relationships_formatted_process.txt", sep="")
 
-function_file  <- paste( input_directory, "go_basic_is_a_relationships_formatted_function.txt", sep="")
+function_file  <- paste( input_dir, "go_basic_is_a_relationships_formatted_function.txt", sep="")
  
-component_file <- paste( input_directory, "go_basic_is_a_relationships_formatted_component.txt", sep="")
+component_file <- paste( input_dir, "go_basic_is_a_relationships_formatted_component.txt", sep="")
 
 ### read the files into a table
 process_table <- read.table (process_file)
@@ -137,7 +137,7 @@ get_distance_from_root <- function ( edge_list_table, input_root ) {
          function_distance_to_root )
          
    
-  write.table(    distance_to_root, paste(results_directory, "go_distance_to_root.txt", sep=""), row.names=FALSE)
+  write.table(    distance_to_root, paste(results_dir, "go_distance_to_root.txt", sep=""), row.names=FALSE)
   
   
 ##################################################################################################################

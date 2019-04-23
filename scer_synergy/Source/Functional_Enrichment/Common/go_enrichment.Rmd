@@ -16,7 +16,7 @@ p_load(tidyverse)
 
 source( '../../Common/global_parameters.R')
 source( '../../Common/helper_functions.R')
-source_rmd_file( file.path(source_directory, "Functional_Enrichment/Common/functional_enrichment_functions.Rmd" ) )
+source_rmd_file( file.path(source_dir, "Functional_Enrichment/Common/functional_enrichment_functions.Rmd" ) )
 sessionInfo()
 ```
 
@@ -27,7 +27,7 @@ sessionInfo()
 command_line_args <-  commandArgs(trailingOnly=T)
 
 #### This is a parameter to change #### *******************
-base_results_dir <-   base::get(command_line_args[2] ) # file.path( results_directory, "Differential_Expression/EdgeR_RUVs_QL/scer/To_Use_k_5_Remove_5a" ) 
+base_results_dir <-   base::get(command_line_args[2] ) # file.path( results_dir, "Differential_Expression/EdgeR_RUVs_QL/scer/To_Use_k_5_Remove_5a" ) 
 
 ##### This is a parameter to change #### *******************
 de_method_label <-  command_line_args[3] #  "To_Use_k_5_Remove_5a" 
@@ -39,10 +39,10 @@ input_data_for_go_enrichment_dir <- file.path( base_results_dir, "Gene_Lists")
 
 # Set output directory for the results
 # No need to change this parameter
-go_terms_results_dir <- file.path( results_directory, "Functional_Enrichment", de_method_label,"GOStat")
+go_terms_results_dir <- file.path( results_dir, "Functional_Enrichment", de_method_label,"GOStat")
 
 # No need to change this parameter
-create_directory_if_not_exists(go_terms_results_dir)
+create_dir_if_not_exists(go_terms_results_dir)
 
 # No need to change this parameter
 possible_matches  <- Sys.glob( file.path(input_data_for_go_enrichment_dir,  "*up_and_down_significant_DE_genes.Rdata" )  ) 
@@ -59,12 +59,12 @@ experiment_label_and_logFC_FDR_table <- read.table (file=file.path(input_data_fo
 ## Obtain the GO annotation dictionaries
 ```{r}
 
-go_dictionary <- get_crypto_go_dictionary_of_choice  ( "Saccharomyces cerevisiae", gene_ontology_directory, 
+go_dictionary <- get_crypto_go_dictionary_of_choice  ( "Saccharomyces cerevisiae", gene_ontology_dir, 
 									  bp_file_name="scer_goframeData_bp.tab", 
 									  mf_file_name="scer_goframeData_mf.tab", 
 									  cc_file_name="scer_goframeData_cc.tab"  ) 
 
-gene_annotation <- read.table ( file.path( data_directory, 'Gene_Annotation/scer_gene_annotation_summary.txt' ) , header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
+gene_annotation <- read.table ( file.path( data_dir, 'Gene_Annotation/scer_gene_annotation_summary.txt' ) , header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
 
 
 universe <- unique( gene_annotation[, "oln_id"])

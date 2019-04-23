@@ -70,10 +70,10 @@ get_normalized_factors_specific_normalization <- function(input_file, column_nam
 # Must run the function get_normalized_factors first
 # input the normalized DGEList, and the PDF file name
 ## Print the 1. MDS plot, 2. Spearman correlation heat map, 3. PCA plot
-print_diagnostic_plots <- function( samples_dgelist, results_directory, pdf_file_name)
+print_diagnostic_plots <- function( samples_dgelist, results_dir, pdf_file_name)
 {
 	# Diagnostic plots for samples 
-	pdf(paste(results_directory, pdf_file_name, sep=""))
+	pdf(paste(results_dir, pdf_file_name, sep=""))
 	
 	### MDS plot
 	plotMDS(samples_dgelist)
@@ -165,7 +165,7 @@ num_significant_genes_up_and_down_edgeR <-  function( top_tags, fdr_threshold = 
 
 ###################################################################################################
 
-plot_RLE_before_and_after_ruv_version_edgeR <- function ( set_before, set_after, title_for_before_ruv, title_for_after_ruv, expt_group_list, treatment_type_list, results_directory, output_file_name ) {
+plot_RLE_before_and_after_ruv_version_edgeR <- function ( set_before, set_after, title_for_before_ruv, title_for_after_ruv, expt_group_list, treatment_type_list, results_dir, output_file_name ) {
 	
 	logCPM_set_before <- cpm(set_before@assayData$normalizedCounts, log=TRUE, prior.count = 2)
 	logCPM_set_after <- cpm(set_after@assayData$normalizedCounts, log=TRUE, prior.count = 2)
@@ -193,7 +193,7 @@ plot_RLE_before_and_after_ruv_version_edgeR <- function ( set_before, set_after,
 	plotMDS(logCPM_set_after, col=c("blue", "green")[as.numeric(as.factor(treatment_type_list))], cex=1.2, main=title_for_after_ruv)
 	
 	
-	pdf( file=file.path( results_directory, output_file_name) )
+	pdf( file=file.path( results_dir, output_file_name) )
 	# RLE plots Before and after RUV
 	plotRLE(set_before , outline=FALSE, ylim=c(-0.4, 0.4), col=brewer.pal(6, "Set2")[as.numeric(as.factor(expt_group_list))], 
 	        main=title_for_before_ruv, las=3)

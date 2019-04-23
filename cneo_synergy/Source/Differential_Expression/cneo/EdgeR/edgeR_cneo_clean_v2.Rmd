@@ -106,17 +106,17 @@ if( "5a" %in% samples_to_remove) {
   num_samples_dir <- "Remove_5a"
 } 
 
-choose_k_results_directory <- file.path(results_directory, "Differential_Expression",  
+choose_k_results_dir <- file.path(results_dir, "Differential_Expression",  
 										paste(  "EdgeR",  type_of_ruv,  type_of_hypothesis_test, sep="_" ),  
 										organism , 
 										num_samples_dir, "k_0" ) 
 
-create_directory_if_not_exists( choose_k_results_directory ) 
+create_dir_if_not_exists( choose_k_results_dir ) 
 
 
 ## Save the results into files 
-edger_gene_lists_dir <- file.path( choose_k_results_directory, "Gene_Lists")
-create_directory_if_not_exists( edger_gene_lists_dir)
+edger_gene_lists_dir <- file.path( choose_k_results_dir, "Gene_Lists")
+create_dir_if_not_exists( edger_gene_lists_dir)
 
 
 
@@ -124,7 +124,7 @@ create_directory_if_not_exists( edger_gene_lists_dir)
 
 ## Load Gene Annotation
 ```{r}
-gene_annotation <- read.table ( file.path( data_directory, 'Gene_Annotation/cneo_gene_annotation_summary.txt' ) , header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
+gene_annotation <- read.table ( file.path( data_dir, 'Gene_Annotation/cneo_gene_annotation_summary.txt' ) , header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
 
 ```
 
@@ -250,7 +250,7 @@ cneo_dgelist <- estimateGLMTagwiseDisp(cneo_dgelist, design)
 norm.expr <- cpm(cneo_dgelist, log=TRUE)
 
 
-write.table(norm.expr, file=file.path(choose_k_results_directory, "edger_without_ruvs_normalised_counts.txt"),
+write.table(norm.expr, file=file.path(choose_k_results_dir, "edger_without_ruvs_normalised_counts.txt"),
 						row.names=T, quote=F, sep="\t")
 ```
 
@@ -336,7 +336,7 @@ set <- betweenLaneNormalization(set, which=normalization_method_between_lane)
 ## Plot RLE and PCA plot
 ```{r}
 
-plot_PCA_RLE <- function ( set_before,  title_for_before_ruv, expt_group_list, treatment_type_list, results_directory, output_file_name ) {
+plot_PCA_RLE <- function ( set_before,  title_for_before_ruv, expt_group_list, treatment_type_list, results_dir, output_file_name ) {
   
   logCPM_set_before <- cpm(set_before@assayData$normalizedCounts, log=TRUE, prior.count = 2)
   
@@ -354,7 +354,7 @@ plot_PCA_RLE <- function ( set_before,  title_for_before_ruv, expt_group_list, t
   plotMDS(logCPM_set_before, col=c("blue", "green")[as.numeric(as.factor(treatment_type_list))], cex=1.2, main=title_for_before_ruv)
 
   
-  pdf( file=file.path( results_directory, output_file_name) )
+  pdf( file=file.path( results_dir, output_file_name) )
   # RLE plots Before and after RUV
   plotRLE(set_before , outline=FALSE, ylim=c(-0.4, 0.4), col=brewer.pal(6, "Set2")[as.numeric(as.factor(expt_group_list))], 
           main=title_for_before_ruv, las=3)
@@ -373,7 +373,7 @@ plot_PCA_RLE <- function ( set_before,  title_for_before_ruv, expt_group_list, t
 plot_PCA_RLE( set, 
 											 "After upper quartile normalisation but no batch effects removal", 
 											 expt_group_list, treatment_type_list,
-											 choose_k_results_directory,
+											 choose_k_results_dir,
 											 "RLE_plots.pdf")
 
 ```

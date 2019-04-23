@@ -48,8 +48,8 @@ channel <- odbcDriverConnect( conn_string)
 
 set_encoding <- sqlQuery(channel,"SET client_encoding='LATIN1'")
 
-results_directory <- "/media/babs/Systemsbiology/Igy/2013/Fungal_Shared/Results/v1.01/EdgeR/cneo/"
-results_directory_de_list <- paste ( results_directory, "de_list/", sep="")
+results_dir <- "/media/babs/Systemsbiology/Igy/2013/Fungal_Shared/Results/v1.01/EdgeR/cneo/"
+results_dir_de_list <- paste ( results_dir, "de_list/", sep="")
 
 sessionInfo()
 
@@ -57,7 +57,7 @@ sessionInfo()
 
 ###### Perform GO terms encrichment tests
 
-load( paste(results_directory_de_list,  "edgeR_cneo_compare_delete_sample_5A.Rdata", sep="") )
+load( paste(results_dir_de_list,  "edgeR_cneo_compare_delete_sample_5A.Rdata", sep="") )
 
 
 ##### obtain the length of the genes
@@ -100,13 +100,13 @@ de_list_of_queries <- list ( cneo_delete_sample_A_down_reg, cneo_delete_sample_A
 
 
 ## Performs GO terms enrichment test
-de_go_terms_temp_results_dir <- paste(results_directory,"go_terms/",sep="")
+de_go_terms_temp_results_dir <- paste(results_dir,"go_terms/",sep="")
 
 loop_over_all_go_term_enrichment_tests_crypto(channel, de_go_terms_temp_results_dir, "cneo", de_query_list_id, de_list_of_queries, universe, go_dictionary)
 
 
 ## Calculate enrichment of membrane protein complexes
-#de_membrane_temp_results_dir <- paste( results_directory, "membrane_protein_complexes/", sep="")
+#de_membrane_temp_results_dir <- paste( results_dir, "membrane_protein_complexes/", sep="")
 
 #loop_membrane_protein_complex_enrichment_cneo (channel, de_membrane_temp_results_dir, de_query_list_id, de_list_of_queries )
 
@@ -133,19 +133,19 @@ expt_label_edger <- paste( "edgeR_",  expt_label, sep="")
 
 cneo_delete_sample_A_data_matrix <- rpkm_values[cneo_delete_sample_A_list_of_de_genes,]
 
-cneo_delete_sample_compare_A_som <- run_soms_analysis( cneo_delete_sample_A_data_matrix, "cneo", expt_label, 5, 5, results_directory ) 
+cneo_delete_sample_compare_A_som <- run_soms_analysis( cneo_delete_sample_A_data_matrix, "cneo", expt_label, 5, 5, results_dir ) 
 
 compare_A_codebook_vector <- cneo_delete_sample_compare_A_som$som$codes
 
 
-draw_soms_xyplot( cneo_delete_sample_compare_A_som$pivot, "cneo", expt_label, 5, 5, results_directory ) 
+draw_soms_xyplot( cneo_delete_sample_compare_A_som$pivot, "cneo", expt_label, 5, 5, results_dir ) 
 dev.off() 
 
 
 cell_for_each_mic_id_compare_A <- unique(cneo_delete_sample_compare_A_som$pivot[,c("id_a", "id_b", "cell")])
 
 
-run_soms_enrichment_tests_crypto( channel, cell_for_each_mic_id_compare_A, expt_label_edger, results_directory, universe, go_dictionary, "cneo")
+run_soms_enrichment_tests_crypto( channel, cell_for_each_mic_id_compare_A, expt_label_edger, results_dir, universe, go_dictionary, "cneo")
 
 ### Mark which gene in which cell is 'up' or 'down' regulated
 compare_A_up_or_down <- rep(NA, length( cell_for_each_mic_id_compare_A[,1] ) )
@@ -156,7 +156,7 @@ compare_A_soms_de <- data.frame( expt_label_edger, "cneo", cell_for_each_mic_id_
 
 cleanup_som_cells_A <- sqlQuery(channel, paste("delete from som_cells where query_list_id = '", expt_label_edger, "' and organism = 'cneo'", sep=""))
 
-insert_into_sql_table_using_file( channel, compare_A_soms_de, "som_cells", FALSE, results_directory, "soms/som_cells_delete_sample_A_cneo.txt")
+insert_into_sql_table_using_file( channel, compare_A_soms_de, "som_cells", FALSE, results_dir, "soms/som_cells_delete_sample_A_cneo.txt")
 
 
 ################################################################################################
@@ -169,16 +169,16 @@ expt_label_edger <- paste( "edgeR_",  expt_label, sep="")
 
 cneo_delete_sample_AL_data_matrix <- rpkm_values[cneo_delete_sample_AL_list_of_de_genes, ]
 
-cneo_delete_sample_compare_AL_som <- run_soms_analysis( cneo_delete_sample_AL_data_matrix, "cneo", expt_label, 5, 5, results_directory ) 
+cneo_delete_sample_compare_AL_som <- run_soms_analysis( cneo_delete_sample_AL_data_matrix, "cneo", expt_label, 5, 5, results_dir ) 
 
 compare_AL_codebook_vector <- cneo_delete_sample_compare_AL_som$som$codes
 
-draw_soms_xyplot( cneo_delete_sample_compare_AL_som$pivot, "cneo", expt_label, 5, 5, results_directory ) 
+draw_soms_xyplot( cneo_delete_sample_compare_AL_som$pivot, "cneo", expt_label, 5, 5, results_dir ) 
 dev.off() 
 
 cell_for_each_mic_id_compare_AL <- unique(cneo_delete_sample_compare_AL_som$pivot[,c("id_a", "id_b", "cell")])
 
-run_soms_enrichment_tests_crypto( channel, cell_for_each_mic_id_compare_AL, expt_label_edger, results_directory, universe, go_dictionary, "cneo")
+run_soms_enrichment_tests_crypto( channel, cell_for_each_mic_id_compare_AL, expt_label_edger, results_dir, universe, go_dictionary, "cneo")
 
 ### Mark which gene in which cell is 'up' or 'down' regulated
 compare_AL_up_or_down <- rep(NA, length( cell_for_each_mic_id_compare_AL[,1] ) )
@@ -189,7 +189,7 @@ compare_AL_soms_de <- data.frame( expt_label_edger, "cneo", cell_for_each_mic_id
 
 cleanup_som_cells_AL <- sqlQuery(channel, paste("delete from som_cells where query_list_id = '", expt_label_edger, "' and organism = 'cneo'", sep=""))
 
-insert_into_sql_table_using_file( channel, compare_AL_soms_de, "som_cells", FALSE, results_directory, "soms/som_cells_delete_sample_AL_cneo.txt")
+insert_into_sql_table_using_file( channel, compare_AL_soms_de, "som_cells", FALSE, results_dir, "soms/som_cells_delete_sample_AL_cneo.txt")
 
 ################################################################################################
 
@@ -197,6 +197,6 @@ insert_into_sql_table_using_file( channel, compare_AL_soms_de, "som_cells", FALS
 
 save( compare_A_codebook_vector, 
       compare_AL_codebook_vector, 
-      file=paste(results_directory,  "soms/edgeR_cneo_delete_sample_codebook_vector.Rdata", sep="") )
+      file=paste(results_dir,  "soms/edgeR_cneo_delete_sample_codebook_vector.Rdata", sep="") )
 
 ################################################################################################        

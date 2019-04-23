@@ -27,9 +27,9 @@ choose_k_results_dir <-  scer_edger_ruvs_ql_results_dir
 
 choose_k_glob_pattern <- file.path(choose_k_results_dir, specific_variation, paste("k_", "*", sep="") ) 
 
-compare_k_results_output_dir <- file.path ( results_directory, "Differential_Expression/Compare_k", specific_variation)
+compare_k_results_output_dir <- file.path ( results_dir, "Differential_Expression/Compare_k", specific_variation)
 
-create_directory_if_not_exists(compare_k_results_output_dir)
+create_dir_if_not_exists(compare_k_results_output_dir)
 
 ## Directory position 
 param_k_path_position <- 12

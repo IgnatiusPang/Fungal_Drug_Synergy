@@ -22,16 +22,16 @@ sessionInfo()
 ## Read files 
 ```{r}
 
-curated_data_dir <- file.path( data_directory, "Curated_Data" )
+curated_data_dir <- file.path( data_dir, "Curated_Data" )
 
 kinases <- read.table ( file.path( curated_data_dir, "phos_kinase_phosphatase_list.tsv"), sep="\t", header=TRUE, quote="")
 transcription_factors <- read.table ( file.path( curated_data_dir, "scer_transcription_factors.tsv"), sep="\t", 
 									  header=TRUE, quote="", comment.char = "")
 cell_cycle_regulated_genes <- read.table ( file.path( curated_data_dir, "peak_times_of_cycling_orfs.tsv" ), sep="\t", header=TRUE, quote="\"")
-cneo_gene_annotation <- read.table ( file.path( data_directory, 'Gene_Annotation/cneo_gene_names.txt' ) , 
+cneo_gene_annotation <- read.table ( file.path( data_dir, 'Gene_Annotation/cneo_gene_names.txt' ) , 
 								header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE, na.strings = "NA")
 
-scer_gene_annotation <- read.table ( file.path( data_directory, 'Gene_Annotation/scer_gene_names.txt' ) , 
+scer_gene_annotation <- read.table ( file.path( data_dir, 'Gene_Annotation/scer_gene_names.txt' ) , 
 								header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE) %>%
                 dplyr::rename( scer_oln_id = "oln_id", 
                                scer_gene_name = "gene_name",
@@ -86,7 +86,7 @@ scer_gene_annotation_updated <- scer_gene_annotation %>%
 
 
 write.table ( scer_gene_annotation_updated, 
-              file=file.path(data_directory, "Gene_Annotation", "scer_gene_annotation_summary.txt" ),
+              file=file.path(data_dir, "Gene_Annotation", "scer_gene_annotation_summary.txt" ),
 			  	row.names = FALSE, quote=FALSE, sep="\t", na="" )
 
 ```

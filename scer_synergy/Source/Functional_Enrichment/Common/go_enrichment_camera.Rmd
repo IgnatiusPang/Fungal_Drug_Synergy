@@ -15,7 +15,7 @@ p_load(tidyverse)
 
 source( '../../Common/global_parameters.R')
 source( '../../Common/helper_functions.R')
-source_rmd_file( file.path(source_directory, "Functional_Enrichment/Common/functional_enrichment_functions.Rmd" ) )
+source_rmd_file( file.path(source_dir, "Functional_Enrichment/Common/functional_enrichment_functions.Rmd" ) )
 sessionInfo()
 ```
 
@@ -41,10 +41,10 @@ input_data_for_go_analysis_dir <- file.path( base_results_dir, "Gene_Lists")
 
 # Set directory for results
 ##### This is a parameter to change #### *******************8
-camera_go_terms_results_dir <- file.path( results_directory, "Functional_Enrichment", de_method_label, "Camera")
+camera_go_terms_results_dir <- file.path( results_dir, "Functional_Enrichment", de_method_label, "Camera")
 
 # No need to change this parameter
-create_directory_if_not_exists(camera_go_terms_results_dir)
+create_dir_if_not_exists(camera_go_terms_results_dir)
 
 # No need to change this parameter
 possible_matches  <- Sys.glob( file.path(input_data_for_go_analysis_dir,  "*up_and_down_significant_DE_genes.Rdata" )  ) 
@@ -61,7 +61,7 @@ experiment_label_and_logFC_FDR_table <- read.table (file=file.path(input_data_fo
 # Read in RUVSeq normalised read counts
 ```{r}
 
-# write.table ( logCPM, file=file.path( rna_seq_results_directory, "log_normalised_counts_after_calcNormFactors.txt" ), col.names = TRUE, row.names = TRUE)
+# write.table ( logCPM, file=file.path( rna_seq_results_dir, "log_normalised_counts_after_calcNormFactors.txt" ), col.names = TRUE, row.names = TRUE)
 
 
 possible_matches  <- Sys.glob( file.path(base_results_dir, "edger_ruvs_log_normalised_counts_cpm.txt"  ) )
@@ -85,7 +85,7 @@ design_matrix <- design_matrix[, c("A", "AL", "CA", "CAL")]
 
 # Read in gene annotation for C. neoformans
 ```{r}
-gene_annotation <- read.table ( file.path( data_directory, 'Gene_Annotation/scer_gene_annotation_summary.txt' ) , header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
+gene_annotation <- read.table ( file.path( data_dir, 'Gene_Annotation/scer_gene_annotation_summary.txt' ) , header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
 ```
 
 ## Biological Process Index
@@ -166,18 +166,18 @@ fix_deprecated_go_terms <- function (go_frameData, deprecated_go_terms) {
 
 ```{r}
 go_bp_file_name  <- "scer_goframeData_bp.tab"
-go_bp_frameData <- read.table ( file.path( gene_ontology_directory, go_bp_file_name),  sep="\t", header=TRUE, stringsAsFactors = FALSE) 
+go_bp_frameData <- read.table ( file.path( gene_ontology_dir, go_bp_file_name),  sep="\t", header=TRUE, stringsAsFactors = FALSE) 
 head( go_bp_frameData)
 
 go_cc_file_name  <- "scer_goframeData_cc.tab"
-go_cc_frameData <- read.table ( file.path( gene_ontology_directory, go_cc_file_name),  sep="\t", header=TRUE, stringsAsFactors = FALSE) 
+go_cc_frameData <- read.table ( file.path( gene_ontology_dir, go_cc_file_name),  sep="\t", header=TRUE, stringsAsFactors = FALSE) 
 
 
 go_mf_file_name  <- "scer_goframeData_mf.tab"
-go_mf_frameData <- read.table ( file.path( gene_ontology_directory, go_mf_file_name),  sep="\t", header=TRUE, stringsAsFactors = FALSE) 
+go_mf_frameData <- read.table ( file.path( gene_ontology_dir, go_mf_file_name),  sep="\t", header=TRUE, stringsAsFactors = FALSE) 
 
 deprecated_go_terms_file  <-  "go_ids_not_found.tab"
-deprecated_go_terms <- read.table ( file.path( gene_ontology_directory, deprecated_go_terms_file),  
+deprecated_go_terms <- read.table ( file.path( gene_ontology_dir, deprecated_go_terms_file),  
 														sep="\t", header=TRUE, stringsAsFactors = FALSE) 
 head( deprecated_go_terms)
 

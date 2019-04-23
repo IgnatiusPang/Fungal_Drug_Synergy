@@ -48,7 +48,7 @@ gaf_headers <- c("DB",
 
 ## Read SGD feature table
 ```{r}
-sgd_feature_table <-  read.table( file.path(data_directory, "SGD/SGD_features.tab"), sep="\t", stringsAsFactors = FALSE, quote = "", header=FALSE  )
+sgd_feature_table <-  read.table( file.path(data_dir, "SGD/SGD_features.tab"), sep="\t", stringsAsFactors = FALSE, quote = "", header=FALSE  )
                                   
 colnames( sgd_feature_table)   <-  c( "sgd_id" 
 , "feature_type" 
@@ -71,7 +71,7 @@ colnames( sgd_feature_table)   <-  c( "sgd_id"
 
 ## SGD GO
 ```{r}
-sgd_go <- read.table(file.path( data_directory, "SGD/Gene_Ontology/gene_association.sgd"  ), sep="\t",
+sgd_go <- read.table(file.path( data_dir, "SGD/Gene_Ontology/gene_association.sgd"  ), sep="\t",
                        stringsAsFactors = FALSE, header=FALSE, quote = "", strip.white=TRUE, comment.char = "!" )
 
 dim(sgd_go)
@@ -120,11 +120,11 @@ list_of_output_files <- c( "scer_goframeData_bp.tab",
                            "scer_goframeData_cc.tab",
                            "scer_goframeData_mf.tab")
 
-create_directory_if_not_exists(file.path( data_directory, "Gene_Ontology_Annotation", "Ancestor_Cleaned"))
+create_dir_if_not_exists(file.path( data_dir, "Gene_Ontology_Annotation", "Ancestor_Cleaned"))
 
 purrr::walk2(list_of_tables, list_of_output_files, 
              function( x, y){ write.table( x, 
-                                           file.path( data_directory, "Gene_Ontology_Annotation", "Ancestor_Cleaned", y ),
+                                           file.path( data_dir, "Gene_Ontology_Annotation", "Ancestor_Cleaned", y ),
                                            sep="\t", row.names = FALSE, col.names = TRUE, quote=FALSE) } )
 
 

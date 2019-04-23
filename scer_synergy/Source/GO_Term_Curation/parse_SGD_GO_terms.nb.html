@@ -243,53 +243,22 @@ $(document).ready(function () {
 <h2>Load libraries and scripts</h2>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaWYoIXJlcXVpcmUocGFjbWFuKSkge1xuICBpbnN0YWxsLnBhY2thZ2VzKFwicGFjbWFuXCIpXG4gIGxpYnJhcnkocGFjbWFuKVxufVxucF9sb2FkKHRpZHl2ZXJzZSlcbnBfbG9hZChHTy5kYilcbnNvdXJjZSggJy4uL0NvbW1vbi9nbG9iYWxfcGFyYW1ldGVycy5SJylcbnNvdXJjZSggJy4uL0NvbW1vbi9oZWxwZXJfZnVuY3Rpb25zLlInKVxuc2Vzc2lvbkluZm8oKVxuYGBgIn0= -->
-<pre class="r"><code>if(!require(pacman)) {
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5pZighcmVxdWlyZShwYWNtYW4pKSB7XG4gIGluc3RhbGwucGFja2FnZXMoXCJwYWNtYW5cIilcbiAgbGlicmFyeShwYWNtYW4pXG59XG5cbnBfbG9hZCh0aWR5dmVyc2UpXG5wX2xvYWQoR08uZGIpXG5cbnNvdXJjZSggJy4uL0NvbW1vbi9nbG9iYWxfcGFyYW1ldGVycy5SJylcbnNvdXJjZSggJy4uL0NvbW1vbi9oZWxwZXJfZnVuY3Rpb25zLlInKVxuXG5zZXNzaW9uSW5mbygpXG5cbmBgYCJ9 -->
+<pre class="r"><code>
+if(!require(pacman)) {
   install.packages(&quot;pacman&quot;)
   library(pacman)
 }
+
 p_load(tidyverse)
 p_load(GO.db)
+
 source( '../Common/global_parameters.R')
 source( '../Common/helper_functions.R')
-sessionInfo()</code></pre>
+
+sessionInfo()
+</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiUiB2ZXJzaW9uIDMuNS4zICgyMDE5LTAzLTExKVxuUGxhdGZvcm06IHg4Nl82NC1wYy1saW51eC1nbnUgKDY0LWJpdClcblJ1bm5pbmcgdW5kZXI6IFVidW50dSAxOC4wNC4yIExUU1xuXG5NYXRyaXggcHJvZHVjdHM6IGRlZmF1bHRcbkJMQVM6IC91c3IvbGliL3g4Nl82NC1saW51eC1nbnUvYmxhcy9saWJibGFzLnNvLjMuNy4xXG5MQVBBQ0s6IC91c3IvbGliL3g4Nl82NC1saW51eC1nbnUvbGFwYWNrL2xpYmxhcGFjay5zby4zLjcuMVxuXG5sb2NhbGU6XG4gWzFdIExDX0NUWVBFPWVuX0FVLlVURi04ICAgICAgIExDX05VTUVSSUM9QyAgICAgICAgICAgICAgIExDX1RJTUU9ZW5fQVUuVVRGLTggICAgICAgIExDX0NPTExBVEU9ZW5fQVUuVVRGLTggICAgIExDX01PTkVUQVJZPWVuX0FVLlVURi04ICAgXG4gWzZdIExDX01FU1NBR0VTPWVuX0FVLlVURi04ICAgIExDX1BBUEVSPWVuX0FVLlVURi04ICAgICAgIExDX05BTUU9QyAgICAgICAgICAgICAgICAgIExDX0FERFJFU1M9QyAgICAgICAgICAgICAgIExDX1RFTEVQSE9ORT1DICAgICAgICAgICAgXG5bMTFdIExDX01FQVNVUkVNRU5UPWVuX0FVLlVURi04IExDX0lERU5USUZJQ0FUSU9OPUMgICAgICAgXG5cbmF0dGFjaGVkIGJhc2UgcGFja2FnZXM6XG5bMV0gcGFyYWxsZWwgIHN0YXRzNCAgICBzdGF0cyAgICAgZ3JhcGhpY3MgIGdyRGV2aWNlcyB1dGlscyAgICAgZGF0YXNldHMgIG1ldGhvZHMgICBiYXNlICAgICBcblxub3RoZXIgYXR0YWNoZWQgcGFja2FnZXM6XG4gWzFdIG11bHR0ZXN0XzIuMzguMCAgICAgIEdTRUFCYXNlXzEuNDQuMCAgICAgIGFubm90YXRlXzEuNjAuMCAgICAgIFhNTF8zLjk4LTEuMTcgICAgICAgIEdPc3RhdHNfMi40OC4wICAgICAgIGdyYXBoXzEuNjAuMCAgICAgICAgIENhdGVnb3J5XzIuNDguMCAgICAgXG4gWzhdIE1hdHJpeF8xLjItMTUgICAgICAgIGxpbW1hXzMuMzguMyAgICAgICAgIGtuaXRyXzEuMjEgICAgICAgICAgIGZ1cnJyXzAuMS4wICAgICAgICAgIGZ1dHVyZV8xLjExLjEuMSAgICAgIEdPLmRiXzMuNy4wICAgICAgICAgIEFubm90YXRpb25EYmlfMS40NC4wXG5bMTVdIElSYW5nZXNfMi4xNi4wICAgICAgIFM0VmVjdG9yc18wLjIwLjEgICAgIEJpb2Jhc2VfMi40Mi4wICAgICAgIEJpb2NHZW5lcmljc18wLjI4LjAgIGZvcmNhdHNfMC40LjAgICAgICAgIHN0cmluZ3JfMS40LjAgICAgICAgIGRwbHlyXzAuOC4wLjEgICAgICAgXG5bMjJdIHB1cnJyXzAuMy4wICAgICAgICAgIHJlYWRyXzEuMy4xICAgICAgICAgIHRpZHlyXzAuOC4yICAgICAgICAgIHRpYmJsZV8yLjAuMSAgICAgICAgIGdncGxvdDJfMy4xLjAgICAgICAgIHRpZHl2ZXJzZV8xLjIuMSAgICAgIHBhY21hbl8wLjUuMCAgICAgICAgXG5cbmxvYWRlZCB2aWEgYSBuYW1lc3BhY2UgKGFuZCBub3QgYXR0YWNoZWQpOlxuIFsxXSBubG1lXzMuMS0xMzcgICAgICAgICAgIGJpdG9wc18xLjAtNiAgICAgICAgICAgbHVicmlkYXRlXzEuNy40ICAgICAgICBiaXQ2NF8wLjktNyAgICAgICAgICAgIGh0dHJfMS40LjAgICAgICAgICAgICAgUmdyYXBodml6XzIuMjYuMCAgICAgIFxuIFs3XSB0b29sc18zLjUuMyAgICAgICAgICAgIGJhY2twb3J0c18xLjEuMyAgICAgICAgUjZfMi40LjAgICAgICAgICAgICAgICBEQklfMS4wLjAgICAgICAgICAgICAgIGxhenlldmFsXzAuMi4xICAgICAgICAgY29sb3JzcGFjZV8xLjQtMCAgICAgIFxuWzEzXSB3aXRocl8yLjEuMiAgICAgICAgICAgIHRpZHlzZWxlY3RfMC4yLjUgICAgICAgYml0XzEuMS0xNCAgICAgICAgICAgICBjb21waWxlcl8zLjUuMyAgICAgICAgIGNsaV8xLjAuMSAgICAgICAgICAgICAgcnZlc3RfMC4zLjIgICAgICAgICAgIFxuWzE5XSB4bWwyXzEuMi4wICAgICAgICAgICAgIHNjYWxlc18xLjAuMCAgICAgICAgICAgZ2VuZWZpbHRlcl8xLjY0LjAgICAgICBSQkdMXzEuNTguMSAgICAgICAgICAgIGRpZ2VzdF8wLjYuMTggICAgICAgICAgcm1hcmtkb3duXzEuMTEgICAgICAgIFxuWzI1XSBBbm5vdGF0aW9uRm9yZ2VfMS4yNC4wIGJhc2U2NGVuY18wLjEtMyAgICAgICAgcGtnY29uZmlnXzIuMC4yICAgICAgICBodG1sdG9vbHNfMC4zLjYgICAgICAgIHJsYW5nXzAuMy4xICAgICAgICAgICAgcmVhZHhsXzEuMy4wICAgICAgICAgIFxuWzMxXSByc3R1ZGlvYXBpXzAuOS4wICAgICAgIFJTUUxpdGVfMi4xLjEgICAgICAgICAgZ2VuZXJpY3NfMC4wLjIgICAgICAgICBqc29ubGl0ZV8xLjYgICAgICAgICAgIFJDdXJsXzEuOTUtNC4xMSAgICAgICAgbWFncml0dHJfMS41ICAgICAgICAgIFxuWzM3XSBSY3BwXzEuMC4wICAgICAgICAgICAgIG11bnNlbGxfMC41LjAgICAgICAgICAgc3RyaW5naV8xLjMuMSAgICAgICAgICB5YW1sXzIuMi4wICAgICAgICAgICAgIE1BU1NfNy4zLTUxLjEgICAgICAgICAgcGx5cl8xLjguNCAgICAgICAgICAgIFxuWzQzXSBncmlkXzMuNS4zICAgICAgICAgICAgIGJsb2JfMS4xLjEgICAgICAgICAgICAgbGlzdGVudl8wLjcuMCAgICAgICAgICBjcmF5b25fMS4zLjQgICAgICAgICAgIGxhdHRpY2VfMC4yMC0zOCAgICAgICAgaGF2ZW5fMi4wLjAgICAgICAgICAgIFxuWzQ5XSBzcGxpbmVzXzMuNS4zICAgICAgICAgIGhtc18wLjQuMiAgICAgICAgICAgICAgcGlsbGFyXzEuMy4xICAgICAgICAgICBjb2RldG9vbHNfMC4yLTE2ICAgICAgIGdsdWVfMS4zLjAgICAgICAgICAgICAgZXZhbHVhdGVfMC4xMyAgICAgICAgIFxuWzU1XSBtb2RlbHJfMC4xLjMgICAgICAgICAgIGNlbGxyYW5nZXJfMS4xLjAgICAgICAgZ3RhYmxlXzAuMi4wICAgICAgICAgICBhc3NlcnR0aGF0XzAuMi4wICAgICAgIHhmdW5fMC40ICAgICAgICAgICAgICAgeHRhYmxlXzEuOC0zICAgICAgICAgIFxuWzYxXSBicm9vbV8wLjUuMSAgICAgICAgICAgIHN1cnZpdmFsXzIuNDMtMyAgICAgICAgbWVtb2lzZV8xLjEuMCAgICAgICAgICBnbG9iYWxzXzAuMTIuNCAgICAgICAgXG4ifQ== -->
-<pre><code>R version 3.5.3 (2019-03-11)
-Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 18.04.2 LTS
-
-Matrix products: default
-BLAS: /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.7.1
-LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.7.1
-
-locale:
- [1] LC_CTYPE=en_AU.UTF-8       LC_NUMERIC=C               LC_TIME=en_AU.UTF-8        LC_COLLATE=en_AU.UTF-8     LC_MONETARY=en_AU.UTF-8   
- [6] LC_MESSAGES=en_AU.UTF-8    LC_PAPER=en_AU.UTF-8       LC_NAME=C                  LC_ADDRESS=C               LC_TELEPHONE=C            
-[11] LC_MEASUREMENT=en_AU.UTF-8 LC_IDENTIFICATION=C       
-
-attached base packages:
-[1] parallel  stats4    stats     graphics  grDevices utils     datasets  methods   base     
-
-other attached packages:
- [1] multtest_2.38.0      GSEABase_1.44.0      annotate_1.60.0      XML_3.98-1.17        GOstats_2.48.0       graph_1.60.0         Category_2.48.0     
- [8] Matrix_1.2-15        limma_3.38.3         knitr_1.21           furrr_0.1.0          future_1.11.1.1      GO.db_3.7.0          AnnotationDbi_1.44.0
-[15] IRanges_2.16.0       S4Vectors_0.20.1     Biobase_2.42.0       BiocGenerics_0.28.0  forcats_0.4.0        stringr_1.4.0        dplyr_0.8.0.1       
-[22] purrr_0.3.0          readr_1.3.1          tidyr_0.8.2          tibble_2.0.1         ggplot2_3.1.0        tidyverse_1.2.1      pacman_0.5.0        
-
-loaded via a namespace (and not attached):
- [1] nlme_3.1-137           bitops_1.0-6           lubridate_1.7.4        bit64_0.9-7            httr_1.4.0             Rgraphviz_2.26.0      
- [7] tools_3.5.3            backports_1.1.3        R6_2.4.0               DBI_1.0.0              lazyeval_0.2.1         colorspace_1.4-0      
-[13] withr_2.1.2            tidyselect_0.2.5       bit_1.1-14             compiler_3.5.3         cli_1.0.1              rvest_0.3.2           
-[19] xml2_1.2.0             scales_1.0.0           genefilter_1.64.0      RBGL_1.58.1            digest_0.6.18          rmarkdown_1.11        
-[25] AnnotationForge_1.24.0 base64enc_0.1-3        pkgconfig_2.0.2        htmltools_0.3.6        rlang_0.3.1            readxl_1.3.0          
-[31] rstudioapi_0.9.0       RSQLite_2.1.1          generics_0.0.2         jsonlite_1.6           RCurl_1.95-4.11        magrittr_1.5          
-[37] Rcpp_1.0.0             munsell_0.5.0          stringi_1.3.1          yaml_2.2.0             MASS_7.3-51.1          plyr_1.8.4            
-[43] grid_3.5.3             blob_1.1.1             listenv_0.7.0          crayon_1.3.4           lattice_0.20-38        haven_2.0.0           
-[49] splines_3.5.3          hms_0.4.2              pillar_1.3.1           codetools_0.2-16       glue_1.3.0             evaluate_0.13         
-[55] modelr_0.1.3           cellranger_1.1.0       gtable_0.2.0           assertthat_0.2.0       xfun_0.4               xtable_1.8-3          
-[61] broom_0.5.1            survival_2.43-3        memoise_1.1.0          globals_0.12.4        </code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -297,8 +266,9 @@ loaded via a namespace (and not attached):
 <h2>Global parameters</h2>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2FmX2hlYWRlcnMgPC0gYyhcIkRCXCIsXG5cIkRCIE9iamVjdCBJRFwiLFxuXCJTWU1CT0xcIiwgIyBcIkRCIE9iamVjdCBTeW1ib2xcIixcblwiUXVhbGlmaWVyXCIsXG5cIkdPLlRFUk1cIiwgIyBcIkdPIElEXCJcblwiREI6UmVmZXJlbmNlICh8REI6UmVmZXJlbmNlKVwiLFxuXCJHTy5FVklERU5DRS5DT0RFXCIsICMgXCJFdmlkZW5jZSBDb2RlXCIsXG5cIldpdGggKG9yKSBGcm9tXCIsXG5cIkdPLkFTUEVDVFwiLCAjICBcIkFzcGVjdFwiXG5cIkRCIE9iamVjdCBOYW1lXCIsXG5cIkRCIE9iamVjdCBTeW5vbnltICh8U3lub255bSlcIixcblwiREIgT2JqZWN0IFR5cGVcIixcblwiVGF4b24ofHRheG9uKVwiLFxuXCJEYXRlXCIsXG5cIkFTU0lHTkVELkJZXCIsICAjIFwiQXNzaWduZWQgQnlcIixcblwiQW5ub3RhdGlvbiBFeHRlbnNpb25cIixcblwiR2VuZSBQcm9kdWN0IEZvcm0gSURcIiApIFxuYGBgIn0= -->
-<pre class="r"><code>gaf_headers &lt;- c(&quot;DB&quot;,
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5nYWZfaGVhZGVycyA8LSBjKFwiREJcIixcblwiREIgT2JqZWN0IElEXCIsXG5cIlNZTUJPTFwiLCAjIFwiREIgT2JqZWN0IFN5bWJvbFwiLFxuXCJRdWFsaWZpZXJcIixcblwiR08uVEVSTVwiLCAjIFwiR08gSURcIlxuXCJEQjpSZWZlcmVuY2UgKHxEQjpSZWZlcmVuY2UpXCIsXG5cIkdPLkVWSURFTkNFLkNPREVcIiwgIyBcIkV2aWRlbmNlIENvZGVcIixcblwiV2l0aCAob3IpIEZyb21cIixcblwiR08uQVNQRUNUXCIsICMgIFwiQXNwZWN0XCJcblwiREIgT2JqZWN0IE5hbWVcIixcblwiREIgT2JqZWN0IFN5bm9ueW0gKHxTeW5vbnltKVwiLFxuXCJEQiBPYmplY3QgVHlwZVwiLFxuXCJUYXhvbih8dGF4b24pXCIsXG5cIkRhdGVcIixcblwiQVNTSUdORUQuQllcIiwgICMgXCJBc3NpZ25lZCBCeVwiLFxuXCJBbm5vdGF0aW9uIEV4dGVuc2lvblwiLFxuXCJHZW5lIFByb2R1Y3QgRm9ybSBJRFwiICkgXG5cbmBgYCJ9 -->
+<pre class="r"><code>
+gaf_headers &lt;- c(&quot;DB&quot;,
 &quot;DB Object ID&quot;,
 &quot;SYMBOL&quot;, # &quot;DB Object Symbol&quot;,
 &quot;Qualifier&quot;,
@@ -314,7 +284,8 @@ loaded via a namespace (and not attached):
 &quot;Date&quot;,
 &quot;ASSIGNED.BY&quot;,  # &quot;Assigned By&quot;,
 &quot;Annotation Extension&quot;,
-&quot;Gene Product Form ID&quot; ) </code></pre>
+&quot;Gene Product Form ID&quot; ) 
+</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -323,8 +294,8 @@ loaded via a namespace (and not attached):
 <h2>Read SGD feature table</h2>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2dkX2ZlYXR1cmVfdGFibGUgPC0gIHJlYWQudGFibGUoIGZpbGUucGF0aChkYXRhX2RpcmVjdG9yeSwgXCJTR0QvU0dEX2ZlYXR1cmVzLnRhYlwiKSwgc2VwPVwiXFx0XCIsIHN0cmluZ3NBc0ZhY3RvcnMgPSBGQUxTRSwgcXVvdGUgPSBcIlwiLCBoZWFkZXI9RkFMU0UgIClcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmNvbG5hbWVzKCBzZ2RfZmVhdHVyZV90YWJsZSkgICA8LSAgYyggXCJzZ2RfaWRcIiBcbiwgXCJmZWF0dXJlX3R5cGVcIiBcbiwgXCJmZWF0dXJlX3F1YWxpZmllclwiIFxuLCBcIm9sbl9pZFwiXG4sIFwic3RhbmRhcmRfZ2VuZV9uYW1lXCIgXG4sIFwiYWxpYXNcIiBcbiwgXCJwYXJlbnRfZmVhdHVyZV9uYW1lXCIgXG4sIFwic2Vjb25kYXJ5X3NnZF9pZFwiIFxuLCBcImNocm9tb3NvbWVcIiBcbiwgXCJzdGFydFwiIFxuLCBcInN0b3BcIiBcbiwgXCJzdHJhbmRcIiBcbiwgXCJnZW5ldGljX3Bvc2l0aW9uXCIgXG4sIFwiY29vcmRpbmF0ZV92ZXJzaW9uXCIgXG4sIFwic2VxdWVuY2VfdmVyc2lvblwiIFxuLCBcImRlc2NyaXB0aW9uXCIgICkgXG5gYGAifQ== -->
-<pre class="r"><code>sgd_feature_table &lt;-  read.table( file.path(data_directory, &quot;SGD/SGD_features.tab&quot;), sep=&quot;\t&quot;, stringsAsFactors = FALSE, quote = &quot;&quot;, header=FALSE  )
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2dkX2ZlYXR1cmVfdGFibGUgPC0gIHJlYWQudGFibGUoIGZpbGUucGF0aChkYXRhX2RpciwgXCJTR0QvU0dEX2ZlYXR1cmVzLnRhYlwiKSwgc2VwPVwiXFx0XCIsIHN0cmluZ3NBc0ZhY3RvcnMgPSBGQUxTRSwgcXVvdGUgPSBcIlwiLCBoZWFkZXI9RkFMU0UgIClcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmNvbG5hbWVzKCBzZ2RfZmVhdHVyZV90YWJsZSkgICA8LSAgYyggXCJzZ2RfaWRcIiBcbiwgXCJmZWF0dXJlX3R5cGVcIiBcbiwgXCJmZWF0dXJlX3F1YWxpZmllclwiIFxuLCBcIm9sbl9pZFwiXG4sIFwic3RhbmRhcmRfZ2VuZV9uYW1lXCIgXG4sIFwiYWxpYXNcIiBcbiwgXCJwYXJlbnRfZmVhdHVyZV9uYW1lXCIgXG4sIFwic2Vjb25kYXJ5X3NnZF9pZFwiIFxuLCBcImNocm9tb3NvbWVcIiBcbiwgXCJzdGFydFwiIFxuLCBcInN0b3BcIiBcbiwgXCJzdHJhbmRcIiBcbiwgXCJnZW5ldGljX3Bvc2l0aW9uXCIgXG4sIFwiY29vcmRpbmF0ZV92ZXJzaW9uXCIgXG4sIFwic2VxdWVuY2VfdmVyc2lvblwiIFxuLCBcImRlc2NyaXB0aW9uXCIgICkgXG5gYGAifQ== -->
+<pre class="r"><code>sgd_feature_table &lt;-  read.table( file.path(data_dir, &quot;SGD/SGD_features.tab&quot;), sep=&quot;\t&quot;, stringsAsFactors = FALSE, quote = &quot;&quot;, header=FALSE  )
                                   
 colnames( sgd_feature_table)   &lt;-  c( &quot;sgd_id&quot; 
 , &quot;feature_type&quot; 
@@ -350,16 +321,14 @@ colnames( sgd_feature_table)   &lt;-  c( &quot;sgd_id&quot;
 <h2>SGD GO</h2>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2dkX2dvIDwtIHJlYWQudGFibGUoZmlsZS5wYXRoKCBkYXRhX2RpcmVjdG9yeSwgXCJTR0QvR2VuZV9PbnRvbG9neS9nZW5lX2Fzc29jaWF0aW9uLnNnZFwiICApLCBzZXA9XCJcXHRcIixcbiAgICAgICAgICAgICAgICAgICAgICAgc3RyaW5nc0FzRmFjdG9ycyA9IEZBTFNFLCBoZWFkZXI9RkFMU0UsIHF1b3RlID0gXCJcIiwgc3RyaXAud2hpdGU9VFJVRSwgY29tbWVudC5jaGFyID0gXCIhXCIgKVxuZGltKHNnZF9nbylcbmBgYCJ9 -->
-<pre class="r"><code>sgd_go &lt;- read.table(file.path( data_directory, &quot;SGD/Gene_Ontology/gene_association.sgd&quot;  ), sep=&quot;\t&quot;,
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2dkX2dvIDwtIHJlYWQudGFibGUoZmlsZS5wYXRoKCBkYXRhX2RpciwgXCJTR0QvR2VuZV9PbnRvbG9neS9nZW5lX2Fzc29jaWF0aW9uLnNnZFwiICApLCBzZXA9XCJcXHRcIixcbiAgICAgICAgICAgICAgICAgICAgICAgc3RyaW5nc0FzRmFjdG9ycyA9IEZBTFNFLCBoZWFkZXI9RkFMU0UsIHF1b3RlID0gXCJcIiwgc3RyaXAud2hpdGU9VFJVRSwgY29tbWVudC5jaGFyID0gXCIhXCIgKVxuXG5kaW0oc2dkX2dvKVxuXG5jb2xuYW1lcyggc2dkX2dvICkgIDwtICBnYWZfaGVhZGVyc1xuXG5zZ2RfZ29fY2xlYW5lZCA8LSBzZ2RfZ28gJT4lIFxuICAgICAgICAgICAgICBkcGx5cjo6c2VsZWN0KCAgb25lX29mICggYyggXCJEQiBPYmplY3QgSURcIiwgXCJTWU1CT0xcIiwgXCJHTy5URVJNXCIsIFwiR08uTkFNRVwiLCBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwiR08uRVZJREVOQ0UuQ09ERVwiLCBcIkFTU0lHTkVELkJZXCIsIFwiR08uQVNQRUNUXCIgKSkgKSAlPiVcbiAgICAgICAgICAgICAgZGlzdGluY3QoKSAlPiVcbiAgICAgICAgICAgICAgbGVmdF9qb2luKCBzZ2RfZmVhdHVyZV90YWJsZSwgYnkgPWMoIFwiREIgT2JqZWN0IElEXCIgPSBcInNnZF9pZFwiKSkgJT4lXG4gICAgICAgICAgICAgIGRwbHlyOjpzZWxlY3QoICBvbmVfb2YgKCBjKCBcIm9sbl9pZFwiLCBcIkdPLlRFUk1cIiwgXCJHTy5OQU1FXCIsIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJHTy5FVklERU5DRS5DT0RFXCIsIFwiQVNTSUdORUQuQllcIiwgXCJHTy5BU1BFQ1RcIiApKSApICAlPiVcbiAgICAgICAgICAgICAgZHBseXI6OnJlbmFtZSAoICBTWU1CT0wgPSBcIm9sbl9pZFwiKVxuXG5cbmRpbShzZ2RfZ29fY2xlYW5lZClcblxuc2dkX2dvX2NsZWFuZWQgJT4lXG4gIGRpc3RpbmN0KCBHTy5FVklERU5DRS5DT0RFKVxuXG5gYGAifQ== -->
+<pre class="r"><code>sgd_go &lt;- read.table(file.path( data_dir, &quot;SGD/Gene_Ontology/gene_association.sgd&quot;  ), sep=&quot;\t&quot;,
                        stringsAsFactors = FALSE, header=FALSE, quote = &quot;&quot;, strip.white=TRUE, comment.char = &quot;!&quot; )
-dim(sgd_go)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDExMTMzOSAgICAgMTdcbiJ9 -->
-<pre><code>[1] 111339     17</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY29sbmFtZXMoIHNnZF9nbyApICA8LSAgZ2FmX2hlYWRlcnNcbnNnZF9nb19jbGVhbmVkIDwtIHNnZF9nbyAlPiUgXG4gICAgICAgICAgICAgIGRwbHlyOjpzZWxlY3QoICBvbmVfb2YgKCBjKCBcIkRCIE9iamVjdCBJRFwiLCBcIlNZTUJPTFwiLCBcIkdPLlRFUk1cIiwgXCJHTy5OQU1FXCIsIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJHTy5FVklERU5DRS5DT0RFXCIsIFwiQVNTSUdORUQuQllcIiwgXCJHTy5BU1BFQ1RcIiApKSApICU+JVxuICAgICAgICAgICAgICBkaXN0aW5jdCgpICU+JVxuICAgICAgICAgICAgICBsZWZ0X2pvaW4oIHNnZF9mZWF0dXJlX3RhYmxlLCBieSA9YyggXCJEQiBPYmplY3QgSURcIiA9IFwic2dkX2lkXCIpKSAlPiVcbiAgICAgICAgICAgICAgZHBseXI6OnNlbGVjdCggIG9uZV9vZiAoIGMoIFwib2xuX2lkXCIsIFwiR08uVEVSTVwiLCBcIkdPLk5BTUVcIiwgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcIkdPLkVWSURFTkNFLkNPREVcIiwgXCJBU1NJR05FRC5CWVwiLCBcIkdPLkFTUEVDVFwiICkpICkgICU+JVxuICAgICAgICAgICAgICBkcGx5cjo6cmVuYW1lICggIFNZTUJPTCA9IFwib2xuX2lkXCIpXG5gYGAifQ== -->
-<pre class="r"><code>colnames( sgd_go )  &lt;-  gaf_headers
+
+dim(sgd_go)
+
+colnames( sgd_go )  &lt;-  gaf_headers
+
 sgd_go_cleaned &lt;- sgd_go %&gt;% 
               dplyr::select(  one_of ( c( &quot;DB Object ID&quot;, &quot;SYMBOL&quot;, &quot;GO.TERM&quot;, &quot;GO.NAME&quot;, 
                                           &quot;GO.EVIDENCE.CODE&quot;, &quot;ASSIGNED.BY&quot;, &quot;GO.ASPECT&quot; )) ) %&gt;%
@@ -367,28 +336,15 @@ sgd_go_cleaned &lt;- sgd_go %&gt;%
               left_join( sgd_feature_table, by =c( &quot;DB Object ID&quot; = &quot;sgd_id&quot;)) %&gt;%
               dplyr::select(  one_of ( c( &quot;oln_id&quot;, &quot;GO.TERM&quot;, &quot;GO.NAME&quot;, 
                                           &quot;GO.EVIDENCE.CODE&quot;, &quot;ASSIGNED.BY&quot;, &quot;GO.ASPECT&quot; )) )  %&gt;%
-              dplyr::rename (  SYMBOL = &quot;oln_id&quot;)</code></pre>
+              dplyr::rename (  SYMBOL = &quot;oln_id&quot;)
+
+
+dim(sgd_go_cleaned)
+
+sgd_go_cleaned %&gt;%
+  distinct( GO.EVIDENCE.CODE)
+</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiVW5rbm93biBjb2x1bW5zOiBgR08uTkFNRWBVbmtub3duIGNvbHVtbnM6IGBHTy5OQU1FYFxuIn0= -->
-<pre><code>Unknown columns: `GO.NAME`Unknown columns: `GO.NAME`</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGltKHNnZF9nb19jbGVhbmVkKVxuYGBgIn0= -->
-<pre class="r"><code>dim(sgd_go_cleaned)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDg5NjE4ICAgICA1XG4ifQ== -->
-<pre><code>[1] 89618     5</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2dkX2dvX2NsZWFuZWQgJT4lXG4gIGRpc3RpbmN0KCBHTy5FVklERU5DRS5DT0RFKVxuYGBgIn0= -->
-<pre class="r"><code>sgd_go_cleaned %&gt;%
-  distinct( GO.EVIDENCE.CODE)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibmNvbCI6MSwibnJvdyI6MTh9LCJyZGYiOiJINHNJQUFBQUFBQUFBMTFSVVUrRE1CajhhSWRtSk9veWY4ZjZZUHdEU0p1Rm1NRUN4dXkxTWxRaWxnVzY2S08vZk5xeXRwaVNBTmNyZDk4ZExlanVMdHBGQUlBQWh4Z1FWbkNHMUNPQUdjejEreHNBMzQ0RXdFTGRTN09CVXhvYmlOTEVrWnV0ZzJYcDREcDFrTVVPUGt5dzNFeHdZcGsxUXhtMVpKRzQvYWQ0bXJCMUU3Si9iRUVuMjl6Qng4SXJHUXIrV1ErbW9DVVg2NXl3NTVTeUxHRWt5U256UlBPKyt5SldlS1ZEL3NCNExYMzNxdVdEN3g3dHVlVGt0VmQ2dFRwNWtzdnVJSnRPS0JIUy96NzB4RUh2RVRkSG9aUHNWOVg3VVh5czd2VUFjMlpnMGdYblpBNEg1NUhvMTFpRnh1cWlGbStOcUczMmxyL1VyVmxjcThaallYTG9HeUZ0RThVT1JIYVMyKytpcW1zdE0zYUQweCtMc0I2eGFRSUFBQT09In0= -->
-<div data-pagedtable="false">
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["GO.EVIDENCE.CODE"],"name":[1],"type":["chr"],"align":["left"]}],"data":[{"1":"IDA"},{"1":"IC"},{"1":"IMP"},{"1":"ISS"},{"1":"IGI"},{"1":"IEA"},{"1":"IBA"},{"1":"ISM"},{"1":"ISA"},{"1":"IEP"},{"1":"ND"},{"1":"RCA"},{"1":"TAS"},{"1":"IPI"},{"1":"NAS"},{"1":"IRD"},{"1":"ISO"},{"1":"IKR"}],"options":{"columns":{"min":{},"max":[10],"total":[1]},"rows":{"min":[10],"max":[10],"total":[18]},"pages":{}}}
-  </script>
-</div>
-<!-- rnb-frame-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
@@ -400,8 +356,10 @@ sgd_go_cleaned &lt;- sgd_go %&gt;%
 <h2>Remove the ancestors whenever it is possible</h2>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlzdF9vZl9nb19hc3BlY3RzIDwtIGMoXCJQXCIsIFwiQ1wiLCBcIkZcIilcbmxpc3Rfb2ZfdGFibGVzIDwtIHB1cnJyOjptYXAoIGxpc3Rfb2ZfZ29fYXNwZWN0cywgZnVuY3Rpb24oZ29fYXNwZWN0KSB7XG5zZ2RfZ29fY2xlYW5lZCAlPiUgXG4gIGRwbHlyOjpmaWx0ZXIoIEdPLkFTUEVDVCA9PSBnb19hc3BlY3QpICU+JVxuICBkcGx5cjo6ZGlzdGluY3QoIEdPLlRFUk0sIEdPLkVWSURFTkNFLkNPREUsIFNZTUJPTCApICU+JVxuICBkcGx5cjo6cmVuYW1lICggIGdvX2lkID0gXCJHTy5URVJNXCIsXG4gICAgICAgICAgICBldmlkZW5jZSA9IFwiR08uRVZJREVOQ0UuQ09ERVwiLFxuICAgICAgICAgICAgb2xuX2lkID0gXCJTWU1CT0xcIikgfSApXG5uYW1lcyggbGlzdF9vZl90YWJsZXMpIDwtIGxpc3Rfb2ZfZ29fYXNwZWN0c1xubGlzdF9vZl9vdXRwdXRfZmlsZXMgPC0gYyggXCJzY2VyX2dvZnJhbWVEYXRhX2JwLnRhYlwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJzY2VyX2dvZnJhbWVEYXRhX2NjLnRhYlwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJzY2VyX2dvZnJhbWVEYXRhX21mLnRhYlwiKVxuY3JlYXRlX2RpcmVjdG9yeV9pZl9ub3RfZXhpc3RzKGZpbGUucGF0aCggZGF0YV9kaXJlY3RvcnksIFwiR2VuZV9PbnRvbG9neV9Bbm5vdGF0aW9uXCIsIFwiQW5jZXN0b3JfQ2xlYW5lZFwiKSlcbnB1cnJyOjp3YWxrMihsaXN0X29mX3RhYmxlcywgbGlzdF9vZl9vdXRwdXRfZmlsZXMsIFxuICAgICAgICAgICAgIGZ1bmN0aW9uKCB4LCB5KXsgd3JpdGUudGFibGUoIHgsIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGZpbGUucGF0aCggZGF0YV9kaXJlY3RvcnksIFwiR2VuZV9PbnRvbG9neV9Bbm5vdGF0aW9uXCIsIFwiQW5jZXN0b3JfQ2xlYW5lZFwiLCB5ICksXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgc2VwPVwiXFx0XCIsIHJvdy5uYW1lcyA9IEZBTFNFLCBjb2wubmFtZXMgPSBUUlVFLCBxdW90ZT1GQUxTRSkgfSApXG5gYGAifQ== -->
-<pre class="r"><code>list_of_go_aspects &lt;- c(&quot;P&quot;, &quot;C&quot;, &quot;F&quot;)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5saXN0X29mX2dvX2FzcGVjdHMgPC0gYyhcIlBcIiwgXCJDXCIsIFwiRlwiKVxuXG5saXN0X29mX3RhYmxlcyA8LSBwdXJycjo6bWFwKCBsaXN0X29mX2dvX2FzcGVjdHMsIGZ1bmN0aW9uKGdvX2FzcGVjdCkge1xuc2dkX2dvX2NsZWFuZWQgJT4lIFxuICBkcGx5cjo6ZmlsdGVyKCBHTy5BU1BFQ1QgPT0gZ29fYXNwZWN0KSAlPiVcbiAgZHBseXI6OmRpc3RpbmN0KCBHTy5URVJNLCBHTy5FVklERU5DRS5DT0RFLCBTWU1CT0wgKSAlPiVcbiAgZHBseXI6OnJlbmFtZSAoICBnb19pZCA9IFwiR08uVEVSTVwiLFxuICAgICAgICAgICAgZXZpZGVuY2UgPSBcIkdPLkVWSURFTkNFLkNPREVcIixcbiAgICAgICAgICAgIG9sbl9pZCA9IFwiU1lNQk9MXCIpIH0gKVxuXG5uYW1lcyggbGlzdF9vZl90YWJsZXMpIDwtIGxpc3Rfb2ZfZ29fYXNwZWN0c1xuXG5saXN0X29mX291dHB1dF9maWxlcyA8LSBjKCBcInNjZXJfZ29mcmFtZURhdGFfYnAudGFiXCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICBcInNjZXJfZ29mcmFtZURhdGFfY2MudGFiXCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICBcInNjZXJfZ29mcmFtZURhdGFfbWYudGFiXCIpXG5cbmNyZWF0ZV9kaXJfaWZfbm90X2V4aXN0cyhmaWxlLnBhdGgoIGRhdGFfZGlyLCBcIkdlbmVfT250b2xvZ3lfQW5ub3RhdGlvblwiLCBcIkFuY2VzdG9yX0NsZWFuZWRcIikpXG5cbnB1cnJyOjp3YWxrMihsaXN0X29mX3RhYmxlcywgbGlzdF9vZl9vdXRwdXRfZmlsZXMsIFxuICAgICAgICAgICAgIGZ1bmN0aW9uKCB4LCB5KXsgd3JpdGUudGFibGUoIHgsIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGZpbGUucGF0aCggZGF0YV9kaXIsIFwiR2VuZV9PbnRvbG9neV9Bbm5vdGF0aW9uXCIsIFwiQW5jZXN0b3JfQ2xlYW5lZFwiLCB5ICksXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgc2VwPVwiXFx0XCIsIHJvdy5uYW1lcyA9IEZBTFNFLCBjb2wubmFtZXMgPSBUUlVFLCBxdW90ZT1GQUxTRSkgfSApXG5cblxuYGBgIn0= -->
+<pre class="r"><code>
+list_of_go_aspects &lt;- c(&quot;P&quot;, &quot;C&quot;, &quot;F&quot;)
+
 list_of_tables &lt;- purrr::map( list_of_go_aspects, function(go_aspect) {
 sgd_go_cleaned %&gt;% 
   dplyr::filter( GO.ASPECT == go_aspect) %&gt;%
@@ -409,22 +367,27 @@ sgd_go_cleaned %&gt;%
   dplyr::rename (  go_id = &quot;GO.TERM&quot;,
             evidence = &quot;GO.EVIDENCE.CODE&quot;,
             oln_id = &quot;SYMBOL&quot;) } )
+
 names( list_of_tables) &lt;- list_of_go_aspects
+
 list_of_output_files &lt;- c( &quot;scer_goframeData_bp.tab&quot;,
                            &quot;scer_goframeData_cc.tab&quot;,
                            &quot;scer_goframeData_mf.tab&quot;)
-create_directory_if_not_exists(file.path( data_directory, &quot;Gene_Ontology_Annotation&quot;, &quot;Ancestor_Cleaned&quot;))
+
+create_dir_if_not_exists(file.path( data_dir, &quot;Gene_Ontology_Annotation&quot;, &quot;Ancestor_Cleaned&quot;))
+
 purrr::walk2(list_of_tables, list_of_output_files, 
              function( x, y){ write.table( x, 
-                                           file.path( data_directory, &quot;Gene_Ontology_Annotation&quot;, &quot;Ancestor_Cleaned&quot;, y ),
-                                           sep=&quot;\t&quot;, row.names = FALSE, col.names = TRUE, quote=FALSE) } )</code></pre>
+                                           file.path( data_dir, &quot;Gene_Ontology_Annotation&quot;, &quot;Ancestor_Cleaned&quot;, y ),
+                                           sep=&quot;\t&quot;, row.names = FALSE, col.names = TRUE, quote=FALSE) } )
+</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKCiMjIExvYWQgbGlicmFyaWVzIGFuZCBzY3JpcHRzCmBgYHtyfQoKaWYoIXJlcXVpcmUocGFjbWFuKSkgewogIGluc3RhbGwucGFja2FnZXMoInBhY21hbiIpCiAgbGlicmFyeShwYWNtYW4pCn0KCnBfbG9hZCh0aWR5dmVyc2UpCnBfbG9hZChHTy5kYikKCnNvdXJjZSggJy4uL0NvbW1vbi9nbG9iYWxfcGFyYW1ldGVycy5SJykKc291cmNlKCAnLi4vQ29tbW9uL2hlbHBlcl9mdW5jdGlvbnMuUicpCgpzZXNzaW9uSW5mbygpCgpgYGAKCiMjIEdsb2JhbCBwYXJhbWV0ZXJzCmBgYHtyfQoKZ2FmX2hlYWRlcnMgPC0gYygiREIiLAoiREIgT2JqZWN0IElEIiwKIlNZTUJPTCIsICMgIkRCIE9iamVjdCBTeW1ib2wiLAoiUXVhbGlmaWVyIiwKIkdPLlRFUk0iLCAjICJHTyBJRCIKIkRCOlJlZmVyZW5jZSAofERCOlJlZmVyZW5jZSkiLAoiR08uRVZJREVOQ0UuQ09ERSIsICMgIkV2aWRlbmNlIENvZGUiLAoiV2l0aCAob3IpIEZyb20iLAoiR08uQVNQRUNUIiwgIyAgIkFzcGVjdCIKIkRCIE9iamVjdCBOYW1lIiwKIkRCIE9iamVjdCBTeW5vbnltICh8U3lub255bSkiLAoiREIgT2JqZWN0IFR5cGUiLAoiVGF4b24ofHRheG9uKSIsCiJEYXRlIiwKIkFTU0lHTkVELkJZIiwgICMgIkFzc2lnbmVkIEJ5IiwKIkFubm90YXRpb24gRXh0ZW5zaW9uIiwKIkdlbmUgUHJvZHVjdCBGb3JtIElEIiApIAoKYGBgCgoKIyMgUmVhZCBTR0QgZmVhdHVyZSB0YWJsZQpgYGB7cn0Kc2dkX2ZlYXR1cmVfdGFibGUgPC0gIHJlYWQudGFibGUoIGZpbGUucGF0aChkYXRhX2RpcmVjdG9yeSwgIlNHRC9TR0RfZmVhdHVyZXMudGFiIiksIHNlcD0iXHQiLCBzdHJpbmdzQXNGYWN0b3JzID0gRkFMU0UsIHF1b3RlID0gIiIsIGhlYWRlcj1GQUxTRSAgKQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCmNvbG5hbWVzKCBzZ2RfZmVhdHVyZV90YWJsZSkgICA8LSAgYyggInNnZF9pZCIgCiwgImZlYXR1cmVfdHlwZSIgCiwgImZlYXR1cmVfcXVhbGlmaWVyIiAKLCAib2xuX2lkIgosICJzdGFuZGFyZF9nZW5lX25hbWUiIAosICJhbGlhcyIgCiwgInBhcmVudF9mZWF0dXJlX25hbWUiIAosICJzZWNvbmRhcnlfc2dkX2lkIiAKLCAiY2hyb21vc29tZSIgCiwgInN0YXJ0IiAKLCAic3RvcCIgCiwgInN0cmFuZCIgCiwgImdlbmV0aWNfcG9zaXRpb24iIAosICJjb29yZGluYXRlX3ZlcnNpb24iIAosICJzZXF1ZW5jZV92ZXJzaW9uIiAKLCAiZGVzY3JpcHRpb24iICApIApgYGAKCgojIyBTR0QgR08KYGBge3J9CnNnZF9nbyA8LSByZWFkLnRhYmxlKGZpbGUucGF0aCggZGF0YV9kaXJlY3RvcnksICJTR0QvR2VuZV9PbnRvbG9neS9nZW5lX2Fzc29jaWF0aW9uLnNnZCIgICksIHNlcD0iXHQiLAogICAgICAgICAgICAgICAgICAgICAgIHN0cmluZ3NBc0ZhY3RvcnMgPSBGQUxTRSwgaGVhZGVyPUZBTFNFLCBxdW90ZSA9ICIiLCBzdHJpcC53aGl0ZT1UUlVFLCBjb21tZW50LmNoYXIgPSAiISIgKQoKZGltKHNnZF9nbykKCmNvbG5hbWVzKCBzZ2RfZ28gKSAgPC0gIGdhZl9oZWFkZXJzCgpzZ2RfZ29fY2xlYW5lZCA8LSBzZ2RfZ28gJT4lIAogICAgICAgICAgICAgIGRwbHlyOjpzZWxlY3QoICBvbmVfb2YgKCBjKCAiREIgT2JqZWN0IElEIiwgIlNZTUJPTCIsICJHTy5URVJNIiwgIkdPLk5BTUUiLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIkdPLkVWSURFTkNFLkNPREUiLCAiQVNTSUdORUQuQlkiLCAiR08uQVNQRUNUIiApKSApICU+JQogICAgICAgICAgICAgIGRpc3RpbmN0KCkgJT4lCiAgICAgICAgICAgICAgbGVmdF9qb2luKCBzZ2RfZmVhdHVyZV90YWJsZSwgYnkgPWMoICJEQiBPYmplY3QgSUQiID0gInNnZF9pZCIpKSAlPiUKICAgICAgICAgICAgICBkcGx5cjo6c2VsZWN0KCAgb25lX29mICggYyggIm9sbl9pZCIsICJHTy5URVJNIiwgIkdPLk5BTUUiLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIkdPLkVWSURFTkNFLkNPREUiLCAiQVNTSUdORUQuQlkiLCAiR08uQVNQRUNUIiApKSApICAlPiUKICAgICAgICAgICAgICBkcGx5cjo6cmVuYW1lICggIFNZTUJPTCA9ICJvbG5faWQiKQoKCmRpbShzZ2RfZ29fY2xlYW5lZCkKCnNnZF9nb19jbGVhbmVkICU+JQogIGRpc3RpbmN0KCBHTy5FVklERU5DRS5DT0RFKQoKYGBgCgpgYGB7cn0KCmBgYAoKCgojIyBSZW1vdmUgdGhlIGFuY2VzdG9ycyB3aGVuZXZlciBpdCBpcyBwb3NzaWJsZSAKYGBge3J9CgpsaXN0X29mX2dvX2FzcGVjdHMgPC0gYygiUCIsICJDIiwgIkYiKQoKbGlzdF9vZl90YWJsZXMgPC0gcHVycnI6Om1hcCggbGlzdF9vZl9nb19hc3BlY3RzLCBmdW5jdGlvbihnb19hc3BlY3QpIHsKc2dkX2dvX2NsZWFuZWQgJT4lIAogIGRwbHlyOjpmaWx0ZXIoIEdPLkFTUEVDVCA9PSBnb19hc3BlY3QpICU+JQogIGRwbHlyOjpkaXN0aW5jdCggR08uVEVSTSwgR08uRVZJREVOQ0UuQ09ERSwgU1lNQk9MICkgJT4lCiAgZHBseXI6OnJlbmFtZSAoICBnb19pZCA9ICJHTy5URVJNIiwKICAgICAgICAgICAgZXZpZGVuY2UgPSAiR08uRVZJREVOQ0UuQ09ERSIsCiAgICAgICAgICAgIG9sbl9pZCA9ICJTWU1CT0wiKSB9ICkKCm5hbWVzKCBsaXN0X29mX3RhYmxlcykgPC0gbGlzdF9vZl9nb19hc3BlY3RzCgpsaXN0X29mX291dHB1dF9maWxlcyA8LSBjKCAic2Nlcl9nb2ZyYW1lRGF0YV9icC50YWIiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAic2Nlcl9nb2ZyYW1lRGF0YV9jYy50YWIiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAic2Nlcl9nb2ZyYW1lRGF0YV9tZi50YWIiKQoKY3JlYXRlX2RpcmVjdG9yeV9pZl9ub3RfZXhpc3RzKGZpbGUucGF0aCggZGF0YV9kaXJlY3RvcnksICJHZW5lX09udG9sb2d5X0Fubm90YXRpb24iLCAiQW5jZXN0b3JfQ2xlYW5lZCIpKQoKcHVycnI6OndhbGsyKGxpc3Rfb2ZfdGFibGVzLCBsaXN0X29mX291dHB1dF9maWxlcywgCiAgICAgICAgICAgICBmdW5jdGlvbiggeCwgeSl7IHdyaXRlLnRhYmxlKCB4LCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGZpbGUucGF0aCggZGF0YV9kaXJlY3RvcnksICJHZW5lX09udG9sb2d5X0Fubm90YXRpb24iLCAiQW5jZXN0b3JfQ2xlYW5lZCIsIHkgKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNlcD0iXHQiLCByb3cubmFtZXMgPSBGQUxTRSwgY29sLm5hbWVzID0gVFJVRSwgcXVvdGU9RkFMU0UpIH0gKQoKCmBgYAoKCgoK</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKCiMjIExvYWQgbGlicmFyaWVzIGFuZCBzY3JpcHRzCmBgYHtyfQoKaWYoIXJlcXVpcmUocGFjbWFuKSkgewogIGluc3RhbGwucGFja2FnZXMoInBhY21hbiIpCiAgbGlicmFyeShwYWNtYW4pCn0KCnBfbG9hZCh0aWR5dmVyc2UpCnBfbG9hZChHTy5kYikKCnNvdXJjZSggJy4uL0NvbW1vbi9nbG9iYWxfcGFyYW1ldGVycy5SJykKc291cmNlKCAnLi4vQ29tbW9uL2hlbHBlcl9mdW5jdGlvbnMuUicpCgpzZXNzaW9uSW5mbygpCgpgYGAKCiMjIEdsb2JhbCBwYXJhbWV0ZXJzCmBgYHtyfQoKZ2FmX2hlYWRlcnMgPC0gYygiREIiLAoiREIgT2JqZWN0IElEIiwKIlNZTUJPTCIsICMgIkRCIE9iamVjdCBTeW1ib2wiLAoiUXVhbGlmaWVyIiwKIkdPLlRFUk0iLCAjICJHTyBJRCIKIkRCOlJlZmVyZW5jZSAofERCOlJlZmVyZW5jZSkiLAoiR08uRVZJREVOQ0UuQ09ERSIsICMgIkV2aWRlbmNlIENvZGUiLAoiV2l0aCAob3IpIEZyb20iLAoiR08uQVNQRUNUIiwgIyAgIkFzcGVjdCIKIkRCIE9iamVjdCBOYW1lIiwKIkRCIE9iamVjdCBTeW5vbnltICh8U3lub255bSkiLAoiREIgT2JqZWN0IFR5cGUiLAoiVGF4b24ofHRheG9uKSIsCiJEYXRlIiwKIkFTU0lHTkVELkJZIiwgICMgIkFzc2lnbmVkIEJ5IiwKIkFubm90YXRpb24gRXh0ZW5zaW9uIiwKIkdlbmUgUHJvZHVjdCBGb3JtIElEIiApIAoKYGBgCgoKIyMgUmVhZCBTR0QgZmVhdHVyZSB0YWJsZQpgYGB7cn0Kc2dkX2ZlYXR1cmVfdGFibGUgPC0gIHJlYWQudGFibGUoIGZpbGUucGF0aChkYXRhX2RpciwgIlNHRC9TR0RfZmVhdHVyZXMudGFiIiksIHNlcD0iXHQiLCBzdHJpbmdzQXNGYWN0b3JzID0gRkFMU0UsIHF1b3RlID0gIiIsIGhlYWRlcj1GQUxTRSAgKQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCmNvbG5hbWVzKCBzZ2RfZmVhdHVyZV90YWJsZSkgICA8LSAgYyggInNnZF9pZCIgCiwgImZlYXR1cmVfdHlwZSIgCiwgImZlYXR1cmVfcXVhbGlmaWVyIiAKLCAib2xuX2lkIgosICJzdGFuZGFyZF9nZW5lX25hbWUiIAosICJhbGlhcyIgCiwgInBhcmVudF9mZWF0dXJlX25hbWUiIAosICJzZWNvbmRhcnlfc2dkX2lkIiAKLCAiY2hyb21vc29tZSIgCiwgInN0YXJ0IiAKLCAic3RvcCIgCiwgInN0cmFuZCIgCiwgImdlbmV0aWNfcG9zaXRpb24iIAosICJjb29yZGluYXRlX3ZlcnNpb24iIAosICJzZXF1ZW5jZV92ZXJzaW9uIiAKLCAiZGVzY3JpcHRpb24iICApIApgYGAKCgojIyBTR0QgR08KYGBge3J9CnNnZF9nbyA8LSByZWFkLnRhYmxlKGZpbGUucGF0aCggZGF0YV9kaXIsICJTR0QvR2VuZV9PbnRvbG9neS9nZW5lX2Fzc29jaWF0aW9uLnNnZCIgICksIHNlcD0iXHQiLAogICAgICAgICAgICAgICAgICAgICAgIHN0cmluZ3NBc0ZhY3RvcnMgPSBGQUxTRSwgaGVhZGVyPUZBTFNFLCBxdW90ZSA9ICIiLCBzdHJpcC53aGl0ZT1UUlVFLCBjb21tZW50LmNoYXIgPSAiISIgKQoKZGltKHNnZF9nbykKCmNvbG5hbWVzKCBzZ2RfZ28gKSAgPC0gIGdhZl9oZWFkZXJzCgpzZ2RfZ29fY2xlYW5lZCA8LSBzZ2RfZ28gJT4lIAogICAgICAgICAgICAgIGRwbHlyOjpzZWxlY3QoICBvbmVfb2YgKCBjKCAiREIgT2JqZWN0IElEIiwgIlNZTUJPTCIsICJHTy5URVJNIiwgIkdPLk5BTUUiLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIkdPLkVWSURFTkNFLkNPREUiLCAiQVNTSUdORUQuQlkiLCAiR08uQVNQRUNUIiApKSApICU+JQogICAgICAgICAgICAgIGRpc3RpbmN0KCkgJT4lCiAgICAgICAgICAgICAgbGVmdF9qb2luKCBzZ2RfZmVhdHVyZV90YWJsZSwgYnkgPWMoICJEQiBPYmplY3QgSUQiID0gInNnZF9pZCIpKSAlPiUKICAgICAgICAgICAgICBkcGx5cjo6c2VsZWN0KCAgb25lX29mICggYyggIm9sbl9pZCIsICJHTy5URVJNIiwgIkdPLk5BTUUiLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIkdPLkVWSURFTkNFLkNPREUiLCAiQVNTSUdORUQuQlkiLCAiR08uQVNQRUNUIiApKSApICAlPiUKICAgICAgICAgICAgICBkcGx5cjo6cmVuYW1lICggIFNZTUJPTCA9ICJvbG5faWQiKQoKCmRpbShzZ2RfZ29fY2xlYW5lZCkKCnNnZF9nb19jbGVhbmVkICU+JQogIGRpc3RpbmN0KCBHTy5FVklERU5DRS5DT0RFKQoKYGBgCgpgYGB7cn0KCmBgYAoKCgojIyBSZW1vdmUgdGhlIGFuY2VzdG9ycyB3aGVuZXZlciBpdCBpcyBwb3NzaWJsZSAKYGBge3J9CgpsaXN0X29mX2dvX2FzcGVjdHMgPC0gYygiUCIsICJDIiwgIkYiKQoKbGlzdF9vZl90YWJsZXMgPC0gcHVycnI6Om1hcCggbGlzdF9vZl9nb19hc3BlY3RzLCBmdW5jdGlvbihnb19hc3BlY3QpIHsKc2dkX2dvX2NsZWFuZWQgJT4lIAogIGRwbHlyOjpmaWx0ZXIoIEdPLkFTUEVDVCA9PSBnb19hc3BlY3QpICU+JQogIGRwbHlyOjpkaXN0aW5jdCggR08uVEVSTSwgR08uRVZJREVOQ0UuQ09ERSwgU1lNQk9MICkgJT4lCiAgZHBseXI6OnJlbmFtZSAoICBnb19pZCA9ICJHTy5URVJNIiwKICAgICAgICAgICAgZXZpZGVuY2UgPSAiR08uRVZJREVOQ0UuQ09ERSIsCiAgICAgICAgICAgIG9sbl9pZCA9ICJTWU1CT0wiKSB9ICkKCm5hbWVzKCBsaXN0X29mX3RhYmxlcykgPC0gbGlzdF9vZl9nb19hc3BlY3RzCgpsaXN0X29mX291dHB1dF9maWxlcyA8LSBjKCAic2Nlcl9nb2ZyYW1lRGF0YV9icC50YWIiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAic2Nlcl9nb2ZyYW1lRGF0YV9jYy50YWIiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAic2Nlcl9nb2ZyYW1lRGF0YV9tZi50YWIiKQoKY3JlYXRlX2Rpcl9pZl9ub3RfZXhpc3RzKGZpbGUucGF0aCggZGF0YV9kaXIsICJHZW5lX09udG9sb2d5X0Fubm90YXRpb24iLCAiQW5jZXN0b3JfQ2xlYW5lZCIpKQoKcHVycnI6OndhbGsyKGxpc3Rfb2ZfdGFibGVzLCBsaXN0X29mX291dHB1dF9maWxlcywgCiAgICAgICAgICAgICBmdW5jdGlvbiggeCwgeSl7IHdyaXRlLnRhYmxlKCB4LCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGZpbGUucGF0aCggZGF0YV9kaXIsICJHZW5lX09udG9sb2d5X0Fubm90YXRpb24iLCAiQW5jZXN0b3JfQ2xlYW5lZCIsIHkgKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNlcD0iXHQiLCByb3cubmFtZXMgPSBGQUxTRSwgY29sLm5hbWVzID0gVFJVRSwgcXVvdGU9RkFMU0UpIH0gKQoKCmBgYAoKCgoK</div>
 
 
 

@@ -22,7 +22,7 @@ source( '../../Common/global_parameters.R')
 
 ```{r}
 
-soms_results_dir <- file.path( results_directory, "Self_Organising_Maps/EdgeR_RUVs_QL/To_Use_k_0_Remove_5a/Condition_on_child_terms_true" ) 
+soms_results_dir <- file.path( results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL/To_Use_k_0_Remove_5a/Condition_on_child_terms_true" ) 
 
 compare_A_soms <- readRDS ( file.path( soms_results_dir, "compare_A/5x5/soms_results.RDS" ) )
 compare_AL_soms <- readRDS ( file.path( soms_results_dir, "compare_AL/5x5/soms_results.RDS" ) )

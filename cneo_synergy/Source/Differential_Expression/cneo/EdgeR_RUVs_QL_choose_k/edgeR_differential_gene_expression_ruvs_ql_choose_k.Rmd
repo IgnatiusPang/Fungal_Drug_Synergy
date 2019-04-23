@@ -84,30 +84,30 @@ if( "5a" %in% samples_to_remove) {
   num_samples_dir <- "Remove_5a"
 } 
 
-choose_k_results_directory <- file.path(results_directory, "Differential_Expression",  
+choose_k_results_dir <- file.path(results_dir, "Differential_Expression",  
 										paste(  "EdgeR",  type_of_ruv,  type_of_hypothesis_test, sep="_" ),  
 										organism , 
 										num_samples_dir, 
 										paste("k_", num_unwanted_variables, sep="") ) 
 
-create_directory_if_not_exists( choose_k_results_directory ) 
+create_dir_if_not_exists( choose_k_results_dir ) 
 
 ## Save the results into files 
-edger_ruvs_gene_lists_dir <- file.path( choose_k_results_directory, "Gene_Lists")
-create_directory_if_not_exists( edger_ruvs_gene_lists_dir)
+edger_ruvs_gene_lists_dir <- file.path( choose_k_results_dir, "Gene_Lists")
+create_dir_if_not_exists( edger_ruvs_gene_lists_dir)
 
 
 ```
 
 ## Load DGEList object and the normalised read counts for gene 
 ```{r}
-cneo_dgelist <- readRDS( file=file.path( choose_k_results_directory, "cneo_deg_ruv.Rdata") ) 
+cneo_dgelist <- readRDS( file=file.path( choose_k_results_dir, "cneo_deg_ruv.Rdata") ) 
 
 ```
 
 ## Load Gene Annotation
 ```{r}
-gene_annotation <- read.table ( file.path( data_directory, 'Gene_Annotation/cneo_gene_annotation_summary.txt' ) , header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
+gene_annotation <- read.table ( file.path( data_dir, 'Gene_Annotation/cneo_gene_annotation_summary.txt' ) , header=TRUE, sep="\t", quote="", stringsAsFactors = FALSE)
 
 ```
 
@@ -115,7 +115,7 @@ gene_annotation <- read.table ( file.path( data_directory, 'Gene_Annotation/cneo
 ## Load design matrix
 ```{r}
 
-ruvs_design <- readRDS( file=file.path( choose_k_results_directory, "ruvs_design_matrix.Rdata") ) 
+ruvs_design <- readRDS( file=file.path( choose_k_results_dir, "ruvs_design_matrix.Rdata") ) 
 
 design_matrix <- read.table(cneo_design_matrix_file, header=TRUE, sep="\t", stringsAsFactors = TRUE)
 

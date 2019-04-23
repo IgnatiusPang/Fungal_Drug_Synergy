@@ -65,6 +65,9 @@ create_directory_if_not_exists <- function(file_path, mode = "0777") {
 	
 }
 
+create_dir_if_not_exists <- create_directory_if_not_exists
+
+
 ##################################################################################################################
 
 ## Function to source Rmd files 

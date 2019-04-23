@@ -486,12 +486,12 @@ run_list_of_go_term_enrichment_tests_old <- function( query_list_id_list, multip
 ```{r}
 
 # Get the gene to GO terms dictionary for Cryptococcus species, using a dictionary chosen by the user
-get_crypto_go_dictionary_of_choice <- function (  organism_long_name, annotation_directory, bp_file_name, mf_file_name, cc_file_name) {
+get_crypto_go_dictionary_of_choice <- function (  organism_long_name, annotation_dir, bp_file_name, mf_file_name, cc_file_name) {
 
         ### Using Blast2GO, Uniprot, and manual OrthoMCL (1 to 1 matches) annotations
-        goframeData_bp <- read.table ( file.path( annotation_directory, bp_file_name),  sep="\t", header=TRUE) 
-        goframeData_mf <- read.table ( file.path( annotation_directory, mf_file_name),  sep="\t", header=TRUE) 
-        goframeData_cc <- read.table ( file.path( annotation_directory, cc_file_name),  sep="\t", header=TRUE) 
+        goframeData_bp <- read.table ( file.path( annotation_dir, bp_file_name),  sep="\t", header=TRUE) 
+        goframeData_mf <- read.table ( file.path( annotation_dir, mf_file_name),  sep="\t", header=TRUE) 
+        goframeData_cc <- read.table ( file.path( annotation_dir, cc_file_name),  sep="\t", header=TRUE) 
         
         goFrame_bp <- GOFrame(goframeData_bp, organism = organism_long_name)
         goFrame_mf <- GOFrame(goframeData_mf, organism = organism_long_name)
@@ -537,7 +537,7 @@ Input parameters:
 
 * cluster\_for\_each\_gene - results generated from the script 'run_SOMs_analysis.Rmd'
 * expt\_label - The label for each experiment
-* results\_directory - the directory to save the output files 
+* results\_dir - the directory to save the output files 
 * pvalueCutoff  - Benjamini-Hochberg adjusted p-value < X for a GO term to be significant (default 0.05)
 
 * Outputs the following files:
