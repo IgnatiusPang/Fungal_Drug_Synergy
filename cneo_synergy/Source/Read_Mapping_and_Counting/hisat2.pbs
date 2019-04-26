@@ -18,6 +18,9 @@ module load hisat2/2.1.0
 GENOME_DIR=/srv/scratch/z3371724/Fungal/Data/C_neoformans_genome
 INDEX_DIR=/srv/scratch/z3371724/Fungal/Data/C_neoformans_index/c.neoformans
 
+# https://ccb.jhu.edu/software/hisat2/manual.shtml
+# List of splice sites 'splicesites.txt' was generated using the following command: 'python hisat2_extract_splice_sites.py genes.gtf > splicesites.txt', where hisat2_extract_splice_sites.py is included in the HISAT2 package, genes.gtf is a gene annotation file.
+
 hisat2 -p 4 --known-splicesite-infile $GENOME_DIR/splicesites.txt  -x $INDEX_DIR \
 -1 *_R1_001.fastq.gz -2  *_R2_001.fastq.gz  -S ${job_name}.sam > ${job_name}.stdout.log
 
