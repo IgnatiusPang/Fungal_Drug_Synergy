@@ -5,7 +5,7 @@ use warnings;
 
 # java jvm-args -jar picard.jar PicardCommandName OPTION1=value1 OPTION2=value2...
 
-my $base_directory = "/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy/cneo_synergy"
+my $base_directory = "/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy/cneo_synergy";
 my $input_directory= "$base_directory/Data/Sorted_SAM_Files/srv/scratch/z3371724/Fungal/Results/Synergy/BAM_Files/";
 my $output_directory = "$base_directory/Results/Insert_Sizes/";
 my $picard_tools_directory = "/home/ignatius/Programs/2015/Picard_Tools/picard-tools-1.127/";
