@@ -1,3 +1,16 @@
+## Set up the interface to the RDS
+# https://www.hpc.science.unsw.edu.au/about/copying-files-unsw-data-archive
+module add unswdataarchive/2017-02-06
+cd /srv/scratch/z3371724/Fungal/Data/Synergy/script
+scp /share/apps/unswdataarchive/2017-02-06/script.zip .
+unzip script.zip 
+rm -rf __MACOSX/
+
+## Make the config file readable only to yourself
+chmod 700 script
+chmod 700 script/config.cfg 
+## Then add password to the config file 
+
 
 ## Move fastq files from UNSW research data store to Katana drives 
 screen -S z3371724

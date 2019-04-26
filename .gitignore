@@ -56,6 +56,10 @@ cneo_synergy/Data/OrthoMCL
 cneo_synergy/Data/QuickGO
 cneo_synergy/Data/SGD
 cneo_synergy/Data/Uniprot
+cneo_synergy/Data/Sorted_SAM_Files
+# cneo_synergy/Data/GEO_upload/
+cneo_synergy/Data/Raw_Reads/
+
 
 ## S. cerevisiae
 scer_synergy/Data/Curated_Data
@@ -79,6 +83,7 @@ cneo_synergy/Results/Functional_Enrichment
 cneo_synergy/Results/Read_Counts/cneo/Original_Files
 cneo_synergy/Results/ReciprocalBestHits
 cneo_synergy/Results/Self_Organising_Maps
+cneo_synergy/Results/Insert_Sizes
 
 ## S. cerevisiae
 scer_synergy/Results/Differential_Expression
