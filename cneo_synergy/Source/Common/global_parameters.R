@@ -1,6 +1,6 @@
 
 ## List of directories
-base_dir    <- "/home/ignatius/PostDoc/2019/cneo_synergy"
+base_dir    <- "/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy/cneo_synergy"
 data_dir    <- file.path ( base_dir, "Data" ) 
 source_dir  <- file.path( base_dir, "Source")
 common_dir  <- file.path( source_dir, "Common")  # Commonly used codes (e.g. parameters file)
@@ -30,7 +30,7 @@ cneo_edger_ruvs_ql_chosen_dir <- file.path( results_dir, "Differential_Expressio
 de_genes_fdr_cutoff <- 0.05
 
 ## Samples to remove
-samples_to_remove <- c("5a")  # 
+samples_to_remove <- c()  # "5a"
 
 
 

@@ -55,12 +55,7 @@ scer_enriched_go_cleaned <- scer_enriched_go %>%
                             separate( query_list_id, c("query_list_id", "direction"), sep="\\.")  %>%
                             dplyr::select(  query_list_id, direction, term, bh, oddsratio, gobpid, ontology)
 
-
 ```
-
-
-
-
 
 
 ```{r}
@@ -70,10 +65,6 @@ compare_enriched_go <- scer_enriched_go_cleaned %>%
                                                                  "ontology" = "ontology",
                                                                  "direction" = "direction",
                                                                  "query_list_id" = "query_list_id"), suffix=c(".scer", ".cneo") ) 
-
-
-
-
 
 compare_enriched_go_long <- compare_enriched_go %>%
                           gather( key="score_type", value = "value", c("bh.scer", "bh.cneo", "oddsratio.scer", "oddsratio.cneo") ) %>%
@@ -122,6 +113,7 @@ write.table(thesis_results_recreate, file=file.path( compare_results_dir, "Compa
 
 
 ```{r}
+
 data_plot_odds_ratio_temp <- compare_enriched_go_spread %>%
                           separate( query_label, c("organism", "query_lists_id", "direction"), sep=",") %>%
                           filter( ontology == "BP" & !is.na(oddsratio)) %>%
@@ -147,28 +139,30 @@ data_plot_odds_ratio <-  data_plot_odds_ratio_temp  %>%
   mutate( Odds_Ratio_Score =  ifelse( direction == "down", -1, 1)*oddsratio ) %>%
   mutate( direction = factor ( ifelse( direction== "up", "Up", "Down"), levels = c("Up", "Down"))) %>%
   dplyr::rename( p.adjust = "bh") %>%
+  filter ( !is.na(x_labels) & x_labels != "NA") %>%
   mutate( x_labels = factor( x_labels, 
                              levels = c( "C. neoformans AMB only",
                                          "C. neoformans AMB + LF",
                                          "S. cerevisiae AMB only",
-                                         "S. cerevisiae AMB + LF")) ) 
+                                         "S. cerevisiae AMB + LF")) )  
 
 
 subset_to_plot <- data_plot_odds_ratio %>%
     right_join( list_of_selected_go_terms, by="gobpid") %>%
-  mutate( term =  purrr::map2_chr( as.character(term), gobpid,  ~ifelse( is.na(.x), GOTERM[[.y]]@Term, .x)) ) %>%
-  mutate( organism = ifelse(  is.na(organism  ), "scer", organism  ),
-          query_lists_id = ifelse( is.na( query_lists_id),  "compare_A", query_lists_id)) %>%
-    mutate( term = factor( term, levels =  rev(unique(term))) ) 
+    mutate( term =  purrr::map2_chr( as.character(term), gobpid,  ~ifelse( is.na(.x), GOTERM[[.y]]@Term, .x)) ) %>%
+    mutate( organism = ifelse(  is.na(organism  ), "scer", organism  ),
+            query_lists_id = ifelse( is.na( query_lists_id),  "compare_A", query_lists_id)) %>%
+    mutate( term = factor( term, levels =  rev(unique(term))) ) %>%
+    filter ( !is.na(x_labels) & x_labels != "NA")
 
 
 odds_ratio_ggplot <- subset_to_plot  %>%
-  ggplot( aes(  x_labels,  term,
-                color = direction,
-                shape = direction, 
-                fill = Odds_Ratio_Score, 
-                size = -log10(p.adjust)  )) +
-  geom_point() + 
+    ggplot( aes(  x_labels, term,
+                  color = direction,
+                  shape = direction, 
+                  fill = Odds_Ratio_Score, 
+                  size = -log10(p.adjust)  )) +
+    geom_point() + 
     scale_shape_manual(values = c(24,25)) +
     scale_fill_gradient2(high = "coral3", low = "deepskyblue3", mid = "white") + 
     scale_color_manual(values = c( "coral3", "deepskyblue3")) + 
@@ -176,16 +170,14 @@ odds_ratio_ggplot <- subset_to_plot  %>%
     theme_bw() +
     guides(size = guide_legend(override.aes = list(shape=17))) +
     theme(plot.title = element_text(hjust = 0.5), 
-          axis.title.y =  element_blank(), 
+          axis.title.y = element_blank(), 
           axis.title.x = element_blank(),
-          axis.text.x = element_text(angle = 45, hjust = 1, face = "bold"), 
-          axis.text.y = element_text(face = "bold"))
+          axis.text.x  = element_text(angle = 45, hjust = 1, face = "bold"), 
+          axis.text.y  = element_text(face = "bold"))
 
 odds_ratio_ggplot
 
-
-ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.png"))
-
+ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.png"), width= 10 ,  height = 12 )
 
 write.table( data_plot_odds_ratio, file=file.path( compare_go_terms_results_dir, "data_plot_odds_ratio.txt"),
             sep="\t", row.names = FALSE, quote = FALSE)

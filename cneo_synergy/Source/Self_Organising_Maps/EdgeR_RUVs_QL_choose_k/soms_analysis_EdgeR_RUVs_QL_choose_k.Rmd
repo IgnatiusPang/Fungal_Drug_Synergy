@@ -380,12 +380,12 @@ list_of_files <- Sys.glob ( paste( EdgeR_RUVs_QL_soms_results_dir, "/*/*/cluster
 
 
 directory_cleaning <-  purrr::map ( list_of_files, function(x) { 
-									  cleaned_dir <- strsplit(x, "/")[[1]]  
-									  cleaned_dir <- cleaned_dir[1:(length(cleaned_dir)-1 )] 
-									  cleaned_dir <- paste ( cleaned_dir , collapse="/")
-									  	return ( cleaned_dir)
-									  	} )  %>%
-					unlist()
+                  									  cleaned_dir <- strsplit(x, "/")[[1]]  
+                  									  cleaned_dir <- cleaned_dir[1:(length(cleaned_dir)-1 )] 
+                  									  cleaned_dir <- paste ( cleaned_dir , collapse="/")
+									  	                return ( cleaned_dir)
+									  	              } )  %>%
+					             unlist()
 
 list_of_x <-  purrr::map ( list_of_files, function(x) { 
 									  cleaned_dir <- strsplit(x, "/")[[1]][[13]]  
@@ -394,7 +394,7 @@ list_of_x <-  purrr::map ( list_of_files, function(x) {
 									  
 									  
 									  	} )  %>%
-					unlist()
+					    unlist()
 
 
 list_of_y <-  purrr::map ( list_of_files, function(x) { 
@@ -402,9 +402,7 @@ list_of_y <-  purrr::map ( list_of_files, function(x) {
 									  cleaned_dir <- strsplit (cleaned_dir, "x" )
 									  	return ( as.integer(cleaned_dir[[1]][2]) )
 									  	} )  %>%
-					unlist()
-
-
+					    unlist()
 
 list_of_clusters <- purrr::map ( list_of_files, function(x) {  read.table( x, header=TRUE)} ) 
 
@@ -423,9 +421,10 @@ hash_lookup_table <- create_id_to_attribute_hash( 1:length(all_time_points ), as
 hash_lookup_table_for_list <-  function(x ) { purrr::map ( x, function(y) { convert_key_to_attribute(as.character(y), hash_lookup_table) } ) %>% unlist() }
 
 
-list_of_clusters <- purrr::map ( list_of_clusters, function(my_table) { dplyr::mutate( my_table,  
-																					   x = hash_lookup_table_for_list(x) ) %>%
-																		dplyr::arrange( cluster, x )} )   
+list_of_clusters <- purrr::map ( list_of_clusters, 
+                                 function(my_table) { dplyr::mutate( my_table,  
+																					                            x = hash_lookup_table_for_list(x) ) %>%
+																 dplyr::arrange( cluster, x )} )   
 
 head( list_of_clusters[[1]]) 
 
@@ -479,29 +478,35 @@ list_of_files <- Sys.glob ( paste( EdgeR_RUVs_QL_soms_results_dir, "/*/*/enriche
 
 purrr::walk ( list_of_files, 
 			   function ( input_file ) {
-			
-            x <- input_file
 			     
-            cleaned_dir <- strsplit(x, "/")[[1]]  
+            cleaned_dir <- strsplit(input_file, "/")[[1]]  
 						cleaned_dir <- cleaned_dir[1:(length(cleaned_dir)-1 )] 
 						cleaned_dir <- paste ( cleaned_dir , collapse="/")
 
-            genes_vs_go_terms <-  read.table( x, header=TRUE, sep="\t", stringsAsFactors = FALSE, quote="")
-			     
+            genes_vs_go_terms <- read.table( input_file, header=TRUE, sep="\t", stringsAsFactors = FALSE, quote="")
+			      enriched_go_terms <- read_tsv( file.path( cleaned_dir, "enriched_go_terms_SOMs.txt"))
+			      
+			      significant_go_terms <- enriched_go_terms %>% 
+			                              dplyr::filter( raw_p_value < 0.01 ) %>%
+			                              dplyr::distinct(  query_list_id, ontology, gobpid ) 
+            
             list_of_go_terms <- genes_vs_go_terms %>%
+                                inner_join( significant_go_terms, by =c( "query_list_id" = "query_list_id", 
+                                                                         "ontology" = "ontology", 
+                                                                         "go_id" ="gobpid"  )) %>%
                                 dplyr::distinct(go_id) %>%
                                 dplyr::mutate( go_term = purrr::map_chr( go_id, ~ GOTERM[[.]]@Term )   )  ## Add the GO Term
 
             enriched_genes_soms_cleaned <- genes_vs_go_terms %>%
+                               inner_join( significant_go_terms, by =c("query_list_id" = "query_list_id", 
+                                                                     "ontology" = "ontology", 
+                                                                     "go_id" ="gobpid"  )) %>%
                                dplyr::left_join( list_of_go_terms, by = "go_id" ) %>%
 	                             dplyr::select( one_of( c( "go_id", "go_term", "gene_id", "ontology",
 	                                                       "annotation_list_id", "query_list_id", "organism",
 	                                                       "gene_names",	"uniprot_acc",	"broad_gene_name",	"uniprot_gene_name",	
                                                          "fungidb_gene_name",	"blast2go_annotation",	"is_tf",	"is_kinases",	
                                                          "is_virulence_gene",	"order_peaktime",	"scer_orthologs",	"scer_ortholog_descriptions" )))
-
-            
-            
             
             write.table(enriched_genes_soms_cleaned, file= file.path( cleaned_dir, "enriched_genes_SOMs_updated.txt"),
                         sep="\t", quote = FALSE, row.names = FALSE, na="NA")
