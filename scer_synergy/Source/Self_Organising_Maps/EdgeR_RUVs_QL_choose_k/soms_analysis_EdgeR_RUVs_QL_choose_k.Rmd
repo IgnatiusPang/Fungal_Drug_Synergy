@@ -15,6 +15,7 @@ print( command_line_args)
 ## Global parameters
 ```{r }
 my_som_random_number_seed <- 257645
+go_terms_enrichment_raw_p_value_cutoff < 0.01
 go_terms_enrichment_p_value_cutoff <- 1
 gostat_pvalue_cutoff_param <- 1
 condition_on_child_terms_param <- FALSE
@@ -258,6 +259,9 @@ run_one_soms_and_go_experiment_large_scale <- function( data_matrix, list_of_top
 		updated_enriched_genes <- go_enrichment_results$enriched_genes %>%
 		                          left_join( gene_annotation_table, by=c("gene_id" = "oln_id")) 
 		
+		updated_enriched_go_terms <- go_enrichment_results$enriched_go_terms %>%
+		                             dplyr::filter ( raw_p_value < go_terms_enrichment_raw_p_value_cutoff)
+		
 	## This bit somehow does not work because it is running in parallel mode 	
 	# 	                       %>%  dplyr::mutate( go_term = purrr::map_chr( go_id, ~ GOTERM[[.]]@Term )   )	%>% ## Add the GO Term
 	#                           dplyr::select( one_of( c( "go_id", "go_term", "gene_id", "ontology",
@@ -267,7 +271,7 @@ run_one_soms_and_go_experiment_large_scale <- function( data_matrix, list_of_top
 	#                                                     "blast2go_annotation", "is_tf", "is_kinases" )))
 		
 		write.table( updated_enriched_genes, enriched_genes_file_name, sep="\t", row.names = FALSE, quote=FALSE)
-		write.table (  go_enrichment_results$enriched_go_terms,  enriched_go_terms_file_name, sep="\t", row.names = FALSE, quote=FALSE)
+		write.table ( updated_enriched_go_terms,  enriched_go_terms_file_name, sep="\t", row.names = FALSE, quote=FALSE)
 			
 
 		## Work out directionality of each cluster
@@ -480,7 +484,7 @@ purrr::walk ( list_of_files,
 			      enriched_go_terms <- read_tsv( file.path( cleaned_dir, "enriched_go_terms_SOMs.txt"))
 			      
 			      significant_go_terms <- enriched_go_terms %>% 
-			                              dplyr::filter( raw_p_value < 0.01 ) %>%
+			                              dplyr::filter( raw_p_value < go_terms_enrichment_raw_p_value_cutoff ) %>%
 			                              dplyr::distinct(  query_list_id, ontology, gobpid ) 
             
             list_of_go_terms <- genes_vs_go_terms %>%

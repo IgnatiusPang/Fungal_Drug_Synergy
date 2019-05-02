@@ -1,192 +1,0 @@
-
-
-processing file: soms_analysis_EdgeR_RUVs_QL_choose_k.Rmd
-  |                                                                         |                                                                 |   0%  |                                                                         |..                                                               |   3%
-  ordinary text without R code
-
-  |                                                                         |....                                                             |   5%
-label: run1
-  |                                                                         |.....                                                            |   8%
-  ordinary text without R code
-
-  |                                                                         |.......                                                          |  11%
-label: run2
-  |                                                                         |.........                                                        |  14%
-  ordinary text without R code
-
-  |                                                                         |...........                                                      |  16%
-label: run3
-  |                                                                         |............                                                     |  19%
-  ordinary text without R code
-
-  |                                                                         |..............                                                   |  22%
-label: run4
-  |                                                                         |................                                                 |  24%
-  ordinary text without R code
-
-  |                                                                         |..................                                               |  27%
-label: run5
-  |                                                                         |...................                                              |  30%
-  ordinary text without R code
-
-  |                                                                         |.....................                                            |  32%
-label: run6
-  |                                                                         |.......................                                          |  35%
-  ordinary text without R code
-
-  |                                                                         |.........................                                        |  38%
-label: run7
-  |                                                                         |..........................                                       |  41%
-  ordinary text without R code
-
-  |                                                                         |............................                                     |  43%
-label: run8
-  |                                                                         |..............................                                   |  46%
-  ordinary text without R code
-
-  |                                                                         |................................                                 |  49%
-label: run9
-  |                                                                         |.................................                                |  51%
-  ordinary text without R code
-
-  |                                                                         |...................................                              |  54%
-label: unnamed-chunk-1
-  |                                                                         |.....................................                            |  57%
-  ordinary text without R code
-
-  |                                                                         |.......................................                          |  59%
-label: unnamed-chunk-2
-  |                                                                         |........................................                         |  62%
-  ordinary text without R code
-
-  |                                                                         |..........................................                       |  65%
-label: unnamed-chunk-3 (with options) 
-List of 3
- $ echo   : logi TRUE
- $ message: logi FALSE
- $ warning: logi FALSE
-
-  |                                                                         |............................................                     |  68%
-  ordinary text without R code
-
-  |                                                                         |..............................................                   |  70%
-label: unnamed-chunk-4
-  |                                                                         |...............................................                  |  73%
-  ordinary text without R code
-
-  |                                                                         |.................................................                |  76%
-label: unnamed-chunk-5
-  |                                                                         |...................................................              |  78%
-  ordinary text without R code
-
-  |                                                                         |.....................................................            |  81%
-label: unnamed-chunk-6
-  |                                                                         |......................................................           |  84%
-  ordinary text without R code
-
-  |                                                                         |........................................................         |  86%
-label: unnamed-chunk-7
-Quitting from lines 316-412 (soms_analysis_EdgeR_RUVs_QL_choose_k.Rmd) 
-Error in if ((n <- as.integer(n[1L])) > 0) { : 
-  missing value where TRUE/FALSE needed
-Calls: <Anonymous> ... .f -> print -> draw_soms_xyplot -> factor -> rainbow
-In addition: Warning message:
-call dbDisconnect() when finished working with a connection 
-
-Execution halted
-
-
-processing file: soms_analysis_EdgeR_RUVs_QL_choose_k.Rmd
-  |                                                                         |                                                                 |   0%  |                                                                         |..                                                               |   3%
-  ordinary text without R code
-
-  |                                                                         |....                                                             |   5%
-label: run1
-  |                                                                         |.....                                                            |   8%
-  ordinary text without R code
-
-  |                                                                         |.......                                                          |  11%
-label: run2
-  |                                                                         |.........                                                        |  14%
-  ordinary text without R code
-
-  |                                                                         |...........                                                      |  16%
-label: run3
-  |                                                                         |............                                                     |  19%
-  ordinary text without R code
-
-  |                                                                         |..............                                                   |  22%
-label: run4
-  |                                                                         |................                                                 |  24%
-  ordinary text without R code
-
-  |                                                                         |..................                                               |  27%
-label: run5
-  |                                                                         |...................                                              |  30%
-  ordinary text without R code
-
-  |                                                                         |.....................                                            |  32%
-label: run6
-  |                                                                         |.......................                                          |  35%
-  ordinary text without R code
-
-  |                                                                         |.........................                                        |  38%
-label: run7
-  |                                                                         |..........................                                       |  41%
-  ordinary text without R code
-
-  |                                                                         |............................                                     |  43%
-label: run8
-  |                                                                         |..............................                                   |  46%
-  ordinary text without R code
-
-  |                                                                         |................................                                 |  49%
-label: run9
-  |                                                                         |.................................                                |  51%
-  ordinary text without R code
-
-  |                                                                         |...................................                              |  54%
-label: unnamed-chunk-1
-  |                                                                         |.....................................                            |  57%
-  ordinary text without R code
-
-  |                                                                         |.......................................                          |  59%
-label: unnamed-chunk-2
-  |                                                                         |........................................                         |  62%
-  ordinary text without R code
-
-  |                                                                         |..........................................                       |  65%
-label: unnamed-chunk-3 (with options) 
-List of 3
- $ echo   : logi TRUE
- $ message: logi FALSE
- $ warning: logi FALSE
-
-  |                                                                         |............................................                     |  68%
-  ordinary text without R code
-
-  |                                                                         |..............................................                   |  70%
-label: unnamed-chunk-4
-  |                                                                         |...............................................                  |  73%
-  ordinary text without R code
-
-  |                                                                         |.................................................                |  76%
-label: unnamed-chunk-5
-  |                                                                         |...................................................              |  78%
-  ordinary text without R code
-
-  |                                                                         |.....................................................            |  81%
-label: unnamed-chunk-6
-  |                                                                         |......................................................           |  84%
-  ordinary text without R code
-
-  |                                                                         |........................................................         |  86%
-label: unnamed-chunk-7
-Quitting from lines 316-412 (soms_analysis_EdgeR_RUVs_QL_choose_k.Rmd) 
-Error in if ((n <- as.integer(n[1L])) > 0) { : 
-  missing value where TRUE/FALSE needed
-Calls: <Anonymous> ... .f -> print -> draw_soms_xyplot -> factor -> rainbow
-In addition: Warning message:
-call dbDisconnect() when finished working with a connection 
-
-Execution halted
