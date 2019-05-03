@@ -38,7 +38,7 @@ soms_go_results
 
 
 soms_go_results_cleaned <- soms_go_results %>%
-  filter( bh < 0.05   & ontology == "BP") %>%
+  filter( bh < 0.05 & ontology == "BP") %>%
   mutate( cluster_id = str_replace( query_list_id, "SOMs_cluster_C", "")   ) %>%
   mutate( cluster_id = as.integer(cluster_id)) %>%
   dplyr::select( term, cluster_id, bh  ) %>%
