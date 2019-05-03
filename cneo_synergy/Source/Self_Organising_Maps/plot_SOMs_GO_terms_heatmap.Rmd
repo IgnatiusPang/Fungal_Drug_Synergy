@@ -1,0 +1,104 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+## Load libraries and scripts
+```{r}
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+p_load(GO.db)
+p_load(iheatmapr)		
+p_load(viridis)
+
+source( '../Common/global_parameters.R')
+source( '../Common/helper_functions.R')
+
+sessionInfo()
+
+```
+
+
+
+```{r}
+
+soms_go_results <- read_tsv( file.path(results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL/To_Use_k_0_Remove_5a/Condition_on_child_terms_true/compare_AL/5x5/enriched_go_terms_SOMs.txt"))
+
+soms_go_results
+
+```
+
+
+```{r}
+
+
+soms_go_results_cleaned <- soms_go_results %>%
+  filter( bh < 0.05   & ontology == "BP") %>%
+  mutate( cluster_id = str_replace( query_list_id, "SOMs_cluster_C", "")   ) %>%
+  mutate( cluster_id = as.integer(cluster_id)) %>%
+  dplyr::select( term, cluster_id, bh  ) %>%
+  distinct()
+
+
+
+term_found_in_multiple_clusters <- soms_go_results_cleaned %>%
+  group_by(term ) %>%
+  summarise( counts = n(),
+             list_of_clusters = paste(cluster_id, collapse=", ") ) %>%
+  arrange(desc(counts)) %>%
+  ungroup() %>%
+  filter( counts > 1) %>%
+  dplyr::select( -counts, -list_of_clusters )
+
+soms_go_matrix <- soms_go_results_cleaned %>%
+                  inner_join( term_found_in_multiple_clusters, by =c("term" = "term")) %>%
+                  spread( cluster_id, bh, fill = NA)  %>%
+                  column_to_rownames("term") %>%
+                  as.matrix()
+  
+main_heatmap(  soms_go_matrix, colors= viridis(100), layout = list(margin = list(l = 500)) )  %>%
+  add_row_labels() %>%
+  add_col_labels() #%>%
+  #add_row_clustering() 
+```
+
+
+
+
+```{r}
+
+
+soms_go_results_cleaned <- soms_go_results %>%
+  filter( pvalue < 0.01 & ontology == "BP") %>%
+  mutate( cluster_id = str_replace( query_list_id, "SOMs_cluster_C", "")   ) %>%
+  mutate( cluster_id = as.integer(cluster_id)) %>%
+  dplyr::select( term, cluster_id, pvalue  ) %>%
+  distinct()
+
+
+
+term_found_in_multiple_clusters <- soms_go_results_cleaned %>%
+  group_by(term ) %>%
+  summarise( counts = n(),
+             list_of_clusters = paste(cluster_id, collapse=", ") ) %>%
+  arrange(desc(counts)) %>%
+  ungroup() %>%
+  filter( counts > 1) %>%
+  dplyr::select( -counts, -list_of_clusters )
+
+soms_go_matrix <- soms_go_results_cleaned %>%
+                  inner_join( term_found_in_multiple_clusters, by =c("term" = "term")) %>%
+                  spread( cluster_id, pvalue, fill= NA)  %>%
+                  column_to_rownames("term") %>%
+                  as.matrix()
+  
+main_heatmap(  soms_go_matrix, colors= viridis(100), layout = list(margin = list(l = 500)) )  %>%
+  add_row_labels() %>%
+  add_col_labels() 
+```
+

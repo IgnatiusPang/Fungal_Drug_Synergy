@@ -383,7 +383,7 @@ plot_PCA_RLE( set,
 ```{r}
 y <- DGEList(counts=counts(set), group=design_matrix$Experiment )
 y <- calcNormFactors(y, method=normalization_method)
-y <- estimateGLMCommonDisp(y, design_for_ruv)
+y <- estimateGLMCommonDisp(y, design_for_ruv, verbose=TRUE)
 y <- estimateGLMTrendedDisp(y, design_for_ruv)
 y <- estimateGLMTagwiseDisp(y, design_for_ruv)
 
@@ -399,19 +399,32 @@ if ( is_quasi_likelihood_test == TRUE) {
 }
 ```
 
+## Plot Biological Coefficient of Variation (BCV)
+```{r}
 
+pdf( file.path ( choose_k_results_dir, "plotBCV.pdf"))
+
+#### plot biological variation
+plotBCV(y)
+
+dev.off()
+
+png( file.path ( choose_k_results_dir, "plotBCV.png"))
+
+#### plot biological variation
+plotBCV(y)
+
+dev.off()
+```
 
 ## Define the different comparisons we want to perform 
 ```{r}
-
- 
 
 # Then we can make any comparisons we wish. For example, we might wish to make the following contrasts:
  my.contrasts <- makeContrasts( compare_A   = A - CA,
 								compare_AL   = AL - CAL,
 								levels=design_by_group  )
 ```
-
 
 ```{r}
 fit_by_group <- NULL
@@ -456,6 +469,19 @@ get_top_tags_baseed_on_group <- function ( group,  fit_by_group ) {
 	main = group,
 	cex.main = 1)
 	
+	    ### plot log-fold change against log-counts per million, with DE genes highlighted
+	  pdf(file.path(edger_gene_lists_dir, paste( group, "_", "plotSmear.pdf", sep="")))
+    plotSmear(lrt, de.tags=top %>% filter( FDR < de_genes_fdr_cutoff) %>% pull(genes), main=group)
+    abline(h=c(-1, 1), col="blue")
+    dev.off()
+	
+	
+    ### plot log-fold change against log-counts per million, with DE genes highlighted
+	  png(file.path(edger_gene_lists_dir, paste( group, "_", "plotSmear.png", sep="")))
+    plotSmear(lrt, de.tags=top %>% filter( FDR < de_genes_fdr_cutoff) %>% pull(genes), main=group)
+    abline(h=c(-1, 1), col="blue")
+    dev.off()
+    
 	return (top)
 }
 

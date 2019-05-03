@@ -164,13 +164,17 @@ if ( is_quasi_likelihood_test == TRUE) {
 	fit_by_group <- glmFit(scer_dgelist, design_by_group)
 
 }
+```
 
-# Then we can make any comparisons we wish. For example, we might wish to make the following contrasts:
+## Then we can make any comparisons we wish. For example, we might wish to make the following contrasts:
+```{r} 
  my.contrasts <- makeContrasts( compare_A   = A - CA,
 								compare_AL   = AL - CAL,
 								levels=design_by_group  )
- 
+```
+
 ## Do calculation and get list of significantly differentially expressed genes
+```{r}
 get_top_tags_baseed_on_group <- function ( group,  fit_by_group ) {
  	
 	if ( is_quasi_likelihood_test == TRUE ) {
@@ -202,15 +206,29 @@ get_top_tags_baseed_on_group <- function ( group,  fit_by_group ) {
 	main = group,
 	cex.main = 1)
 	
+		### plot log-fold change against log-counts per million, with DE genes highlighted
+	  pdf(file.path(edger_ruvs_gene_lists_dir, paste( group, "_", "plotSmear.pdf", sep="")))
+    plotSmear(lrt, de.tags=top %>% filter( FDR < de_genes_fdr_cutoff) %>% pull(genes), main=group)
+    abline(h=c(-1, 1), col="blue")
+    dev.off()
+	
+	
+    ### plot log-fold change against log-counts per million, with DE genes highlighted
+	  png(file.path(edger_ruvs_gene_lists_dir, paste( group, "_", "plotSmear.png", sep="")))
+    plotSmear(lrt, de.tags=top %>% filter( FDR < de_genes_fdr_cutoff) %>% pull(genes), main=group)
+    abline(h=c(-1, 1), col="blue")
+    dev.off()
+	
 	return (top)
 }
 
 my_get_top_tag <- partial( get_top_tags_baseed_on_group, fit_by_group=fit_by_group)
 list_of_top_tags <- purrr::map(  colnames( my.contrasts) ,  my_get_top_tag  )
 names( list_of_top_tags) <- colnames( my.contrasts)
-
+```
 
 ## Plot p-values distribution
+```{r}
 plot_p_values_dist <- function(input_table, plot_title ) {
   
   return( input_table %>%

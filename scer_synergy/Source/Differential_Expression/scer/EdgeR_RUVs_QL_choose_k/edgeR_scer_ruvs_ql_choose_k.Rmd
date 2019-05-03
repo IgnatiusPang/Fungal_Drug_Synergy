@@ -64,7 +64,7 @@ if ( length(command_line_args) > 0   ) {
 		
 } else {
 	
-	num_unwanted_variables <- 5
+	num_unwanted_variables <- 1
 	
 	is_quasi_likelihood_test <- TRUE
 	
@@ -321,7 +321,7 @@ set <- betweenLaneNormalization(set, which=normalization_method_between_lane)
 
 y <- DGEList(counts=counts(set), group=design_matrix$Experiment )
 y <- calcNormFactors(y, method=normalization_method)
-y <- estimateGLMCommonDisp(y, design_pre_ruv)
+y <- estimateGLMCommonDisp(y, design_pre_ruv, verbose=TRUE)
 y <- estimateGLMTrendedDisp(y, design_pre_ruv)
 y <- estimateGLMTagwiseDisp(y, design_pre_ruv)
 
@@ -347,6 +347,27 @@ differences <- makeGroups(design_matrix$Experiment)
 
 
 ```
+
+
+
+## Plot Biological Coefficient of Variation (BCV)
+```{r}
+
+pdf( file.path ( choose_k_results_dir, "plotBCV.pdf"))
+
+#### plot biological variation
+plotBCV(y)
+
+dev.off()
+
+png( file.path ( choose_k_results_dir, "plotBCV.png"))
+
+#### plot biological variation
+plotBCV(y)
+
+dev.off()
+```
+
 
 ```{r}
 hist( top[, "PValue"] )

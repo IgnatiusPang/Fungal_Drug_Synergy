@@ -217,6 +217,18 @@ scer_cneo_orthologs <- scer_cneo_orthologs_class_1 %>%
 ```
 
 
+```{r}
+
+scer_cneo_orthologs_class_1 %>% dplyr::select( -reliability_class) %>%
+  setdiff( 
+
+cneo_scer_orthologs %>% dplyr::select( -reliability_class)  )
+
+
+```
+
+
+
 ```{r, eval=FALSE}
 cytoscape_reciprocal_blastp <- reciprocal_blastp_orthologs %>%
 	select( gene_id.a, gene_id.b)  %>%

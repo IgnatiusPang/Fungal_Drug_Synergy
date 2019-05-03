@@ -30,7 +30,7 @@ cneo_edger_ruvs_ql_chosen_dir <- file.path( results_dir, "Differential_Expressio
 de_genes_fdr_cutoff <- 0.05
 
 ## Samples to remove
-samples_to_remove <- c()  # "5a"
+samples_to_remove <- c("5a")  # "5a"
 
 
 
