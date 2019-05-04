@@ -1,44 +1,45 @@
-GO:0006807
-GO:0090304
-GO:0034655
-GO:0072521
-GO:0072524
-GO:0006520
-GO:0044085
-GO:0006260
-GO:0051301
-GO:0007017
-GO:0008154
-GO:0006099
-GO:0006122
-GO:0006091
-GO:0055114
-GO:0016052
-GO:0022613
-GO:0042254
-GO:0006396
-GO:0006413
-GO:0006446
-GO:0042790
-GO:0044267
-GO:0006457
-GO:0031204
-GO:0006511
-GO:0030433
-GO:0006696
-GO:0044242
-GO:0008654
-GO:0009062
-GO:0042744
-GO:0006979
-GO:0034599
-GO:0006974
-GO:0051788
-GO:0071712
-GO:0006879
-GO:0016226
-GO:0015891
-GO:0006875
-GO:0032258
-GO:0006914
-GO:0000422
+gobpid	groups
+GO:0006807	Nucleic acid and amino acid related
+GO:0090304	Nucleic acid and amino acid related
+GO:0034655	Nucleic acid and amino acid related
+GO:0072521	Nucleic acid and amino acid related
+GO:0072524	Nucleic acid and amino acid related
+GO:0006520	Nucleic acid and amino acid related
+GO:0044085	Cell organisation and replication related
+GO:0006260	Cell organisation and replication related
+GO:0051301	Cell organisation and replication related
+GO:0007017	Cell organisation and replication related
+GO:0008154	Cell organisation and replication related
+GO:0006099	Energy related
+GO:0006122	Energy related
+GO:0006091	Energy related
+GO:0055114	Energy related
+GO:0016052	Energy related
+GO:0022613	Transcription and translation related
+GO:0042254	Transcription and translation related
+GO:0006396	Transcription and translation related
+GO:0006413	Transcription and translation related
+GO:0006446	Transcription and translation related
+GO:0042790	Transcription and translation related
+GO:0044267	Protein related
+GO:0006457	Protein related
+GO:0031204	Protein related
+GO:0006511	Protein related
+GO:0030433	Protein related
+GO:0006696	Lipid related
+GO:0044242	Lipid related
+GO:0008654	Lipid related
+GO:0009062	Lipid related
+GO:0042744	Stress related
+GO:0006979	Stress related
+GO:0034599	Stress related
+GO:0006974	Stress related
+GO:0051788	Stress related
+GO:0071712	Stress related
+GO:0006879	Metal related
+GO:0016226	Metal related
+GO:0015891	Metal related
+GO:0006875	Metal related
+GO:0032258	Autophagy related
+GO:0006914	Autophagy related
+GO:0000422	Autophagy related

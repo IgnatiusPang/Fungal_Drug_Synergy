@@ -1,4 +1,4 @@
-term	gobpid	organism	query_lists_id	direction	p.adjust	oddsratio	x_labels	Odds_Ratio_Score
+term	gobpid	organism	query_lists_id	direction	p.adjusted	oddsratio	x_labels	Odds_Ratio_Score
 'de novo' IMP biosynthetic process	GO:0006189	S. cerevisiae	AMB only	Down	0.000464404606640842	30.9803921568627	S. cerevisiae AMB only	-30.9803921568627
 'de novo' posttranslational protein folding	GO:0051084	C. neoformans	AMB + LF	Up	0.000391290707920868	14.0377632534495	C. neoformans AMB + LF	14.0377632534495
 'de novo' protein folding	GO:0006458	C. neoformans	AMB + LF	Up	7.35515968660361e-05	10.9796721311475	C. neoformans AMB + LF	10.9796721311475

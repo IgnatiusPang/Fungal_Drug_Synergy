@@ -100,9 +100,27 @@ compare_A_CA_orthologs <- one_to_one_orthologs_cleaned %>%
 
 compare_A_CA_orthologs_clean <- compare_A_CA_orthologs %>%
                           dplyr::filter( ! is.na(logFC.cneo) &  !is.na(logFC.scer) )
+```
 
 
 
+## Compare AL and CAL
+```{r}
+
+compare_AL_CAL_orthologs <- one_to_one_orthologs_cleaned %>%
+                          left_join(cneo_compare_AL_CAL_clean, by=c("cneo_orf_id" = "genes") ) %>%
+                          left_join(scer_compare_AL_CAL_clean, by=c("scer_oln_id" = "genes"), suffix = c(".cneo", ".scer")) 
+
+
+compare_AL_CAL_orthologs_clean <- compare_AL_CAL_orthologs %>%
+                          dplyr::filter( ! is.na(logFC.cneo) &  !is.na(logFC.scer) )
+```
+
+
+
+
+
+```{r}
 compare_A_CA_ggplot <- compare_A_CA_orthologs_clean %>%
   dplyr::mutate( is_significant = factor( case_when( FDR.cneo < 0.05  & FDR.scer < 0.05  ~ "Both significant",
                                     FDR.cneo < 0.05  & FDR.scer >= 0.05 ~ "C. neoformans Only",
@@ -124,14 +142,23 @@ compare_A_CA_ggplot <- compare_A_CA_orthologs_clean %>%
 compare_A_CA_ggplot
 
 ggsave( filename = file.path(compare_orthologs_results_dir, "compare_A_CA_ggplot.png"), plot=compare_A_CA_ggplot)
+ggsave( filename = file.path(compare_orthologs_results_dir, "compare_A_CA_ggplot.tiff"), plot=compare_A_CA_ggplot)
+ggsave( filename = file.path(compare_orthologs_results_dir, "compare_A_CA_ggplot.pdf"), plot=compare_A_CA_ggplot)
 
 
 compare_A_CA_orthologs_sig <- compare_A_CA_orthologs %>% 
   filter( logFC.cneo < 0.05 & logFC.scer < 0.05)
 
+sink( file.path(compare_orthologs_results_dir, "compare_A_CA_orthologs.txt"))
+cat("Compare A and CA log FC in S. cerevisiae and C. neoformans, Pearson's test")
+cor.test( compare_A_CA_orthologs$logFC.cneo, 
+          compare_A_CA_orthologs$logFC.scer, method="pearson" )
+sink()
 
-sink( file.path(compare_orthologs_results_dir, "compare_A_CA_pearson.txt"))
-cat("Compare A and CA significant genes log FC in S. cerevisiae and C. neoformans, Pearson's test")
+
+
+sink( file.path(compare_orthologs_results_dir, "compare_A_CA_pearson_sig_genes.txt"))
+cat("Compare A and CA significant genes log FC for sig genes in S. cerevisiae and C. neoformans, Pearson's test")
 cor.test( compare_A_CA_orthologs_sig$logFC.cneo, 
           compare_A_CA_orthologs_sig$logFC.scer, method="pearson" )
 sink()
@@ -139,21 +166,7 @@ sink()
 ```
 
 
-
-
-## Compare AL and CAL
 ```{r}
-
-compare_AL_CAL_orthologs <- one_to_one_orthologs_cleaned %>%
-                          left_join(cneo_compare_AL_CAL_clean, by=c("cneo_orf_id" = "genes") ) %>%
-                          left_join(scer_compare_AL_CAL_clean, by=c("scer_oln_id" = "genes"), suffix = c(".cneo", ".scer")) 
-
-
-compare_AL_CAL_orthologs_clean <- compare_AL_CAL_orthologs %>%
-                          dplyr::filter( ! is.na(logFC.cneo) &  !is.na(logFC.scer) )
-
-
-
 compare_AL_CAL_ggplot <- compare_AL_CAL_orthologs_clean %>%
   dplyr::mutate( is_significant = factor( case_when( FDR.cneo < 0.05  & FDR.scer < 0.05  ~ "Both significant",
                                     FDR.cneo < 0.05  & FDR.scer >= 0.05 ~ "C. neoformans Only",
@@ -175,6 +188,8 @@ compare_AL_CAL_ggplot <- compare_AL_CAL_orthologs_clean %>%
 compare_AL_CAL_ggplot
 
 ggsave( filename = file.path(compare_orthologs_results_dir, "compare_AL_CAL_ggplot.png"), plot=compare_AL_CAL_ggplot)
+ggsave( filename = file.path(compare_orthologs_results_dir, "compare_AL_CAL_ggplot.tiff"), plot=compare_AL_CAL_ggplot)
+ggsave( filename = file.path(compare_orthologs_results_dir, "compare_AL_CAL_ggplot.pdf"), plot=compare_AL_CAL_ggplot)
 
 
 compare_AL_CAL_orthologs_sig <- compare_AL_CAL_orthologs %>% 
@@ -182,6 +197,14 @@ compare_AL_CAL_orthologs_sig <- compare_AL_CAL_orthologs %>%
 
 
 sink( file.path(compare_orthologs_results_dir, "compare_AL_CAL_pearson.txt"))
+cat("Compare AL and CAL log FC in S. cerevisiae and C. neoformans, Pearson's test")
+cor.test( compare_AL_CAL_orthologs$logFC.cneo, 
+          compare_AL_CAL_orthologs$logFC.scer, method="pearson" )
+sink()
+
+
+
+sink( file.path(compare_orthologs_results_dir, "compare_AL_CAL_pearson_sig_genes.txt"))
 cat("Compare AL and CAL significant genes log FC in S. cerevisiae and C. neoformans, Pearson's test")
 cor.test( compare_AL_CAL_orthologs_sig$logFC.cneo, 
           compare_AL_CAL_orthologs_sig$logFC.scer, method="pearson" )
@@ -191,6 +214,47 @@ sink()
 
 ```
 
+
+```{r}
+
+compare_A_CA_for_merge <-  compare_A_CA_orthologs_clean %>% mutate( Comparison = "AMB only treatment vs. control" )
+compare_AL_CAL_for_merge <-  compare_AL_CAL_orthologs_clean %>% mutate( Comparison = "AMB + LF treatment vs. control" )
+
+merged_data <- compare_A_CA_for_merge %>%
+               bind_rows( compare_AL_CAL_for_merge) %>%
+               mutate( Comparison = factor( Comparison, levels = c( "AMB only treatment vs. control", 
+                                                                    "AMB + LF treatment vs. control")))
+
+merged_ggplot <- merged_data %>%
+  dplyr::mutate( is_significant = factor( case_when( FDR.cneo < 0.05  & FDR.scer < 0.05  ~ "Both significant",
+                                    FDR.cneo < 0.05  & FDR.scer >= 0.05 ~ "C. neoformans Only",
+                                    FDR.cneo >= 0.05 & FDR.scer < 0.05  ~ "S. cerevisiae Only",
+                                    TRUE ~ "Not sigificant" ), 
+                                    levels=c( "Both significant", "C. neoformans Only", "S. cerevisiae Only", "Not sigificant") )  ) %>%
+  ggplot( aes( logFC.cneo, logFC.scer, col=is_significant)) +
+  geom_point()  + 
+  geom_smooth(aes(group = 1), method = "lm") +
+  # This is how to get part of the legend text into italic fact
+  scale_color_discrete( labels=c( "Both significant", 
+                                  expression(paste(italic("C. neoformans")," Only", sep=" ")), 
+                                  expression(paste(italic("S. cerevisiae")," Only", sep=" ")), 
+                                  "Not sigificant") ) + 
+  guides( color=guide_legend(title="Is Significant")) +
+  xlab ( expression( paste(italic("C. neoformans"), "log fold-change", sep=" ") ) ) +
+  ylab ( expression( paste(italic("S. cerevisiae"), "log fold-change", sep=" ") ) ) +
+  theme(legend.text.align = 0) +
+  facet_grid( . ~ Comparison)
+
+merged_ggplot
+
+dev.size(units = "in")
+
+ggsave( filename = file.path(compare_orthologs_results_dir, "merged_ggplot.png"), plot=merged_ggplot, width= 7 ,  height = 3 )
+ggsave( filename = file.path(compare_orthologs_results_dir, "merged_ggplot.tiff"), plot=merged_ggplot, width= 7 ,  height = 3 )
+ggsave( filename = file.path(compare_orthologs_results_dir, "merged_ggplot.pdf"), plot=merged_ggplot, width= 7 ,  height = 3 )
+
+
+```
 
 
 

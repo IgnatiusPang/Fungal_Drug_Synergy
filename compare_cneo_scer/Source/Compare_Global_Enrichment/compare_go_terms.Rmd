@@ -37,9 +37,8 @@ create_dir_if_not_exists( compare_go_terms_results_dir)
 cneo_enriched_go <- read_tsv(file.path(cneo_results_dir, "Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat/enriched_go_terms_global.txt"))
 scer_enriched_go <- read_tsv(file.path(scer_results_dir, "Functional_Enrichment/To_Use_k_1/GOStat/enriched_go_terms_global.txt" ) )
 
-list_of_selected_go_terms <- read_tsv( file.path( compare_data_dir, "Selected_GO_Terms/list_of_selected_GO_terms.txt"), col_names = FALSE)
+list_of_selected_go_terms <- read_tsv( file.path( compare_data_dir, "Selected_GO_Terms/list_of_selected_GO_terms.txt"), col_names = TRUE)
 
-colnames(list_of_selected_go_terms) <- "gobpid"
 
 ```
 
@@ -138,7 +137,7 @@ data_plot_odds_ratio <-  data_plot_odds_ratio_temp  %>%
   mutate( x_labels =   paste( organism, query_lists_id, sep=" " )) %>%
   mutate( Odds_Ratio_Score =  ifelse( direction == "down", -1, 1)*oddsratio ) %>%
   mutate( direction = factor ( ifelse( direction== "up", "Up", "Down"), levels = c("Up", "Down"))) %>%
-  dplyr::rename( p.adjust = "bh") %>%
+  dplyr::rename( p.adjusted = "bh") %>%
   filter ( !is.na(x_labels) & x_labels != "NA") %>%
   mutate( x_labels = factor( x_labels, 
                              levels = c( "C. neoformans AMB only",
@@ -161,11 +160,12 @@ odds_ratio_ggplot <- subset_to_plot  %>%
                   color = direction,
                   shape = direction, 
                   fill = Odds_Ratio_Score, 
-                  size = -log10(p.adjust)  )) +
+                  size = -log10(p.adjusted)  )) +
     geom_point() + 
-    scale_shape_manual(values = c(24,25)) +
-    scale_fill_gradient2(high = "coral3", low = "deepskyblue3", mid = "white") + 
-    scale_color_manual(values = c( "coral3", "deepskyblue3")) + 
+    scale_shape_manual(values = c(24,25), name = "Direction") +
+    scale_fill_gradient2(high = "coral3", low = "deepskyblue3", mid = "white", name=str_wrap("Odds Ratio Score", width=15)) + 
+    scale_color_manual(values = c( "coral3", "deepskyblue3"), name = "Direction") +
+    scale_size_continuous( name = expression( '-log'[10]*'(adj. p-value)') ) +
     ggtitle("Enriched GO terms (P.adj < 0.05)") +
     theme_bw() +
     guides(size = guide_legend(override.aes = list(shape=17))) +
@@ -173,11 +173,20 @@ odds_ratio_ggplot <- subset_to_plot  %>%
           axis.title.y = element_blank(), 
           axis.title.x = element_blank(),
           axis.text.x  = element_text(angle = 45, hjust = 1, face = "bold"), 
-          axis.text.y  = element_text(face = "bold"))
-
+          axis.text.y  = element_text(face = "bold")) +
+    facet_grid( groups ~ . , drop = TRUE, scales = "free", space = "free", 
+              labeller = label_wrap_gen(width = 10, multi_line = TRUE))  +
+    theme(strip.text.y = element_text(angle = 0))  +
+    scale_x_discrete(labels = function(input) str_wrap(input, width = 15))
+  
 odds_ratio_ggplot
+```
 
-ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.png"), width= 10 ,  height = 12 )
+
+```{r}
+ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.png"),  width= 10,  height = 12 )
+ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.pdf"),  width= 10,  height = 12 )
+ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.tiff"), width= 10,  height = 12 )
 
 write.table( data_plot_odds_ratio, file=file.path( compare_go_terms_results_dir, "data_plot_odds_ratio.txt"),
             sep="\t", row.names = FALSE, quote = FALSE)

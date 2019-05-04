@@ -1,0 +1,12 @@
+Compare A and CA significant genes log FC for sig genes in S. cerevisiae and C. neoformans, Pearson's test
+	Pearson's product-moment correlation
+
+data:  compare_A_CA_orthologs_sig$logFC.cneo and compare_A_CA_orthologs_sig$logFC.scer
+t = 16.314, df = 1318, p-value < 2.2e-16
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.3639791 0.4538039
+sample estimates:
+      cor 
+0.4098848 
+
