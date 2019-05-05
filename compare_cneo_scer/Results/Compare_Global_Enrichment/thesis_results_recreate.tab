@@ -5,6 +5,10 @@ GO:0034655	Nucleic acid and amino acid related	nucleobase-containing compound ca
 GO:0072521	Nucleic acid and amino acid related	purine-containing compound metabolic process	BP	NA	0.0198323881486412	NA	NA	NA	NA	NA	NA
 GO:0072524	Nucleic acid and amino acid related	pyridine-containing compound metabolic process	BP	NA	1.22363150658432e-10	NA	2.09158274312203e-08	NA	NA	0.0104840799766595	NA
 GO:0006520	Nucleic acid and amino acid related	cellular amino acid metabolic process	BP	NA	0.000126830170652825	NA	NA	NA	3.13928452745244e-14	NA	1.2951768808314e-29
+GO:0009073	Nucleic acid and amino acid related	aromatic amino acid family biosynthetic process	BP	NA	NA	0.0353929414456722	NA	NA	2.06464383887078e-06	NA	2.51026175131368e-09
+GO:0008652	Nucleic acid and amino acid related	cellular amino acid biosynthetic process	BP	NA	0.0164436535225343	0.00168213794207379	NA	NA	1.87623462622344e-20	NA	2.01697400721748e-28
+GO:0055086	Nucleic acid and amino acid related	nucleobase-containing small molecule metabolic process	BP	NA	0.00247159075259387	NA	0.00953670636832089	NA	0.0170009778142073	NA	NA
+GO:0019362	Nucleic acid and amino acid related	pyridine nucleotide metabolic process	BP	NA	6.9163126562391e-10	NA	2.09158274312203e-08	NA	NA	0.0192646049055516	NA
 GO:0044085	Cell organisation and replication related	cellular component biogenesis	BP	NA	NA	NA	NA	4.38589724983902e-30	NA	NA	NA
 GO:0006260	Cell organisation and replication related	DNA replication	BP	NA	NA	NA	NA	0.00135656920955692	NA	NA	NA
 GO:0051301	Cell organisation and replication related	cell division	BP	NA	NA	0.0130072668425472	NA	NA	NA	NA	NA
@@ -15,12 +19,11 @@ GO:0006122	Energy related	mitochondrial electron transport, ubiquinol to cytochr
 GO:0006091	Energy related	generation of precursor metabolites and energy	BP	NA	4.71726382605305e-07	NA	8.39564047786537e-08	NA	0.00162195293187428	NA	NA
 GO:0055114	Energy related	oxidation-reduction process	BP	NA	6.6776848913898e-19	NA	2.51583825732959e-19	NA	9.64287719110197e-09	0.0020655751777464	0.0463425380680511
 GO:0016052	Energy related	carbohydrate catabolic process	BP	NA	6.0854626188448e-06	NA	0.000216694867270657	NA	NA	NA	NA
-GO:0022613	Transcription and translation related	ribonucleoprotein complex biogenesis	BP	NA	NA	NA	NA	3.53111013411806e-54	NA	NA	1.18424968819829e-06
-GO:0042254	Transcription and translation related	ribosome biogenesis	BP	NA	NA	NA	NA	3.00696799462456e-59	NA	NA	1.712589483074e-09
-GO:0006396	Transcription and translation related	RNA processing	BP	NA	NA	NA	NA	1.79222681953539e-42	NA	NA	NA
-GO:0006413	Transcription and translation related	translational initiation	BP	NA	NA	NA	NA	0.000722772568723	NA	NA	NA
-GO:0006446	Transcription and translation related	regulation of translational initiation	NA	NA	NA	NA	NA	NA	NA	NA	NA
-GO:0042790	Transcription and translation related	nucleolar large rRNA transcription by RNA polymerase I	BP	NA	NA	NA	NA	0.001527094002765	NA	NA	NA
+GO:0045454	Energy related	cell redox homeostasis	BP	NA	0.000529006431377375	NA	0.000108032735763085	NA	NA	0.0022641627749476	NA
+GO:0044262	Energy related	cellular carbohydrate metabolic process	BP	NA	6.0502047878054e-08	NA	1.39488104019152e-05	NA	0.000115831294315791	NA	NA
+GO:0006091	Energy related	generation of precursor metabolites and energy	BP	NA	4.71726382605305e-07	NA	8.39564047786537e-08	NA	0.00162195293187428	NA	NA
+GO:0006733	Energy related	oxidoreduction coenzyme metabolic process	BP	NA	3.94181845322813e-08	NA	1.11826709158249e-07	NA	0.0288870744977252	0.00876015083113093	NA
+GO:0072350	Energy related	tricarboxylic acid metabolic process	BP	NA	6.0502047878054e-08	NA	8.55854971365905e-07	NA	0.0294105926986386	NA	NA
 GO:0044267	Protein related	cellular protein metabolic process	NA	NA	NA	NA	NA	NA	NA	NA	NA
 GO:0006457	Protein related	protein folding	BP	NA	NA	NA	0.000805159835636418	1.37746621159238e-06	NA	1.02070977568768e-10	NA
 GO:0031204	Protein related	posttranslational protein targeting to membrane, translocation	BP	NA	NA	NA	NA	NA	NA	0.013482650272176	NA
@@ -40,6 +43,10 @@ GO:0006879	Metal related	cellular iron ion homeostasis	BP	NA	NA	NA	NA	NA	0.00312
 GO:0016226	Metal related	iron-sulfur cluster assembly	BP	NA	NA	NA	NA	NA	NA	NA	0.0251093960855613
 GO:0015891	Metal related	siderophore transport	BP	NA	NA	NA	NA	NA	0.00748822996296472	NA	NA
 GO:0006875	Metal related	cellular metal ion homeostasis	BP	NA	NA	NA	NA	NA	0.00029047275311876	NA	NA
+GO:0000041	Metal related	transition metal ion transport	BP	NA	4.13041689837829e-05	NA	0.00136226987996914	NA	NA	NA	NA
+GO:0006825	Metal related	copper ion transport	BP	NA	NA	NA	NA	NA	0.0357252176133811	NA	NA
+GO:0055072	Metal related	iron ion homeostasis	BP	NA	NA	NA	NA	NA	0.00525590383712719	NA	NA
+GO:0055076	Metal related	transition metal ion homeostasis	BP	NA	NA	NA	NA	NA	0.000722227637180789	NA	NA
 GO:0032258	Autophagy related	protein localization by the Cvt pathway	NA	NA	NA	NA	NA	NA	NA	NA	NA
 GO:0006914	Autophagy related	autophagy	BP	NA	NA	NA	NA	NA	0.0337290805790703	NA	NA
 GO:0000422	Autophagy related	autophagy of mitochondrion	BP	NA	NA	NA	NA	NA	0.000756101280575414	NA	NA

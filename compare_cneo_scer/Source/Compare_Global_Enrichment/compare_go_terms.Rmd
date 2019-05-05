@@ -163,12 +163,13 @@ odds_ratio_ggplot <- subset_to_plot  %>%
                   size = -log10(p.adjusted)  )) +
     geom_point() + 
     scale_shape_manual(values = c(24,25), name = "Direction") +
-    scale_fill_gradient2(high = "coral3", low = "deepskyblue3", mid = "white", name=str_wrap("Odds Ratio Score", width=15)) + 
-    scale_color_manual(values = c( "coral3", "deepskyblue3"), name = "Direction") +
-    scale_size_continuous( name = expression( '-log'[10]*'(adj. p-value)') ) +
+    scale_fill_gradient2(high = "coral3", low = "springgreen4", mid = "white", name=str_wrap("Odds Ratio Score", width=15)) + 
+    scale_color_manual(values = c( "coral3", "springgreen4"), name = "Direction") +
+    scale_size_continuous( name = expression( '-log'[10]*'(adj. p)') ) +
     ggtitle("Enriched GO terms (P.adj < 0.05)") +
     theme_bw() +
-    guides(size = guide_legend(override.aes = list(shape=17))) +
+    guides(size = guide_legend(override.aes = list(shape=17)),
+           shape = guide_legend(override.aes = list(size = 5))) +
     theme(plot.title = element_text(hjust = 0.5), 
           axis.title.y = element_blank(), 
           axis.title.x = element_blank(),

@@ -149,7 +149,7 @@ ggsave( filename = file.path(compare_orthologs_results_dir, "compare_A_CA_ggplot
 compare_A_CA_orthologs_sig <- compare_A_CA_orthologs %>% 
   filter( logFC.cneo < 0.05 & logFC.scer < 0.05)
 
-sink( file.path(compare_orthologs_results_dir, "compare_A_CA_orthologs.txt"))
+sink( file.path(compare_orthologs_results_dir, "compare_A_CA_pearson.txt"))
 cat("Compare A and CA log FC in S. cerevisiae and C. neoformans, Pearson's test")
 cor.test( compare_A_CA_orthologs$logFC.cneo, 
           compare_A_CA_orthologs$logFC.scer, method="pearson" )
@@ -231,9 +231,10 @@ merged_ggplot <- merged_data %>%
                                     FDR.cneo >= 0.05 & FDR.scer < 0.05  ~ "S. cerevisiae Only",
                                     TRUE ~ "Not sigificant" ), 
                                     levels=c( "Both significant", "C. neoformans Only", "S. cerevisiae Only", "Not sigificant") )  ) %>%
-  ggplot( aes( logFC.cneo, logFC.scer, col=is_significant)) +
-  geom_point()  + 
+  ggplot( aes( logFC.cneo, logFC.scer)) +
+  geom_point( aes(col=is_significant))  + 
   geom_smooth(aes(group = 1), method = "lm") +
+
   # This is how to get part of the legend text into italic fact
   scale_color_discrete( labels=c( "Both significant", 
                                   expression(paste(italic("C. neoformans")," Only", sep=" ")), 
@@ -246,7 +247,9 @@ merged_ggplot <- merged_data %>%
   facet_grid( . ~ Comparison)
 
 merged_ggplot
+```
 
+```{r}
 dev.size(units = "in")
 
 ggsave( filename = file.path(compare_orthologs_results_dir, "merged_ggplot.png"), plot=merged_ggplot, width= 7 ,  height = 3 )

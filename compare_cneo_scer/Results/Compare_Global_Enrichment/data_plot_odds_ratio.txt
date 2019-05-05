@@ -499,9 +499,6 @@ gene conversion	GO:0035822	S. cerevisiae	AMB + LF	Down	0.0362337880997506	8.7863
 gene expression	GO:0010467	S. cerevisiae	AMB only	Down	2.93087548032407e-11	1.5771225366721	S. cerevisiae AMB only	-1.5771225366721
 gene expression	GO:0010467	S. cerevisiae	AMB + LF	Up	0.043192467733513	1.21778676669981	S. cerevisiae AMB + LF	1.21778676669981
 gene silencing	GO:0016458	S. cerevisiae	AMB only	Down	0.028091152464698	1.66488918964642	S. cerevisiae AMB only	-1.66488918964642
-generation of precursor metabolites and energy	GO:0006091	C. neoformans	AMB only	Up	4.71726382605305e-07	2.65125270646458	C. neoformans AMB only	2.65125270646458
-generation of precursor metabolites and energy	GO:0006091	C. neoformans	AMB + LF	Up	8.39564047786537e-08	2.75375099389721	C. neoformans AMB + LF	2.75375099389721
-generation of precursor metabolites and energy	GO:0006091	S. cerevisiae	AMB only	Up	0.00162195293187428	1.87355156778543	S. cerevisiae AMB only	1.87355156778543
 glucan biosynthetic process	GO:0009250	S. cerevisiae	AMB only	Up	0.0156000406234856	2.78183748672787	S. cerevisiae AMB only	2.78183748672787
 glucan metabolic process	GO:0044042	S. cerevisiae	AMB only	Up	0.00384997781640208	2.64016897081413	S. cerevisiae AMB only	2.64016897081413
 gluconeogenesis	GO:0006094	C. neoformans	AMB only	Up	0.00167977175048323	5.03160556257901	C. neoformans AMB only	5.03160556257901
