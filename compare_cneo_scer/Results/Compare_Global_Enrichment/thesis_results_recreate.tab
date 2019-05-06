@@ -14,6 +14,7 @@ GO:0006260	Cell organisation and replication related	DNA replication	BP	NA	NA	NA
 GO:0051301	Cell organisation and replication related	cell division	BP	NA	NA	0.0130072668425472	NA	NA	NA	NA	NA
 GO:0007017	Cell organisation and replication related	microtubule-based process	BP	0.000342961712885666	NA	7.97349167390326e-05	NA	NA	NA	NA	NA
 GO:0008154	Cell organisation and replication related	actin polymerization or depolymerization	BP	NA	NA	NA	NA	NA	0.00539509938807186	NA	NA
+GO:0000226	Cell organisation and replication related	microtubule cytoskeleton organization	BP	0.000342961712885666	NA	5.19690760478487e-05	NA	NA	NA	NA	NA
 GO:0006099	Energy related	tricarboxylic acid cycle	BP	NA	2.7576029183607e-08	NA	3.98828127309369e-07	NA	NA	NA	NA
 GO:0006122	Energy related	mitochondrial electron transport, ubiquinol to cytochrome c	NA	NA	NA	NA	NA	NA	NA	NA	NA
 GO:0006091	Energy related	generation of precursor metabolites and energy	BP	NA	4.71726382605305e-07	NA	8.39564047786537e-08	NA	0.00162195293187428	NA	NA
@@ -29,16 +30,32 @@ GO:0006457	Protein related	protein folding	BP	NA	NA	NA	0.000805159835636418	1.37
 GO:0031204	Protein related	posttranslational protein targeting to membrane, translocation	BP	NA	NA	NA	NA	NA	NA	0.013482650272176	NA
 GO:0006511	Protein related	ubiquitin-dependent protein catabolic process	BP	NA	NA	NA	NA	NA	NA	6.43028266898664e-12	NA
 GO:0030433	Protein related	ubiquitin-dependent ERAD pathway	BP	NA	NA	NA	NA	NA	NA	8.47728179698025e-10	NA
+GO:0007039	Protein related	protein catabolic process in the vacuole	BP	NA	0.00822008214454756	NA	0.0189195586330104	NA	0.0394396748438761	NA	NA
+GO:0036503	Protein related	ERAD pathway	BP	NA	NA	NA	NA	NA	NA	1.55971092382074e-10	NA
+GO:0043161	Protein related	proteasome-mediated ubiquitin-dependent protein catabolic process	BP	NA	NA	NA	NA	NA	NA	4.44469619806539e-13	NA
+GO:0006620	Protein related	posttranslational protein targeting to endoplasmic reticulum membrane	BP	NA	NA	NA	NA	NA	NA	0.0128233370321027	NA
+GO:0002181	Protein related	cytoplasmic translation	BP	NA	NA	NA	NA	NA	NA	NA	7.05954178346893e-63
+GO:0042254	Protein related	ribosome biogenesis	BP	NA	NA	NA	NA	3.00696799462456e-59	NA	NA	1.712589483074e-09
+GO:0002183	Protein related	cytoplasmic translational initiation	BP	NA	NA	NA	NA	0.00200204887063327	NA	NA	NA
 GO:0006696	Lipid related	ergosterol biosynthetic process	BP	NA	NA	0.0181247825536919	NA	0.000508777155593611	NA	0.00521023221537272	NA
 GO:0044242	Lipid related	cellular lipid catabolic process	NA	NA	NA	NA	NA	NA	NA	NA	NA
 GO:0008654	Lipid related	phospholipid biosynthetic process	BP	NA	NA	NA	NA	NA	NA	0.00719996857108615	NA
 GO:0009062	Lipid related	fatty acid catabolic process	BP	NA	0.00685340759818172	NA	0.0245009287617204	NA	NA	NA	NA
+GO:0016125	Lipid related	sterol metabolic process	BP	0.0478919942313297	NA	0.0204724577529935	NA	0.0131300934472293	NA	0.0189922549205251	NA
 GO:0042744	Stress related	hydrogen peroxide catabolic process	BP	NA	NA	NA	0.00012857663508501	NA	0.0488160755600507	NA	NA
 GO:0006979	Stress related	response to oxidative stress	BP	NA	3.35281834524742e-07	NA	3.98828127309369e-07	NA	0.0278183308966227	0.00166175061573638	NA
 GO:0034599	Stress related	cellular response to oxidative stress	BP	NA	1.79361578404336e-06	NA	8.55854971365905e-07	NA	NA	0.00499877742897953	NA
 GO:0006974	Stress related	cellular response to DNA damage stimulus	NA	NA	NA	NA	NA	NA	NA	NA	NA
 GO:0051788	Stress related	response to misfolded protein	BP	NA	NA	NA	NA	NA	NA	0.0127633977958372	NA
 GO:0071712	Stress related	ER-associated misfolded protein catabolic process	BP	NA	NA	NA	NA	NA	NA	0.0239410831855449	NA
+GO:0042743	Stress related	hydrogen peroxide metabolic process	BP	NA	0.0222988757959759	NA	3.5271384846679e-05	NA	0.0136339711016929	NA	NA
+GO:0035617	Stress related	stress granule disassembly	BP	NA	NA	NA	0.0189195586330104	NA	NA	NA	NA
+GO:0071218	Stress related	cellular response to misfolded protein	BP	NA	NA	NA	NA	NA	NA	0.0127633977958372	NA
+GO:0034976	Stress related	response to endoplasmic reticulum stress	BP	NA	NA	NA	NA	NA	NA	8.10539992107267e-08	NA
+GO:0097501	Stress related	stress response to metal ion	BP	NA	0.00817838518729744	NA	NA	NA	NA	NA	NA
+GO:0000196	Stress related	cell wall integrity MAPK cascade	BP	NA	NA	NA	NA	NA	0.0134505848349533	NA	NA
+GO:0051403	Stress related	stress-activated MAPK cascade	BP	NA	NA	NA	NA	NA	0.0156000406234856	NA	NA
+GO:0070413	Stress related	trehalose metabolism in response to stress	BP	NA	NA	NA	NA	NA	0.0425022413325544	NA	NA
 GO:0006879	Metal related	cellular iron ion homeostasis	BP	NA	NA	NA	NA	NA	0.00312762251435217	NA	NA
 GO:0016226	Metal related	iron-sulfur cluster assembly	BP	NA	NA	NA	NA	NA	NA	NA	0.0251093960855613
 GO:0015891	Metal related	siderophore transport	BP	NA	NA	NA	NA	NA	0.00748822996296472	NA	NA
@@ -50,3 +67,4 @@ GO:0055076	Metal related	transition metal ion homeostasis	BP	NA	NA	NA	NA	NA	0.00
 GO:0032258	Autophagy related	protein localization by the Cvt pathway	NA	NA	NA	NA	NA	NA	NA	NA	NA
 GO:0006914	Autophagy related	autophagy	BP	NA	NA	NA	NA	NA	0.0337290805790703	NA	NA
 GO:0000422	Autophagy related	autophagy of mitochondrion	BP	NA	NA	NA	NA	NA	0.000756101280575414	NA	NA
+GO:0006915	Autophagy related	apoptotic process	BP	NA	NA	NA	0.0157805089859796	NA	NA	NA	NA

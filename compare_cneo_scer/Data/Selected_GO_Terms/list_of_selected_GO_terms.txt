@@ -14,6 +14,7 @@ GO:0006260	Cell organisation and replication related
 GO:0051301	Cell organisation and replication related
 GO:0007017	Cell organisation and replication related
 GO:0008154	Cell organisation and replication related
+GO:0000226	Cell organisation and replication related
 GO:0006099	Energy related
 GO:0006122	Energy related
 GO:0006091	Energy related
@@ -29,16 +30,32 @@ GO:0006457	Protein related
 GO:0031204	Protein related
 GO:0006511	Protein related
 GO:0030433	Protein related
+GO:0007039	Protein related
+GO:0036503	Protein related
+GO:0043161	Protein related
+GO:0006620	Protein related
+GO:0002181	Protein related
+GO:0042254	Protein related
+GO:0002183	Protein related
 GO:0006696	Lipid related
 GO:0044242	Lipid related
 GO:0008654	Lipid related
 GO:0009062	Lipid related
+GO:0016125	Lipid related
 GO:0042744	Stress related
 GO:0006979	Stress related
 GO:0034599	Stress related
 GO:0006974	Stress related
 GO:0051788	Stress related
 GO:0071712	Stress related
+GO:0042743	Stress related
+GO:0035617	Stress related
+GO:0071218	Stress related
+GO:0034976	Stress related
+GO:0097501	Stress related
+GO:0000196	Stress related
+GO:0051403	Stress related
+GO:0070413	Stress related
 GO:0006879	Metal related
 GO:0016226	Metal related
 GO:0015891	Metal related
@@ -50,4 +67,4 @@ GO:0055076	Metal related
 GO:0032258	Autophagy related
 GO:0006914	Autophagy related
 GO:0000422	Autophagy related
-
+GO:0006915	Autophagy related

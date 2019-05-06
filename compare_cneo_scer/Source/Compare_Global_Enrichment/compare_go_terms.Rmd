@@ -152,10 +152,19 @@ subset_to_plot <- data_plot_odds_ratio %>%
     mutate( organism = ifelse(  is.na(organism  ), "scer", organism  ),
             query_lists_id = ifelse( is.na( query_lists_id),  "compare_A", query_lists_id)) %>%
     mutate( term = factor( term, levels =  rev(unique(term))) ) %>%
-    filter ( !is.na(x_labels) & x_labels != "NA")
+    filter ( !is.na(x_labels) & x_labels != "NA") # %>%
 
 
-odds_ratio_ggplot <- subset_to_plot  %>%
+max_odds_ratio_score <- subset_to_plot %>%   
+        filter ( is.finite(Odds_Ratio_Score ) ) %>%
+        summarise( max_odds_ratio_score =  max( Odds_Ratio_Score))  %>%
+        pull(max_odds_ratio_score )  %>%
+        ceiling
+  
+subset_to_plot_clean_max <- subset_to_plot %>%
+                            mutate(Odds_Ratio_Score = ifelse( is.finite(Odds_Ratio_Score), Odds_Ratio_Score, max_odds_ratio_score))
+
+odds_ratio_ggplot <- subset_to_plot_clean_max  %>%
     ggplot( aes(  x_labels, term,
                   color = direction,
                   shape = direction, 
@@ -185,9 +194,9 @@ odds_ratio_ggplot
 
 
 ```{r}
-ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.png"),  width= 10,  height = 12 )
-ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.pdf"),  width= 10,  height = 12 )
-ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.tiff"), width= 10,  height = 12 )
+ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.png"),  width= 10,  height = 13 )
+ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.pdf"),  width= 10,  height = 13 )
+ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.tiff"), width= 10,  height = 13 )
 
 write.table( data_plot_odds_ratio, file=file.path( compare_go_terms_results_dir, "data_plot_odds_ratio.txt"),
             sep="\t", row.names = FALSE, quote = FALSE)
@@ -197,7 +206,7 @@ write.table( data_plot_odds_ratio, file=file.path( compare_go_terms_results_dir,
 
 
 
-
+Inkscape scaling 70% of original
 
 
 
