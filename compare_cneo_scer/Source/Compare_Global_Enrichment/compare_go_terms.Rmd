@@ -37,7 +37,10 @@ create_dir_if_not_exists( compare_go_terms_results_dir)
 cneo_enriched_go <- read_tsv(file.path(cneo_results_dir, "Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat/enriched_go_terms_global.txt"))
 scer_enriched_go <- read_tsv(file.path(scer_results_dir, "Functional_Enrichment/To_Use_k_1/GOStat/enriched_go_terms_global.txt" ) )
 
-list_of_selected_go_terms <- read_tsv( file.path( compare_data_dir, "Selected_GO_Terms/list_of_selected_GO_terms.txt"), col_names = TRUE)
+list_of_selected_go_terms <- read_tsv( file.path( compare_data_dir, "Selected_GO_Terms/list_of_selected_GO_terms.txt"), 
+                                       col_names = TRUE) %>%
+                              dplyr::select(-term)
+
 
 
 ```
@@ -194,9 +197,9 @@ odds_ratio_ggplot
 
 
 ```{r}
-ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.png"),  width= 10,  height = 13 )
-ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.pdf"),  width= 10,  height = 13 )
-ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.tiff"), width= 10,  height = 13 )
+ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.png"),  width= 10,  height = 11 )
+ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.pdf"),  width= 10,  height = 11 )
+ggsave ( filename = file.path( compare_go_terms_results_dir, "compare_s_cerevisiae_c_neoformans_go_terms.tiff"), width= 10,  height = 11 )
 
 write.table( data_plot_odds_ratio, file=file.path( compare_go_terms_results_dir, "data_plot_odds_ratio.txt"),
             sep="\t", row.names = FALSE, quote = FALSE)

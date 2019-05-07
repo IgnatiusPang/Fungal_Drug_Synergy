@@ -15,7 +15,7 @@ print( command_line_args)
 ## Global parameters
 ```{r run2}
 my_som_random_number_seed <- 257645
-go_terms_enrichment_raw_p_value_cutoff < 0.01
+go_terms_enrichment_raw_p_value_cutoff <- 0.01
 go_terms_enrichment_adj_p_value_cutoff <- 1
 gostat_pvalue_cutoff_param <- 1
 condition_on_child_terms_param <- FALSE
@@ -367,19 +367,20 @@ foreach( parameters=all_parameters_to_test, .packages =  packages_to_send_to_nod
 types_of_treatments <- c( "A", "CA", "AL",  "CAL")
 replicate_number <- c( '1', '2', '3')
 
-input_for_cross_df <- list (  types_of_treatments, replicate_number )
+input_for_cross_df <- list (   replicate_number, types_of_treatments )
 names( input_for_cross_df) <- c(  "types_of_treatments", "replicate_number")
 
 updated_all_time_points <-  purrr::cross_df( input_for_cross_df) %>%
-						dplyr::mutate( sample_name = paste0( types_of_treatments, replicate_number )) %>%
+						dplyr::mutate( sample_name = paste0( replicate_number, types_of_treatments )) %>%
 						dplyr::select ( one_of ( c( "sample_name"))) %>%
 						as.data.frame() %>%
 						t() %>%
 						as.vector()
 
 updated_all_time_points <- updated_all_time_points[updated_all_time_points != "AL2"]
+```
 
-
+```{r}
 list_of_files <- Sys.glob ( paste( EdgeR_RUVs_QL_soms_results_dir, "/*/*/cluster_for_each_gene.tab", sep="" ) )
 
 
@@ -392,7 +393,7 @@ directory_cleaning <-  purrr::map ( list_of_files, function(x) {
 					             unlist()
 
 list_of_x <-  purrr::map ( list_of_files, function(x) { 
-									  cleaned_dir <- strsplit(x, "/")[[1]][[13]]  
+									  cleaned_dir <- strsplit(x, "/")[[1]][[14]]  
 									  cleaned_dir <- strsplit (cleaned_dir, "x" )
 									  	return ( as.integer(cleaned_dir[[1]][1]) )
 									  
@@ -402,7 +403,7 @@ list_of_x <-  purrr::map ( list_of_files, function(x) {
 
 
 list_of_y <-  purrr::map ( list_of_files, function(x) { 
-									  cleaned_dir <- strsplit(x, "/")[[1]][[13]]  
+									  cleaned_dir <- strsplit(x, "/")[[1]][[14]]  
 									  cleaned_dir <- strsplit (cleaned_dir, "x" )
 									  	return ( as.integer(cleaned_dir[[1]][2]) )
 									  	} )  %>%
@@ -410,8 +411,23 @@ list_of_y <-  purrr::map ( list_of_files, function(x) {
 
 list_of_clusters <- purrr::map ( list_of_files, function(x) {  read.table( x, header=TRUE)} ) 
 
+```
 
 ### rearrange the x-axis labels to the one we want 
+```{r}
+# "A1"
+# "A2"
+# "A3"
+# "AL1"
+# "AL3"
+# "CA1"
+# "CA2"
+# "CA3"
+# "CAL1"
+# "CAL2"
+# "CAL3"
+
+
 temp_lookup_all_time_points <- 1:length(all_time_points )
 
 names( all_time_points) <- all_time_points
@@ -460,18 +476,6 @@ purrr::pwalk ( list_to_redraw_soms,
 
 ```
 
-## Prototype drawing SOMs using ggplot
-```{r}
-# compare_A_soms <- read.table(file.path(results_dir, "compare_A/5x5/updated_SOMs_data_5_by_5.txt"), header=TRUE,
-#                              sep="\t", stringsAsFactors = FALSE)
-# 
-# 
-# ggplot(compare_A_soms, aes( x, y, fill=id_a, col=cluster)) +
-#   geom_line() +
-#   facet_wrap( .~ cluster)
-           
-# axis.text.x = element_text()           
-```
 
 
 

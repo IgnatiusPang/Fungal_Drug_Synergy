@@ -13,6 +13,7 @@ if(!require(pacman)) {
 
 p_load(tidyverse)
 p_load(gplots)
+p_load(iheatmapr)
 
 
 source( '../../Common/global_parameters.R')
@@ -27,11 +28,38 @@ soms_results_dir <- file.path( results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL/
 compare_A_soms <- readRDS ( file.path( soms_results_dir, "compare_A/5x5/soms_results.RDS" ) )
 compare_AL_soms <- readRDS ( file.path( soms_results_dir, "compare_AL/5x5/soms_results.RDS" ) )
 
+## Read in the table showing direction of gene expression (for the genes in the cluster)
+compare_A_direction <- read_tsv ( file.path( soms_results_dir,"compare_A/5x5/soms_clusters_mapping.txt"  )) %>%
+                       mutate( Direction = case_when( str_detect(Direction, "Up")  ~ "Up",
+                                                      str_detect(Direction, "Down")  ~ "Down",
+                                                      TRUE ~ NA_character_
+                                                      ) )        
+  
+compare_AL_direction <- read_tsv ( file.path( soms_results_dir,"compare_AL/5x5/soms_clusters_mapping.txt"  )) %>%
+                       mutate( Direction = case_when( str_detect(Direction, "Up") ~ "Up",
+                                                      str_detect(Direction, "Down") ~ "Down",
+                                                      TRUE ~ NA_character_
+                                                      ) )        
+
+## Get a list of all the clusters which actually has data in them 
+compare_A_cluster_with_data <- compare_A_direction %>%
+                               mutate( cluster =  purrr::map_chr( cluster, ~paste( "V", ., sep="")) ) %>%
+                               pull(cluster)
+
+compare_AL_cluster_with_data <- compare_AL_direction %>%
+                               mutate( cluster =  purrr::map_chr( cluster, ~paste( "V", ., sep="")) ) %>%
+                               pull(cluster)
+
 
 str(compare_A_soms$som$codes)
 
-compare_A_codebook_vector  <- compare_A_soms$som$codes[[1]]
-compare_AL_codebook_vector <- compare_AL_soms$som$codes[[1]]
+compare_A_codebook_vector_raw  <- compare_A_soms$som$codes[[1]]
+compare_AL_codebook_vector_raw <- compare_AL_soms$som$codes[[1]]
+
+compare_A_codebook_vector <- compare_A_codebook_vector_raw[compare_A_cluster_with_data,]
+compare_AL_codebook_vector <- compare_AL_codebook_vector_raw[compare_AL_cluster_with_data,]
+                 
+
 
 ```
 
@@ -63,11 +91,9 @@ heatmap.2(compare_A_codebook_vector[,heatmap_column_labels],  symm = FALSE, col 
 dev.off()
 
 
-
-
+### AMB + LF model, AL - CAL
 pdf( file.path( soms_results_dir, "compare_AL/5x5/edgeR_compare_AL_som_codebook_vector.pdf") ) 
           
-### AMB + LF model, AL - CAL
 heatmap.2(compare_AL_codebook_vector[,heatmap_column_labels],  symm = FALSE, col = my_colour_palette, Colv=NA,  #distfun = function(c) as.dist(1 - c),
           dendrogram = "row", hclustfun=function(h)hclust(h,method="average"),  density.info="none", trace="none", # main = "Clustering miRNA with low to medium CV",
           #labRow=, 
@@ -83,6 +109,70 @@ dev.off()
 
 
 ##################################################################################################################
+
+
+```
+
+
+```{r}
+
+my_margins <- list(
+  l = 5,
+  r = 5,
+  b = 10,
+  t = 5,
+  pad = 1
+)
+
+my_font <- list(
+  family = "sans serif",
+  size = 16,
+  color = 'black')
+
+my_vwidth <- 6
+my_vheight <- 7
+
+### AMB only model, A - CA
+compare_A_iheatmapr <- main_heatmap( compare_A_codebook_vector[,heatmap_column_labels], 
+                                     layout = list(margin = my_margins, font=my_font),
+                                     name = "Standardized<br>Gene<br>Expression") %>%
+  add_row_labels(size = 0.1) %>%
+  add_col_labels() %>%
+  add_row_clustering() %>%
+  add_col_title("Clusters", buffer = 0.03) %>%
+  add_row_title ("Samples",  buffer = 0.01) %>%
+  add_row_annotation(  data.frame( Direction =  compare_A_direction$Direction) )
+
+compare_A_iheatmapr
+
+save_iheatmap( p=compare_A_iheatmapr, 
+               filename = file.path( soms_results_dir, "compare_A/5x5/edgeR_compare_A_som_codebook_vector_iheatmapr.pdf"),
+               vwidth = my_vwidth, vheight = my_vheight  )
+save_iheatmap( p=compare_A_iheatmapr, 
+               filename = file.path( soms_results_dir, "compare_A/5x5/edgeR_compare_A_som_codebook_vector_iheatmapr.png"),
+               vwidth = my_vwidth, vheight = my_vheight  )
+
+
+### AMB + LF model, AL - CAL
+compare_AL_iheatmapr <- main_heatmap( compare_AL_codebook_vector[,heatmap_column_labels], 
+                                     layout = list(margin = my_margins, font=my_font),
+                                     name = "Standardized<br>Gene<br>Expression" )  %>%
+  add_row_labels(size = 0.1) %>%
+  add_col_labels() %>%
+  add_row_clustering() %>%
+  add_col_title("Clusters", buffer = 0.03) %>%
+  add_row_title ("Samples",  buffer = 0.01) %>%
+  add_row_annotation(  data.frame( Direction =  compare_AL_direction$Direction) )
+
+
+compare_AL_iheatmapr
+
+save_iheatmap( p=compare_AL_iheatmapr, 
+               filename = file.path( soms_results_dir, "compare_AL/5x5/edgeR_compare_AL_som_codebook_vector_iheatmapr.pdf"),
+               vwidth = my_vwidth, vheight = my_vheight     )
+save_iheatmap( p=compare_AL_iheatmapr, 
+               filename = file.path( soms_results_dir, "compare_AL/5x5/edgeR_compare_AL_som_codebook_vector_iheatmapr.png"),
+               vwidth = my_vwidth, vheight = my_vheight)
 
 
 ```

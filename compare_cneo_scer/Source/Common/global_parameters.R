@@ -1,7 +1,12 @@
 
-base_dir    <- "/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy"
+base_dir    <- here::here()
 
 ## List of directories
+data_dir    <- file.path ( base_dir, "compare_cneo_scer/Data" ) 
+source_dir  <- file.path( base_dir, "compare_cneo_scer/Source")
+common_dir  <- file.path( source_dir, "compare_cneo_scer/Common")  # Commonly used codes (e.g. parameters file)
+results_dir <- file.path( base_dir, "compare_cneo_scer/Results")
+
 compare_base_dir    <- file.path(base_dir, "compare_cneo_scer" )
 compare_data_dir    <- file.path ( compare_base_dir, "Data" ) 
 compare_source_dir  <- file.path( compare_base_dir, "Source")

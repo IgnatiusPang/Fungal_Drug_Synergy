@@ -1,10 +1,10 @@
 
 ## List of directories
-base_dir    <- "/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy/scer_synergy"
-data_dir    <- file.path ( base_dir, "Data" ) 
-source_dir  <- file.path( base_dir, "Source")
-common_dir  <- file.path( source_dir, "Common")  # Commonly used codes (e.g. parameters file)
-results_dir <- file.path( base_dir, "Results")
+base_dir    <- here::here()
+data_dir    <- file.path ( base_dir, "scer_synergy/Data" ) 
+source_dir  <- file.path( base_dir, "scer_synergy/Source")
+common_dir  <- file.path( source_dir, "scer_synergy/Common")  # Commonly used codes (e.g. parameters file)
+results_dir <- file.path( base_dir, "scer_synergy/Results")
 
 ## Gene Ontology annotations
 gene_ontology_dir <- file.path( data_dir, "Gene_Ontology_Annotation")

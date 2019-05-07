@@ -980,6 +980,8 @@ outer mitochondrial membrane organization	GO:0007008	S. cerevisiae	AMB + LF	Down
 oxidation-reduction process	GO:0055114	C. neoformans	AMB only	Up	6.6776848913898e-19	2.73799741022959	C. neoformans AMB only	2.73799741022959
 oxidation-reduction process	GO:0055114	C. neoformans	AMB + LF	Up	2.51583825732959e-19	2.66380434782609	C. neoformans AMB + LF	2.66380434782609
 oxidation-reduction process	GO:0055114	S. cerevisiae	AMB only	Up	9.64287719110197e-09	2.06348166759946	S. cerevisiae AMB only	2.06348166759946
+oxidation-reduction process	GO:0055114	S. cerevisiae	AMB + LF	Down	0.0020655751777464	1.58418603637473	S. cerevisiae AMB + LF	-1.58418603637473
+oxidation-reduction process	GO:0055114	S. cerevisiae	AMB + LF	Up	0.0463425380680511	1.40823499555894	S. cerevisiae AMB + LF	1.40823499555894
 oxidoreduction coenzyme metabolic process	GO:0006733	C. neoformans	AMB only	Up	3.94181845322813e-08	4.12879581151832	C. neoformans AMB only	4.12879581151832
 oxidoreduction coenzyme metabolic process	GO:0006733	C. neoformans	AMB + LF	Up	1.11826709158249e-07	3.95109989181392	C. neoformans AMB + LF	3.95109989181392
 oxidoreduction coenzyme metabolic process	GO:0006733	S. cerevisiae	AMB only	Up	0.0288870744977252	1.90847791050436	S. cerevisiae AMB only	1.90847791050436

@@ -255,6 +255,7 @@ dev.size(units = "in")
 ggsave( filename = file.path(compare_orthologs_results_dir, "merged_ggplot.png"), plot=merged_ggplot, width= 7 ,  height = 3 )
 ggsave( filename = file.path(compare_orthologs_results_dir, "merged_ggplot.tiff"), plot=merged_ggplot, width= 7 ,  height = 3 )
 ggsave( filename = file.path(compare_orthologs_results_dir, "merged_ggplot.pdf"), plot=merged_ggplot, width= 7 ,  height = 3 )
+ggsave( filename = file.path(compare_orthologs_results_dir, "merged_ggplot.svg"), plot=merged_ggplot, width= 7 ,  height = 3 )
 
 
 ```

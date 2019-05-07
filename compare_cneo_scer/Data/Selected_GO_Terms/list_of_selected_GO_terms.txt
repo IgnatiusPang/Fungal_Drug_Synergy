@@ -1,70 +1,47 @@
-gobpid	groups
-GO:0006807	Nucleic acid and amino acid related
-GO:0090304	Nucleic acid and amino acid related
-GO:0034655	Nucleic acid and amino acid related
-GO:0072521	Nucleic acid and amino acid related
-GO:0072524	Nucleic acid and amino acid related
-GO:0006520	Nucleic acid and amino acid related
-GO:0009073	Nucleic acid and amino acid related
-GO:0008652	Nucleic acid and amino acid related
-GO:0055086	Nucleic acid and amino acid related
-GO:0019362	Nucleic acid and amino acid related
-GO:0044085	Cell organisation and replication related
-GO:0006260	Cell organisation and replication related
-GO:0051301	Cell organisation and replication related
-GO:0007017	Cell organisation and replication related
-GO:0008154	Cell organisation and replication related
-GO:0000226	Cell organisation and replication related
-GO:0006099	Energy related
-GO:0006122	Energy related
-GO:0006091	Energy related
-GO:0055114	Energy related
-GO:0016052	Energy related
-GO:0045454	Energy related
-GO:0044262	Energy related
-GO:0006091	Energy related
-GO:0006733	Energy related
-GO:0072350	Energy related
-GO:0044267	Protein related
-GO:0006457	Protein related
-GO:0031204	Protein related
-GO:0006511	Protein related
-GO:0030433	Protein related
-GO:0007039	Protein related
-GO:0036503	Protein related
-GO:0043161	Protein related
-GO:0006620	Protein related
-GO:0002181	Protein related
-GO:0042254	Protein related
-GO:0002183	Protein related
-GO:0006696	Lipid related
-GO:0044242	Lipid related
-GO:0008654	Lipid related
-GO:0009062	Lipid related
-GO:0016125	Lipid related
-GO:0042744	Stress related
-GO:0006979	Stress related
-GO:0034599	Stress related
-GO:0006974	Stress related
-GO:0051788	Stress related
-GO:0071712	Stress related
-GO:0042743	Stress related
-GO:0035617	Stress related
-GO:0071218	Stress related
-GO:0034976	Stress related
-GO:0097501	Stress related
-GO:0000196	Stress related
-GO:0051403	Stress related
-GO:0070413	Stress related
-GO:0006879	Metal related
-GO:0016226	Metal related
-GO:0015891	Metal related
-GO:0006875	Metal related
-GO:0000041	Metal related
-GO:0006825	Metal related
-GO:0055072	Metal related
-GO:0055076	Metal related
-GO:0032258	Autophagy related
-GO:0006914	Autophagy related
-GO:0000422	Autophagy related
-GO:0006915	Autophagy related
+gobpid	groups	term
+GO:0009073	Nucleic acid and amino acid related	aromatic amino acid family biosynthetic process
+GO:0008652	Nucleic acid and amino acid related	cellular amino acid biosynthetic process
+GO:0055086	Nucleic acid and amino acid related	nucleobase-containing small molecule metabolic process
+GO:0019362	Nucleic acid and amino acid related	pyridine nucleotide metabolic process
+GO:0009112	Nucleic acid and amino acid related	nucleobase metabolic process
+GO:0007017	Cell organisation and replication related	microtubule-based process
+GO:0008154	Cell organisation and replication related	actin polymerization or depolymerization
+GO:0000226	Cell organisation and replication related	microtubule cytoskeleton organization
+GO:0006122	Energy related	mitochondrial electron transport, ubiquinol to cytochrome c
+GO:0006091	Energy related	generation of precursor metabolites and energy
+GO:0044262	Energy related	cellular carbohydrate metabolic process
+GO:0006091	Energy related	generation of precursor metabolites and energy
+GO:0006733	Energy related	oxidoreduction coenzyme metabolic process
+GO:0072350	Energy related	tricarboxylic acid metabolic process
+GO:0044267	Protein related	cellular protein metabolic process
+GO:0006457	Protein related	protein folding
+GO:0030433	Protein related	ubiquitin-dependent ERAD pathway
+GO:0007039	Protein related	protein catabolic process in the vacuole
+GO:0043161	Protein related	proteasome-mediated ubiquitin-dependent protein catabolic process
+GO:0006620	Protein related	posttranslational protein targeting to endoplasmic reticulum membrane
+GO:0002181	Protein related	cytoplasmic translation
+GO:0042254	Protein related	ribosome biogenesis
+GO:0002183	Protein related	cytoplasmic translational initiation
+GO:0006696	Lipid related	ergosterol biosynthetic process
+GO:0044242	Lipid related	cellular lipid catabolic process
+GO:0016125	Lipid related	sterol metabolic process
+GO:0034599	Stress related	cellular response to oxidative stress
+GO:0006974	Stress related	cellular response to DNA damage stimulus
+GO:0051788	Stress related	response to misfolded protein
+GO:0071712	Stress related	ER-associated misfolded protein catabolic process
+GO:0042743	Stress related	hydrogen peroxide metabolic process
+GO:0035617	Stress related	stress granule disassembly
+GO:0071218	Stress related	cellular response to misfolded protein
+GO:0034976	Stress related	response to endoplasmic reticulum stress
+GO:0097501	Stress related	stress response to metal ion
+GO:0000196	Stress related	cell wall integrity MAPK cascade
+GO:0070413	Stress related	trehalose metabolism in response to stress
+GO:0016226	Metal related	iron-sulfur cluster assembly
+GO:0015891	Metal related	siderophore transport
+GO:0000041	Metal related	transition metal ion transport
+GO:0006825	Metal related	copper ion transport
+GO:0055072	Metal related	iron ion homeostasis
+GO:0055076	Metal related	transition metal ion homeostasis
+GO:0032258	Autophagy related	protein localization by the Cvt pathway
+GO:0000422	Autophagy related	autophagy of mitochondrion
+GO:0006915	Autophagy related	apoptotic process

@@ -1,0 +1,213 @@
+---
+title: "Draw SOMs using ggplot"
+output: html_notebook
+---
+
+
+## Load libraries and codes 
+```{r}
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+p_load(kohonen)
+
+source( '../../Common/global_parameters.R')
+source( '../../Common/helper_functions.R')
+source_rmd_file( file.path(source_dir, "Functional_Enrichment/Common/functional_enrichment_functions.Rmd" ) )
+source_rmd_file( file.path(source_dir, "Self_Organising_Maps/Common/soms_functions.Rmd" ) )
+
+sessionInfo()
+```
+
+## Directories management 
+```{r}
+results_to_use_dir <- "To_Use_k_0_Remove_5a"
+EdgeR_RUVs_QL_de_genes_dir <- file.path( results_dir, "Differential_Expression/EdgeR_RUVs_QL/cneo", results_to_use_dir)
+soms_results_dir <- file.path(results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL/To_Use_k_0_Remove_5a/Condition_on_child_terms_true" ) 
+EdgeR_RUVs_QL_gene_lists_dir <- file.path( EdgeR_RUVs_QL_de_genes_dir, "Gene_Lists")
+
+
+```
+
+
+```{r}
+
+## Read in the SOMs clusters
+# compare_A_soms <- read.table(file.path(soms_results_dir, "compare_A/5x5/updated_cluster_for_each_gene_5_by_5.txt"), 
+#                              stringsAsFactors = FALSE , header = TRUE)
+# compare_AL_soms <- read.table(file.path(soms_results_dir, "compare_AL/5x5/updated_cluster_for_each_gene_5_by_5.txt"), 
+#                               stringsAsFactors = FALSE, header = TRUE)
+
+
+compare_A_soms <- read.table(file.path(soms_results_dir, "compare_A/5x5/cluster_for_each_gene.tab"), stringsAsFactors = FALSE )
+compare_AL_soms <- read.table(file.path(soms_results_dir, "compare_AL/5x5/cluster_for_each_gene.tab"), stringsAsFactors = FALSE)
+
+## Read in the read counts
+cpm_read_counts_file <- file.path(EdgeR_RUVs_QL_de_genes_dir, "edger_without_ruvs_normalised_counts.txt")
+norm.expr <- read.table(file=cpm_read_counts_file,
+						            header=TRUE, sep="\t")
+
+## Read in the significantly differentially expressed genes 
+list_of_top_tags_table <- readRDS( file.path( EdgeR_RUVs_QL_gene_lists_dir,  "list_of_top_tags_table.Rdata" ) )
+
+```
+
+## Estabilish groups of experiments 
+```{r run9}
+
+compare_A <- c("compare_A" )
+
+compare_AL <-  c("compare_AL" )
+
+list_of_groups_of_experiments <- list( compare_A, compare_AL )
+
+names(list_of_groups_of_experiments ) <- c( "compare_A", "compare_AL" )
+
+```
+
+## Find the list of genes to use for each group
+```{r}
+
+get_list_of_genes <- function( experiment_name ) {
+	 list_of_genes <- dplyr::filter( list_of_top_tags_table[[experiment_name]], FDR < 0.05) %>%
+						pull(genes)
+	 
+	 return( list_of_genes)
+}
+
+	
+list_of_gene_sets <- purrr::map( list_of_groups_of_experiments, function(x) {  purrr::map( x, get_list_of_genes) %>% unlist() %>% unique() })
+
+```
+
+
+
+## Define the time points
+```{r}
+types_of_treatments <- c( "CA",  "A", "CAL", "AL")
+replicate_number <- c( '1', '2', '3')
+
+input_for_cross_df <- list (replicate_number, types_of_treatments )
+names( input_for_cross_df) <- c( "replicate_number", "types_of_treatments")
+
+all_time_points <-  purrr::cross_df( input_for_cross_df) %>%
+						dplyr::mutate( sample_name = paste0( types_of_treatments, replicate_number )) %>%
+						dplyr::select ( one_of ( c( "sample_name"))) %>%
+						as.data.frame() %>%
+						t() %>%
+						as.vector()
+
+all_time_points <- all_time_points[all_time_points != "AL2"]
+```
+
+## Convert 'x'  number to sample name
+```{r}
+convert_num_to_sample_name <-   all_time_points  
+names(convert_num_to_sample_name) <- seq_along( all_time_points)
+
+
+```
+
+## Get Cluster X and Y coordinates
+```{r}
+
+cluster_id_to_soms_coord <-  cross_df( list( som_x=1:5, som_y=1:5) ) %>%
+  mutate( cluster_id = row_number())
+
+```
+
+
+##  Pareto scaling of the AMB only treatment read counts data
+```{r}
+
+compare_A_raw_counts <- norm.expr[ list_of_gene_sets$compare_A, all_time_points]
+compare_A_norm_counts <- genescale(compare_A_raw_counts, axis=1, method="Z") %>%
+                         as.data.frame() %>%
+                         rownames_to_column("orf_id") %>%
+                         gather( "samples", "norm_counts", all_time_points    )
+
+
+compare_A_clusters <- compare_A_soms %>%
+                      mutate( x = purrr::map_chr( x, ~convert_num_to_sample_name[.]   )  ) %>%
+                      inner_join( compare_A_norm_counts, by = c("id_a" = "orf_id", "x" = "samples")) %>%
+                      inner_join( cluster_id_to_soms_coord, by =c("cluster" = "cluster_id"))
+ 
+compare_A_clusters  %>% filter ( abs(y - norm_counts) > 1*10^3 ) 
+
+
+```
+
+##  Pareto scaling of the AMB + LF treatment read counts data
+```{r}
+
+compare_AL_raw_counts <- norm.expr[ list_of_gene_sets$compare_AL, all_time_points]
+compare_AL_norm_counts <- genescale(compare_AL_raw_counts, axis=1, method="Z") %>%
+                          as.data.frame() %>%
+                          rownames_to_column("orf_id") %>%
+                          gather( "samples", "norm_counts", all_time_points    )
+
+
+compare_AL_clusters <- compare_AL_soms %>%
+                      mutate( x = purrr::map_chr( x, ~convert_num_to_sample_name[.]   )  ) %>%
+                      inner_join( compare_A_norm_counts, by = c("id_a" = "orf_id", "x" = "samples")) %>%
+                      inner_join( cluster_id_to_soms_coord, by =c("cluster" = "cluster_id"))
+ 
+compare_AL_clusters  %>% filter ( abs(y - norm_counts) > 1*10^3 ) 
+
+
+
+```
+
+
+
+
+
+
+## Prototype drawing SOMs using ggplot
+```{r}
+compare_A_ggplot <- compare_A_clusters %>%
+  mutate( x = factor ( x, levels = all_time_points )) %>%
+  mutate( cluster = factor(cluster, levels = 1:25 )) %>%
+  ggplot( aes( x, y,  col=cluster, group=id_a )) +
+  geom_line() +
+  facet_wrap( . ~ cluster, nrow=5, drop=FALSE) + 
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 90),
+        # Issue with x-axis tick label alignment https://github.com/tidyverse/ggplot2/issues/1878
+        axis.text.x.bottom = element_text( vjust= 0.5  )) + 
+  xlab( "Samples") +
+  ylab ( "Standardized Gene Expression")
+
+compare_A_ggplot
+
+ggsave(filename = file.path(soms_results_dir, "compare_A/5x5/ggplot_SOMs_5_by_5.pdf"), plot=compare_A_ggplot, width = 6,  height =6.1  )
+
+compare_AL_ggplot <- compare_AL_clusters %>%
+  mutate( x = factor ( x, levels = all_time_points )) %>%
+  mutate( cluster = factor(cluster, levels = 1:25 )) %>%
+  ggplot( aes( x, y,  col=cluster, group=id_a )) +
+  geom_line() +
+  facet_wrap( . ~ cluster, nrow=5, drop=FALSE) + 
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 90),
+        axis.text.x.bottom = element_text( vjust= 0.5 )) +
+  xlab( "Samples") +
+  ylab ( "Standardized Gene Expression")
+
+compare_AL_ggplot
+
+ggsave(filename = file.path(soms_results_dir, "compare_AL/5x5/ggplot_SOMs_5_by_5.pdf"), plot=compare_AL_ggplot, width = 6,  height =6.1  )
+
+```
+
+
+
+
+
+
+
+
