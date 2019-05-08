@@ -78,6 +78,58 @@ soms_AL_go_results_cleaned <- soms_AL_go_results %>%
 
 ```
 
+## Gene per SOM cluster and the standardised gene expression value for each sample
+Merge the gene per cluster information with the gene annotation information
+```{r}
+compare_A_soms <- read.table(file.path(soms_results_dir, "compare_A/5x5/cluster_for_each_gene.tab"), stringsAsFactors = FALSE )
+
+compare_AL_soms <- read.table(file.path(soms_results_dir, "compare_AL/5x5/cluster_for_each_gene.tab"), stringsAsFactors = FALSE)
+
+gene_annotation <- read_tsv( file.path(data_dir, "Gene_Annotation/cneo_gene_annotation_summary.txt" ))
+
+
+compare_A_soms_annot <- compare_A_soms %>%
+  dplyr::distinct( id_a, cluster) %>%
+  left_join( gene_annotation, by = c( "id_a" = "orf_id")) %>%
+  dplyr::distinct( id_a, cluster, is_tf, is_kinases, is_virulence_gene, order_peaktime, scer_orthologs)
+
+
+compare_AL_soms_annot <- compare_AL_soms %>%
+  dplyr::distinct( id_a, cluster) %>%
+  left_join( gene_annotation, by = c( "id_a" = "orf_id")) %>%
+  dplyr::distinct( id_a, cluster, is_tf, is_kinases, is_virulence_gene, order_peaktime, scer_orthologs)
+
+
+```
+
+
+## Summarise gene annotation per cluster 
+```{r}
+
+compare_A_col_annot <- compare_A_soms_annot  %>%
+                       group_by (cluster  ) %>%
+                        summarise( count_tfs =   sum(ifelse(is.na(is_tf), 0, 1)),
+                                   count_kinases =   sum(ifelse(is.na(is_kinases), 0, 1)),
+                                   count_virulence_genes = sum(ifelse(is.na(is_virulence_gene), 0, 1)),
+                                   count_cell_cycle_genes = sum(ifelse(is.na(order_peaktime), 0, 1))) %>%
+                        filter(  count_tfs > 0 |
+                                  count_kinases > 0 |
+                                  count_virulence_genes > 0 |
+                                  count_cell_cycle_genes > 0  )
+
+
+compare_AL_col_annot <- compare_AL_soms_annot  %>%
+                       group_by (cluster  ) %>%
+                        summarise( count_tfs =   sum(ifelse(is.na(is_tf), 0, 1)),
+                                   count_kinases =   sum(ifelse(is.na(is_kinases), 0, 1)),
+                                   count_virulence_genes = sum(ifelse(is.na(is_virulence_gene), 0, 1)),
+                                   count_cell_cycle_genes = sum(ifelse(is.na(order_peaktime), 0, 1))) %>%
+                        filter(  count_tfs > 0 |
+                                  count_kinases > 0 |
+                                  count_virulence_genes > 0 |
+                                  count_cell_cycle_genes > 0  )
+
+```
 
 
 
@@ -146,6 +198,8 @@ cneo_soms_A_select <- main_heatmap(  soms_A_select_go_matrix, colors= c("lightbl
 
 cneo_soms_A_select
 
+dim(soms_A_select_go_matrix)
+
 save_iheatmap(p=cneo_soms_A_select, filename=file.path( soms_results_dir, "compare_A/5x5/compare_A_selected_go_terms_iheatmapr.png"))
 
 ```
@@ -156,28 +210,34 @@ save_iheatmap(p=cneo_soms_A_select, filename=file.path( soms_results_dir, "compa
 soms_A_gene_annotation <- soms_A_select_go %>%
   inner_join  ( soms_A_go_genes, by =c( "cluster_id" = "cluster_id",
                                        "gobpid" = "go_id") ) %>%
-  dplyr::distinct( gobpid, term, cluster_id, Treatment, gene_id, is_tf, is_kinases, is_virulence_gene, order_peaktime, scer_orthologs)
+  dplyr::distinct( gobpid, term, cluster_id, Treatment, gene_id, is_tf, is_kinases, is_virulence_gene, order_peaktime)
 
-soms_A_gene_annotation_sum <- soms_A_gene_annotation %>%
-  dplyr::select( -cluster_id, -Treatment ) %>%
+soms_A_gene_row_annot_sum <- soms_A_gene_annotation %>%
+  dplyr::select( -cluster_id, -Treatment) %>%
   dplyr::distinct( ) %>%
   group_by( term ) %>%
-  summarise(# count_tfs =   sum(ifelse(is.na(is_tf), 0, 1)),
+  summarise( count_tfs =   sum(ifelse(is.na(is_tf), 0, 1)),
              count_kinases =   sum(ifelse(is.na(is_kinases), 0, 1)),
              count_virulence_genes = sum(ifelse(is.na(is_virulence_gene), 0, 1)),
-             count_cell_cycle_genes = sum(ifelse(is.na(order_peaktime), 0, 1)),
-             count_ortholog_genes = sum(ifelse(is.na(scer_orthologs), 0, 1))) %>%
-  filter( # count_tfs > 0 |
-            count_kinases > 0 |
-            count_virulence_genes > 0 |
-            count_cell_cycle_genes > 0 |
-            count_ortholog_genes > 0 ) %>%
+             count_cell_cycle_genes = sum(ifelse(is.na(order_peaktime), 0, 1)))  %>%
+  # filter(  count_tfs > 0 |
+  #           count_kinases > 0 |
+  #           count_virulence_genes > 0 |
+  #           count_cell_cycle_genes > 0 ) %>%
  arrange(term) %>%
  column_to_rownames( "term")
 
+dim(soms_A_select_go_matrix)
+dim(soms_A_gene_row_annot_sum )
+
+soms_A_gene_col_annot_sum <- compare_A_col_annot %>%
+                             filter( cluster %in% (soms_A_gene_annotation %>% pull(cluster_id) %>% unique) ) %>%
+                             column_to_rownames("cluster")
+                         
 
 cneo_soms_A_select_annot <- cneo_soms_A_select %>%
-                            add_row_annotation(  soms_A_gene_annotation_sum)
+                            add_row_annotation(  soms_A_gene_row_annot_sum) # %>%
+                            # add_col_annotation( soms_A_gene_col_annot_sum)
 
 cneo_soms_A_select_annot
 ```
@@ -231,6 +291,7 @@ cneo_soms_AL_select
 
 save_iheatmap(p=cneo_soms_AL_select, filename=file.path( soms_results_dir, "compare_AL/5x5/compare_AL_selected_go_terms_iheatmapr.png"))
 
+dim(soms_AL_select_go_matrix)
 ```
 
 
@@ -241,28 +302,30 @@ save_iheatmap(p=cneo_soms_AL_select, filename=file.path( soms_results_dir, "comp
 soms_AL_gene_annotation <- soms_AL_select_go %>%
   inner_join  ( soms_AL_go_genes, by =c( "cluster_id" = "cluster_id",
                                        "gobpid" = "go_id") ) %>%
-  dplyr::distinct( gobpid, term, cluster_id, Treatment, gene_id, is_tf, is_kinases, is_virulence_gene, order_peaktime, scer_orthologs)
+  dplyr::distinct( gobpid, term, cluster_id, Treatment, gene_id, is_tf, is_kinases, is_virulence_gene, order_peaktime)
 
-soms_AL_gene_annotation_sum <- soms_AL_gene_annotation %>%
+soms_AL_gene_row_annot_sum <- soms_AL_gene_annotation %>%
   dplyr::select( -cluster_id, -Treatment ) %>%
   dplyr::distinct( ) %>%
   group_by( term ) %>%
-  summarise( # count_tfs =   sum(ifelse(is.na(is_tf), 0, 1)),
+  summarise(  count_tfs =   sum(ifelse(is.na(is_tf), 0, 1)),
              count_kinases =   sum(ifelse(is.na(is_kinases), 0, 1)),
              count_virulence_genes = sum(ifelse(is.na(is_virulence_gene), 0, 1)),
-             count_cell_cycle_genes = sum(ifelse(is.na(order_peaktime), 0, 1)),
-             count_ortholog_genes = sum(ifelse(is.na(scer_orthologs), 0, 1))) %>%
-  filter( # count_tfs > 0 |
-            count_kinases > 0 |
-            count_virulence_genes > 0 |
-            count_cell_cycle_genes > 0 |
-            count_ortholog_genes > 0 ) %>%
+             count_cell_cycle_genes = sum(ifelse(is.na(order_peaktime), 0, 1))) %>%
+  # filter(  count_tfs > 0 |
+  #           count_kinases > 0 |
+  #           count_virulence_genes > 0 |
+  #           count_cell_cycle_genes > 0 ) %>%
  arrange(term) %>%
  column_to_rownames( "term")
 
+soms_AL_gene_col_annot_sum <- compare_AL_col_annot %>%
+                             filter( cluster %in% (soms_AL_gene_annotation %>% pull(cluster_id) %>% unique) ) %>%
+                             column_to_rownames("cluster")
 
 cneo_soms_AL_select_annot <- cneo_soms_AL_select %>%
-                            add_row_annotation(  soms_AL_gene_annotation_sum)
+                            add_row_annotation(  soms_AL_gene_row_annot_sum) # %>%
+                            # add_col_annotation( soms_AL_gene_col_annot_sum)
 
 cneo_soms_AL_select_annot
 ```
