@@ -63,6 +63,16 @@ compare_AL_codebook_vector <- compare_AL_codebook_vector_raw[compare_AL_cluster_
 
 ```
 
+## Check consistency of code book vector sample names order
+```{r}
+if ( any( colnames( compare_A_codebook_vector )  != colnames( compare_AL_codebook_vector )  ) ) {
+  
+  stop ( "Code book vector sample names order for AMB treatment and AMB + LF treatment are not consistent.")
+}
+
+
+```
+
 
 ```{r}
 ##################################################################################################################

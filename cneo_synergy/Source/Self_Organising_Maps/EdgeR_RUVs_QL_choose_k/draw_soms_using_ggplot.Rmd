@@ -33,7 +33,50 @@ EdgeR_RUVs_QL_gene_lists_dir <- file.path( EdgeR_RUVs_QL_de_genes_dir, "Gene_Lis
 
 ```
 
+## These are the data from the SOMs code book vector
+```{r}
 
+soms_results_dir <- file.path( results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL/To_Use_k_0_Remove_5a/Condition_on_child_terms_true" ) 
+
+compare_A_soms <- readRDS ( file.path( soms_results_dir, "compare_A/5x5/soms_results.RDS" ) )
+compare_AL_soms <- readRDS ( file.path( soms_results_dir, "compare_AL/5x5/soms_results.RDS" ) )
+
+## Read in the table showing direction of gene expression (for the genes in the cluster)
+compare_A_direction <- read_tsv ( file.path( soms_results_dir,"compare_A/5x5/soms_clusters_mapping.txt"  )) %>%
+                       mutate( Direction = case_when( str_detect(Direction, "Up")  ~ "Up",
+                                                      str_detect(Direction, "Down")  ~ "Down",
+                                                      TRUE ~ NA_character_
+                                                      ) )        
+  
+compare_AL_direction <- read_tsv ( file.path( soms_results_dir,"compare_AL/5x5/soms_clusters_mapping.txt"  )) %>%
+                       mutate( Direction = case_when( str_detect(Direction, "Up") ~ "Up",
+                                                      str_detect(Direction, "Down") ~ "Down",
+                                                      TRUE ~ NA_character_
+                                                      ) )        
+
+## Get a list of all the clusters which actually has data in them 
+compare_A_cluster_with_data <- compare_A_direction %>%
+                               mutate( cluster =  purrr::map_chr( cluster, ~paste( "V", ., sep="")) ) %>%
+                               pull(cluster)
+
+compare_AL_cluster_with_data <- compare_AL_direction %>%
+                               mutate( cluster =  purrr::map_chr( cluster, ~paste( "V", ., sep="")) ) %>%
+                               pull(cluster)
+
+
+str(compare_A_soms$som$codes)
+
+compare_A_codebook_vector_raw  <- compare_A_soms$som$codes[[1]]
+compare_AL_codebook_vector_raw <- compare_AL_soms$som$codes[[1]]
+
+compare_A_codebook_vector <- compare_A_codebook_vector_raw[compare_A_cluster_with_data,]
+compare_AL_codebook_vector <- compare_AL_codebook_vector_raw[compare_AL_cluster_with_data,]
+                 
+
+
+```
+
+## Load the gene expression data normalized by library size and z-score from the SOMs cluster 
 ```{r}
 
 ## Read in the SOMs clusters
@@ -86,9 +129,9 @@ list_of_gene_sets <- purrr::map( list_of_groups_of_experiments, function(x) {  p
 
 
 
-## Define the time points
+## Sample Order to use in the figure 
 ```{r}
-types_of_treatments <- c( "CA",  "A", "CAL", "AL")
+types_of_treatments <- c(    "CA", "A",   "CAL", "AL")
 replicate_number <- c( '1', '2', '3')
 
 input_for_cross_df <- list (replicate_number, types_of_treatments )
@@ -104,10 +147,20 @@ all_time_points <-  purrr::cross_df( input_for_cross_df) %>%
 all_time_points <- all_time_points[all_time_points != "AL2"]
 ```
 
+
+
 ## Convert 'x'  number to sample name
 ```{r}
-convert_num_to_sample_name <-   all_time_points  
-names(convert_num_to_sample_name) <- seq_along( all_time_points)
+
+
+if ( any( colnames( compare_A_codebook_vector )  != colnames( compare_AL_codebook_vector )  ) ) {
+  
+  stop ( "Code book vector sample names order for AMB treatment and AMB + LF treatment are not consistent.")
+}
+
+
+convert_num_to_sample_name <-      colnames( compare_A_codebook_vector ) 
+names(convert_num_to_sample_name) <- seq_along(  colnames( compare_A_codebook_vector ) )
 
 
 ```
@@ -136,7 +189,7 @@ compare_A_clusters <- compare_A_soms %>%
                       inner_join( compare_A_norm_counts, by = c("id_a" = "orf_id", "x" = "samples")) %>%
                       inner_join( cluster_id_to_soms_coord, by =c("cluster" = "cluster_id"))
  
-compare_A_clusters  %>% filter ( abs(y - norm_counts) > 1*10^3 ) 
+compare_A_clusters  %>% filter ( abs(y - norm_counts) > 1*10^-3 ) 
 
 
 ```
@@ -156,13 +209,35 @@ compare_AL_clusters <- compare_AL_soms %>%
                       inner_join( compare_A_norm_counts, by = c("id_a" = "orf_id", "x" = "samples")) %>%
                       inner_join( cluster_id_to_soms_coord, by =c("cluster" = "cluster_id"))
  
-compare_AL_clusters  %>% filter ( abs(y - norm_counts) > 1*10^3 ) 
+compare_AL_clusters  %>% filter ( abs(y - norm_counts) > 1*10^-3 ) 
 
 
 
 ```
 
 
+
+
+```{r}
+
+
+compare_A_ggplot_cluster_19 <- compare_A_clusters %>%
+  mutate( x = factor ( x, levels = all_time_points )) %>%
+  mutate( cluster = factor(cluster, levels = 1:25 )) %>%
+  filter( cluster == 19) %>%
+  ggplot( aes( x, y,  col=cluster, group=id_a )) +
+  geom_line() +
+  facet_wrap( . ~ cluster, nrow=5, drop=FALSE) + 
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 90),
+        # Issue with x-axis tick label alignment https://github.com/tidyverse/ggplot2/issues/1878
+        axis.text.x.bottom = element_text( vjust= 0.5  )) + 
+  xlab( "Samples") +
+  ylab ( "Standardized Gene Expression")
+
+compare_A_ggplot_cluster_19
+
+```
 
 
 

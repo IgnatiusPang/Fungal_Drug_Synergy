@@ -23,11 +23,16 @@ sessionInfo()
 
 ```
 
+## Directories Management
+```{r}
+soms_AL_results_dir <- file.path(results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL/To_Use_k_0_Remove_5a/Condition_on_child_terms_true" ) 
+
+```
 
 
 ```{r}
 
-soms_go_results <- read_tsv( file.path(results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL/To_Use_k_0_Remove_5a/Condition_on_child_terms_true/compare_AL/5x5/enriched_go_terms_SOMs.txt"))
+soms_go_results <- read_tsv( file.path(soms_AL_results_dir, "compare_AL/5x5/enriched_go_terms_SOMs.txt"))
 
 soms_go_results
 
@@ -61,10 +66,33 @@ soms_go_matrix <- soms_go_results_cleaned %>%
                   column_to_rownames("term") %>%
                   as.matrix()
   
-main_heatmap(  soms_go_matrix, colors= viridis(100), layout = list(margin = list(l = 500)) )  %>%
+cneo_soms_AL_stringent <- main_heatmap(  soms_go_matrix, colors= viridis(100), layout = list(margin = list(l = 500)) )  %>%
   add_row_labels() %>%
   add_col_labels() #%>%
   #add_row_clustering() 
+
+cneo_soms_AL_stringent
+
+
+save_iheatmap(cneo_soms_AL_stringent, filename = file.path(soms_AL_results_dir, "compare_AL/5x5", "cneo_soms_AL_stringent_iheatmapr.png"  ))
+```
+
+
+
+```{r}
+cneo_soms_AL_stringent_gg <- soms_go_results_cleaned %>%
+inner_join( term_found_in_multiple_clusters, by =c("term" = "term")) %>%
+  mutate( cluster_id = factor(cluster_id)) %>%
+  ggplot( aes( cluster_id, term )) +
+  geom_tile(aes(fill = bh), colour = "white") +
+  # scale_fill_gradient(low = "white",  high = "steelblue") +
+  scale_fill_gradientn(colours = viridis(100))
+
+cneo_soms_AL_stringent_gg
+
+
+ggsave( plot= cneo_soms_AL_stringent_gg, filename = file.path(soms_AL_results_dir, "compare_AL/5x5", "cneo_soms_AL_stringent_heatmap_ggplot.png"  ), width = 10)
+
 ```
 
 
