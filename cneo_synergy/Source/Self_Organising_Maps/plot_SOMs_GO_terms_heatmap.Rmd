@@ -15,6 +15,7 @@ p_load(tidyverse)
 p_load(GO.db)
 p_load(iheatmapr)		
 p_load(viridis)
+p_load(readxl)
 
 source( '../Common/global_parameters.R')
 source( '../Common/helper_functions.R')
@@ -25,33 +26,177 @@ sessionInfo()
 
 ## Directories Management
 ```{r}
-soms_AL_results_dir <- file.path(results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL/To_Use_k_0_Remove_5a/Condition_on_child_terms_true" ) 
+soms_results_dir <- file.path(results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL/To_Use_k_0_Remove_5a/Condition_on_child_terms_true" ) 
 
 ```
 
-
+## Read list of enriched GO terms related to each SOM cluster
 ```{r}
 
-soms_go_results <- read_tsv( file.path(soms_AL_results_dir, "compare_AL/5x5/enriched_go_terms_SOMs.txt"))
+soms_A_go_results <- read_tsv( file.path(soms_results_dir, "compare_A/5x5/enriched_go_terms_SOMs.txt"))
 
-soms_go_results
+soms_AL_go_results <- read_tsv( file.path(soms_results_dir, "compare_AL/5x5/enriched_go_terms_SOMs.txt"))
 
-```
-
-
-```{r}
-
-
-soms_go_results_cleaned <- soms_go_results %>%
-  filter( bh < 0.05 & ontology == "BP") %>%
+soms_A_go_results_cleaned <- soms_A_go_results %>%
+  filter( pvalue < 0.01 & ontology == "BP") %>%
   mutate( cluster_id = str_replace( query_list_id, "SOMs_cluster_C", "")   ) %>%
   mutate( cluster_id = as.integer(cluster_id)) %>%
-  dplyr::select( term, cluster_id, bh  ) %>%
+  dplyr::select( gobpid, term, cluster_id, pvalue, bh  ) %>%
+  mutate( Enrichment = case_when( bh < 0.05 ~ "High",
+                                  pvalue < 0.01 & bh >= 0.05 ~ "Medium",
+                                  TRUE ~ "Low")) %>%
+  mutate( Enrichment_Levels = case_when( bh < 0.05 ~ 2,
+                                  pvalue < 0.01 & bh >= 0.05 ~ 1,
+                                  TRUE ~ 0)) %>%  
   distinct()
 
 
+soms_AL_go_results_cleaned <- soms_AL_go_results %>%
+  filter( pvalue < 0.01 & ontology == "BP") %>%
+  mutate( cluster_id = str_replace( query_list_id, "SOMs_cluster_C", "")   ) %>%
+  mutate( cluster_id = as.integer(cluster_id)) %>%
+  dplyr::select( gobpid, term, cluster_id, pvalue, bh  ) %>%
+  mutate( Enrichment = case_when( bh < 0.05 ~ "High",
+                                  pvalue < 0.01 & bh >= 0.05 ~ "Medium",
+                                  TRUE ~ "Low")) %>%
+  mutate( Enrichment_Levels = case_when( bh < 0.05 ~ 2,
+                                  pvalue < 0.01 & bh >= 0.05 ~ 1,
+                                  TRUE ~ 0)) %>%  
+  distinct()
 
-term_found_in_multiple_clusters <- soms_go_results_cleaned %>%
+
+```
+
+## Read list of selected GO terms
+```{r}
+selected_GO_terms <- readxl::read_xlsx( file.path(data_dir, "Data_for_SOMs/Selected SOMs enriched terms.xlsx" ), sheet="Lookup_Table" ) 
+  
+```
+## Read in the table showing direction of gene expression (for the genes in the cluster)
+```{r}
+compare_A_direction <- read_tsv ( file.path( soms_results_dir,"compare_A/5x5/soms_clusters_mapping.txt"  )) %>%
+                       mutate( Direction = case_when( str_detect(Direction, "Up")  ~ "Up",
+                                                      str_detect(Direction, "Down")  ~ "Down",
+                                                      TRUE ~ NA_character_
+                                                      ) )        
+  
+compare_AL_direction <- read_tsv ( file.path( soms_results_dir,"compare_AL/5x5/soms_clusters_mapping.txt"  )) %>%
+                       mutate( Direction = case_when( str_detect(Direction, "Up") ~ "Up",
+                                                      str_detect(Direction, "Down") ~ "Down",
+                                                      TRUE ~ NA_character_
+                                                      ) )        
+
+```
+
+```{r}
+
+soms_A_select_go <- soms_A_go_results_cleaned %>%
+    inner_join( selected_GO_terms, by = c( "gobpid" = "GO_ID") ) %>%
+    filter( Treatment == "AMB+LF treatment" ) %>%
+    arrange( Responses, GO_term  ) %>%
+    dplyr::select( - Cluster) %>%
+    distinct()
+
+soms_A_select_go_matrix <- soms_A_select_go %>% 
+    dplyr::select( Responses, cluster_id, term, Enrichment_Levels ) %>%
+     arrange( cluster_id, Responses, term  ) %>%
+    distinct() %>%
+    spread( cluster_id, Enrichment_Levels, fill = NA)  %>%
+    arrange( Responses, term  ) %>%
+    dplyr::select( - Responses) %>%
+    distinct( ) %>%
+    as.data.frame %>%
+    column_to_rownames("term") %>%
+    as.matrix()
+
+soms_A_group_term <- soms_A_select_go %>%
+      distinct( Responses, GO_term  ) %>%
+      arrange( Responses, GO_term  ) 
+
+
+soms_A_direction <-  soms_A_select_go %>%
+                      distinct( cluster_id) %>%
+                      inner_join ( compare_A_direction, by=c("cluster_id" = "cluster" ) ) %>%
+                      distinct( cluster_id, Direction) %>%
+                      arrange( cluster_id)
+                     
+if( any ( colnames( soms_A_select_go_matrix) != soms_A_direction$cluster_id )) {
+  stop("Order of SOMs cluster not matched for merging with table describing the direction of gene expression change.")
+}
+
+cneo_soms_A_select <- main_heatmap(  soms_A_select_go_matrix, colors= c("lightblue", "darkblue"), layout = list(margin = list(l = 500)) )  %>%
+  add_row_labels() %>%
+  add_col_labels() %>%
+  add_row_annotation( data.frame( Responses =  soms_A_group_term$Responses)) %>%
+  add_col_annotation( data.frame( Direction = soms_A_direction$Direction), colors = list(Direction=c("green", "red")))
+
+cneo_soms_A_select
+
+save_iheatmap(p=cneo_soms_A_select, filename=file.path( soms_results_dir, "compare_A/5x5/compare_A_selected_go_terms_iheatmapr.png"))
+
+```
+
+
+## AMB + LF treatment
+```{r}
+
+soms_AL_select_go <- soms_AL_go_results_cleaned %>%
+    inner_join( selected_GO_terms, by = c( "gobpid" = "GO_ID") ) %>%
+    filter( Treatment == "AMB+LF treatment" ) %>%
+    arrange( Responses, GO_term  ) %>%
+    dplyr::select( - Cluster) %>%
+    distinct()
+
+soms_AL_select_go_matrix <- soms_AL_select_go %>% 
+    dplyr::select( Responses, cluster_id, term, Enrichment_Levels ) %>%
+     arrange( cluster_id, Responses, term  ) %>%
+    distinct() %>%
+    spread( cluster_id, Enrichment_Levels, fill = NA)  %>%
+    arrange( Responses, term  ) %>%
+    dplyr::select( - Responses) %>%
+    distinct( ) %>%
+    as.data.frame %>%
+    column_to_rownames("term") %>%
+    as.matrix()
+
+soms_AL_group_term <- soms_AL_select_go %>%
+      distinct( Responses, GO_term  ) %>%
+      arrange( Responses, GO_term  ) 
+
+
+soms_AL_direction <-  soms_AL_select_go %>%
+                      distinct( cluster_id) %>%
+                      inner_join ( compare_AL_direction, by=c("cluster_id" = "cluster" ) ) %>%
+                      distinct( cluster_id, Direction) %>%
+                      arrange( cluster_id)
+                     
+if( any ( colnames( soms_AL_select_go_matrix) != soms_AL_direction$cluster_id )) {
+  stop("Order of SOMs cluster not matched for merging with table describing the direction of gene expression change.")
+}
+
+cneo_soms_AL_select <- main_heatmap(  soms_AL_select_go_matrix, colors= c("lightblue", "darkblue"), layout = list(margin = list(l = 500)) )  %>%
+  add_row_labels() %>%
+  add_col_labels() %>%
+  add_row_annotation( data.frame( Responses =  soms_AL_group_term$Responses)) %>%
+  add_col_annotation( data.frame( Direction = soms_AL_direction$Direction), colors = list(Direction=c("green", "red")))
+
+cneo_soms_AL_select
+
+save_iheatmap(p=cneo_soms_AL_select, filename=file.path( soms_results_dir, "compare_AL/5x5/compare_AL_selected_go_terms_iheatmapr.png"))
+
+```
+
+
+
+
+
+
+
+
+## Enriched AMB + LF treatment, adjusted p-value < 0.05, filtering and data preparations
+```{r}
+
+term_found_in_multiple_clusters <- soms_AL_go_results_cleaned %>%
   group_by(term ) %>%
   summarise( counts = n(),
              list_of_clusters = paste(cluster_id, collapse=", ") ) %>%
@@ -60,13 +205,18 @@ term_found_in_multiple_clusters <- soms_go_results_cleaned %>%
   filter( counts > 1) %>%
   dplyr::select( -counts, -list_of_clusters )
 
-soms_go_matrix <- soms_go_results_cleaned %>%
-                  inner_join( term_found_in_multiple_clusters, by =c("term" = "term")) %>%
-                  spread( cluster_id, bh, fill = NA)  %>%
+soms_AL_in_mult_clusters <- soms_AL_go_results_cleaned %>%
+                            inner_join( term_found_in_multiple_clusters, by =c("term" = "term"))
+```
+
+## Enriched AMB + LF treatment, adjusted p-value < 0.05, iheatmapr
+```{r}
+soms_AL_go_matrix <- soms_AL_in_mult_clusters %>%
+                  spread( cluster_id, pvalue, fill = NA)  %>%
                   column_to_rownames("term") %>%
                   as.matrix()
   
-cneo_soms_AL_stringent <- main_heatmap(  soms_go_matrix, colors= viridis(100), layout = list(margin = list(l = 500)) )  %>%
+cneo_soms_AL_stringent <- main_heatmap(  soms_AL_go_matrix, colors= viridis(100), layout = list(margin = list(l = 500)) )  %>%
   add_row_labels() %>%
   add_col_labels() #%>%
   #add_row_clustering() 
@@ -74,90 +224,25 @@ cneo_soms_AL_stringent <- main_heatmap(  soms_go_matrix, colors= viridis(100), l
 cneo_soms_AL_stringent
 
 
-save_iheatmap(cneo_soms_AL_stringent, filename = file.path(soms_AL_results_dir, "compare_AL/5x5", "cneo_soms_AL_stringent_iheatmapr.png"  ))
+save_iheatmap(cneo_soms_AL_stringent, filename = file.path(soms_results_dir, "compare_AL/5x5", "cneo_soms_AL_stringent_iheatmapr.png"  ))
 ```
 
 
-
+## Enriched AMB + LF treatment, adjusted p-value < 0.05, ggplot
 ```{r}
-cneo_soms_AL_stringent_gg <- soms_go_results_cleaned %>%
-inner_join( term_found_in_multiple_clusters, by =c("term" = "term")) %>%
+cneo_soms_AL_stringent_gg <- soms_AL_in_mult_clusters %>%
   mutate( cluster_id = factor(cluster_id)) %>%
   ggplot( aes( cluster_id, term )) +
-  geom_tile(aes(fill = bh), colour = "white") +
+  geom_tile(aes(fill = pvalue), colour = "white") +
   # scale_fill_gradient(low = "white",  high = "steelblue") +
   scale_fill_gradientn(colours = viridis(100))
 
 cneo_soms_AL_stringent_gg
 
 
-ggsave( plot= cneo_soms_AL_stringent_gg, filename = file.path(soms_AL_results_dir, "compare_AL/5x5", "cneo_soms_AL_stringent_heatmap_ggplot.png"  ), width = 10)
+ggsave( plot= cneo_soms_AL_stringent_gg, filename = file.path(soms_results_dir, "compare_AL/5x5", "cneo_soms_AL_stringent_heatmap_ggplot.png"  ), width = 10)
 
 ```
 
 
-
-## Enriched GO terms found in more than one clusters with p-value < 0.01
-```{r}
-
-
-soms_go_results_cleaned <- soms_go_results %>%
-  filter( pvalue < 0.01 & ontology == "BP") %>%
-  mutate( cluster_id = str_replace( query_list_id, "SOMs_cluster_C", "")   ) %>%
-  mutate( cluster_id = as.integer(cluster_id)) %>%
-  dplyr::select( term, cluster_id, pvalue  ) %>%
-  distinct()
-
-
-
-term_found_in_multiple_clusters <- soms_go_results_cleaned %>%
-  group_by(term ) %>%
-  summarise( counts = n(),
-             list_of_clusters = paste(cluster_id, collapse=", ") ) %>%
-  arrange(desc(counts)) %>%
-  ungroup() %>%
-  filter( counts > 1) %>%
-  dplyr::select( -counts, -list_of_clusters )
-
-soms_go_matrix <- soms_go_results_cleaned %>%
-                  inner_join( term_found_in_multiple_clusters, by =c("term" = "term")) %>%
-                  spread( cluster_id, pvalue, fill= NA)  %>%
-                  column_to_rownames("term") %>%
-                  as.matrix()
-  
-main_heatmap(  soms_go_matrix, colors= viridis(100), layout = list(margin = list(l = 500)) )  %>%
-  add_row_labels() %>%
-  add_col_labels() 
-```
-
-```{r}
-
-soms_go_results_cleaned <- soms_go_results %>%
-  filter( pvalue < 0.01 & ontology == "BP") %>%
-  mutate( cluster_id = str_replace( query_list_id, "SOMs_cluster_C", "")   ) %>%
-  mutate( cluster_id = as.integer(cluster_id)) %>%
-  dplyr::select( term, cluster_id, pvalue  ) %>%
-  distinct()
-
-
-
-term_found_in_multiple_clusters <- soms_go_results_cleaned %>%
-  group_by(term ) %>%
-  summarise( counts = n(),
-             list_of_clusters = paste(cluster_id, collapse=", ") ) %>%
-  arrange(desc(counts)) %>%
-  ungroup() %>%
-  filter( counts == 1) %>%
-  dplyr::select( -counts, -list_of_clusters )
-
-soms_go_matrix <- soms_go_results_cleaned %>%
-                  inner_join( term_found_in_multiple_clusters, by =c("term" = "term")) %>%
-                  spread( cluster_id, pvalue, fill= NA)  %>%
-                  column_to_rownames("term") %>%
-                  as.matrix()
-  
-main_heatmap(  soms_go_matrix, colors= viridis(100), layout = list(margin = list(l = 500)) )  %>%
-  add_row_labels() %>%
-  add_col_labels() 
-```
 

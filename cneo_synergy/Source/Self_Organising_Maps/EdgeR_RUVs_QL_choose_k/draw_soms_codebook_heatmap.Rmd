@@ -60,6 +60,9 @@ compare_A_codebook_vector <- compare_A_codebook_vector_raw[compare_A_cluster_wit
 compare_AL_codebook_vector <- compare_AL_codebook_vector_raw[compare_AL_cluster_with_data,]
                  
 
+## Remove V's from Cluster ID
+rownames(compare_A_codebook_vector)  <- str_replace( rownames(compare_A_codebook_vector), "V", "")
+rownames(compare_AL_codebook_vector)  <- str_replace( rownames(compare_AL_codebook_vector), "V", "")
 
 ```
 
