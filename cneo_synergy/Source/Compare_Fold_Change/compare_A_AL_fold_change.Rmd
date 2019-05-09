@@ -65,7 +65,8 @@ compare_fold_change <- compare_A_de_genes_clean %>%
                               FDR.A < 0.05 & FDR.AL < 0.05 & sign(logFC.A) == sign(logFC.AL)  ~ "Same",
                               FDR.A < 0.05 & FDR.AL >= 0.05 ~ "AMB only",
                               FDR.A >= 0.05 & FDR.AL < 0.05 ~ "AMB+LF only",
-                              TRUE ~ "Not significant" )    )
+                              TRUE ~ "Not significant" )    ) %>%
+  mutate( coarse_groups = factor( coarse_groups, levels = c( "Same", "AMB only", "AMB+LF only", "Opposite", "Not significant")))
 
 write.table( compare_fold_change, file = file.path( results_dir, "Compare_Fold_Change", "compare_A_AL_fold_change.tab" ), 
              sep="\t", row.names = FALSE, quote = FALSE ) 
@@ -87,7 +88,7 @@ scatter_plot
 There were 3 genes that had opposite sig. log fold-change in AMB and AMB+LF treatment
 CNAG_02691
 CNAG_05638
-CNAG_04363
+CNAG_04363 up in AMB only, down in AMB+LF. 
 All three genes were hypothetical only. Therefore we focused on genes that are significantly differentially expressed in AMB treatment or AMB+LF treatment only. 
 
 
@@ -101,6 +102,12 @@ coarse_scatter_plot <-  compare_fold_change  %>%
                  labs( col = "Is Statistically Significant")
 
 ggplotly( coarse_scatter_plot )
+
+ggsave( plot=coarse_scatter_plot, filename= file.path( results_dir, "Compare_Fold_Change", "compare_A_AL_fold_change.pdf"))
+ggsave( plot=coarse_scatter_plot, filename= file.path( results_dir, "Compare_Fold_Change", "compare_A_AL_fold_change.png"))
+ggsave( plot=coarse_scatter_plot, filename= file.path( results_dir, "Compare_Fold_Change", "compare_A_AL_fold_change.svg"))
+ggsave( plot=coarse_scatter_plot, filename= file.path( results_dir, "Compare_Fold_Change", "compare_A_AL_fold_change.tiff"))
+
 ```
 
 

@@ -30,6 +30,16 @@ soms_results_dir <- file.path(results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL/T
 
 ```
 
+## Read log fold-change of AMB and AMB+LF treatment and how they compare with each other
+```{r}
+compare_fold_change <- read_tsv( file = file.path( results_dir, "Compare_Fold_Change", "compare_A_AL_fold_change.tab" ) ) 
+
+compare_fold_change_clean <- compare_fold_change %>%
+                             dplyr::distinct( genes, coarse_groups) 
+                             
+```
+
+
 ## Read list of enriched GO terms related to each SOM cluster
 ```{r}
 
@@ -124,6 +134,10 @@ compare_AL_direction <- read_tsv ( file.path( soms_results_dir,"compare_AL/5x5/s
 
 ```
 
+
+
+
+## Collate data for AMB treatment's SOM cluster versus enriched GO terms heat map
 ```{r}
 
 soms_A_select_go <- soms_A_go_results_cleaned %>%
@@ -159,20 +173,45 @@ soms_A_direction <-  soms_A_select_go %>%
 if( any ( colnames( soms_A_select_go_matrix) != soms_A_direction$cluster_id )) {
   stop("Order of SOMs cluster not matched for merging with table describing the direction of gene expression change.")
 }
+```
 
 
-grid_params <- setup_colorbar_grid(nrows = 3, 
-                                   x_spacing = 0.7,
-                                   y_spacing = 0.4)
+
+## Count for each cluster, number of significantly differentially expressed genes specific to AMB treament only
+```{r}
+
+count_soms_A_only_genes <- soms_A_go_genes %>%
+ left_join( compare_fold_change_clean, by = c( "gene_id" = "genes" )) %>%
+  distinct( gene_id, cluster_id, coarse_groups) %>%
+  group_by(cluster_id, coarse_groups) %>%
+  summarise( counts = n()) %>%
+  ungroup %>%
+  spread( coarse_groups, counts, fill = 0) %>%
+  dplyr::select( -Same) %>%
+  right_join ( compare_A_direction, 
+               by = c( "cluster_id" = "cluster" )  ) %>%
+  mutate( `AMB only` = ifelse(is.na(`AMB only`), 0, `AMB only`)) %>%
+  filter( cluster_id %in% colnames( soms_A_select_go_matrix)) %>%
+  dplyr::select( cluster_id, Direction, `AMB only`) %>%
+  dplyr::rename( `AMB specific` = "AMB only") %>%
+  column_to_rownames("cluster_id")
+
+
+```
+
+
+```{r}
+grid_params <- setup_colorbar_grid(x_spacing = 0.3)
 
 
 cneo_soms_A_select <- main_heatmap(  soms_A_select_go_matrix, colors= c("lightblue", "darkblue"), 
                                      layout = list(margin = list(l = 350)),
+                                     name = "Significance",
                                       colorbar_grid = grid_params )  %>%
   add_row_labels() %>%
   add_col_labels() %>%
   add_row_annotation( data.frame( Responses =  soms_A_group_term$Responses)) %>%
-  add_col_annotation( data.frame( Direction = soms_A_direction$Direction), colors = list(Direction=c("green", "red")))
+  add_col_annotation( count_soms_A_only_genes, colors = list(Direction=c("green", "red")))
 
 cneo_soms_A_select
 
@@ -222,20 +261,48 @@ soms_AL_direction <-  soms_AL_select_go %>%
 if( any ( colnames( soms_AL_select_go_matrix) != soms_AL_direction$cluster_id )) {
   stop("Order of SOMs cluster not matched for merging with table describing the direction of gene expression change.")
 }
-
-grid_params <- setup_colorbar_grid(nrows = 3, 
-                                   x_spacing = 0.7,
-                                   y_spacing = 0.4)
+```
 
 
+## Count for each cluster, number of significantly differentially expressed genes specific to AMB+LF treatment only
+```{r}
+count_soms_AL_only_genes <- soms_AL_go_genes %>%
+ left_join( compare_fold_change_clean, by = c( "gene_id" = "genes" )) %>%
+  distinct( gene_id, cluster_id, coarse_groups) %>%
+  group_by(cluster_id, coarse_groups) %>%
+  summarise( counts = n()) %>%
+  ungroup %>%
+  spread( coarse_groups, counts, fill = 0) %>%
+  dplyr::select( -Same) %>%
+  right_join ( compare_AL_direction, 
+               by = c( "cluster_id" = "cluster" )  ) %>%
+  mutate( `AMB+LF only` = ifelse(is.na(`AMB+LF only`), 0, `AMB+LF only`)) %>%
+  filter( cluster_id %in% colnames( soms_AL_select_go_matrix)) %>%
+  dplyr::select( cluster_id, Direction, `AMB+LF only`) %>%
+  dplyr::rename( `AMB+LF specific` = "AMB+LF only") %>%
+  column_to_rownames("cluster_id")
+
+
+
+# soms_AL_go_genes
+# compare_fold_change_clean
+
+```
+
+
+```{r}
+
+
+grid_params <- setup_colorbar_grid(x_spacing = 0.3)
 
 cneo_soms_AL_select <- main_heatmap(  soms_AL_select_go_matrix, colors= c("lightblue", "darkblue"), 
                                       layout = list(margin = list(l = 350)),
-                                      colorbar_grid = grid_params)  %>%
+                                      name = "Significance",
+                                      colorbar_grid = grid_params )  %>%
   add_row_labels() %>%
   add_col_labels() %>%
   add_row_annotation( data.frame( Responses =  soms_AL_group_term$Responses)) %>%
-  add_col_annotation( data.frame( Direction = soms_AL_direction$Direction), colors = list(Direction=c("green", "red")))
+  add_col_annotation( count_soms_AL_only_genes, colors = list(Direction=c("green", "red")))
 
 cneo_soms_AL_select
 
@@ -292,6 +359,10 @@ save_iheatmap(p=cneo_soms_A_select_annot,
 
 
 ## Try to add more annotation, AMB+LF
+
+iron ion transmembrane transport, GO:0034755, AMB+LF treatment Cluster 10, have 1 virulence gene (CNAG_03464 /  Cu-oxidase / Laccase-2 / EC 1.10.3.2 / Diphenol oxidase 2). 
+
+
 ```{r}
 
 
