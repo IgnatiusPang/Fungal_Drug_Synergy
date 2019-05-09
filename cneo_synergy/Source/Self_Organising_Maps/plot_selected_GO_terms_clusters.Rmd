@@ -1,0 +1,168 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+## Load libraries and scripts
+```{r}
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+p_load(iheatmapr)		
+p_load(viridis)
+p_load(readxl)
+
+source( '../Common/global_parameters.R')
+source( '../Common/helper_functions.R')
+
+sessionInfo()
+
+```
+
+## Directories Management
+```{r}
+soms_results_dir <- file.path(results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL/To_Use_k_0_Remove_5a/Condition_on_child_terms_true" ) 
+
+```
+
+## Read log fold-change of AMB and AMB+LF treatment and how they compare with each other
+```{r}
+compare_fold_change <- read_tsv( file = file.path( results_dir, "Compare_Fold_Change", "compare_A_AL_fold_change.tab" ) ) 
+
+compare_fold_change_clean <- compare_fold_change %>%
+                             dplyr::distinct( genes, coarse_groups) 
+                             
+```
+
+
+## Read list of enriched GO terms related to each SOM cluster
+```{r}
+
+## Enriched GO terms per cluster
+soms_A_go_results <- read_tsv( file.path(soms_results_dir, "compare_A/5x5/enriched_go_terms_SOMs.txt"))
+
+soms_AL_go_results <- read_tsv( file.path(soms_results_dir, "compare_AL/5x5/enriched_go_terms_SOMs.txt"))
+
+## Genes associated with enriched GO terms per cluster
+soms_A_go_genes <- read_tsv( file.path(soms_results_dir, "compare_A/5x5/enriched_genes_SOMs_updated.txt")) %>%
+                   mutate( cluster_id = str_replace( query_list_id, "SOMs_cluster_C", "")   ) %>%
+                   mutate( cluster_id = as.integer(cluster_id))
+
+soms_AL_go_genes <- read_tsv( file.path(soms_results_dir, "compare_AL/5x5/enriched_genes_SOMs_updated.txt")) %>%
+                    mutate( cluster_id = str_replace( query_list_id, "SOMs_cluster_C", "")   )  %>%
+                    mutate( cluster_id = as.integer(cluster_id))
+
+## Direction of fold-change per cluster
+soms_A_go_results_cleaned <- soms_A_go_results %>%
+  filter( pvalue < 0.01 & ontology == "BP") %>%
+  mutate( cluster_id = str_replace( query_list_id, "SOMs_cluster_C", "")   ) %>%
+  mutate( cluster_id = as.integer(cluster_id)) %>%
+  dplyr::select( gobpid, term, cluster_id, pvalue, bh  ) %>%
+  mutate( Enrichment = case_when( bh < 0.05 ~ "High",
+                                  pvalue < 0.01 & bh >= 0.05 ~ "Medium",
+                                  TRUE ~ "Low")) %>%
+  mutate( Enrichment_Levels = case_when( bh < 0.05 ~ 2,
+                                  pvalue < 0.01 & bh >= 0.05 ~ 1,
+                                  TRUE ~ 0)) %>%  
+  distinct()
+
+
+soms_AL_go_results_cleaned <- soms_AL_go_results %>%
+  filter( pvalue < 0.01 & ontology == "BP") %>%
+  mutate( cluster_id = str_replace( query_list_id, "SOMs_cluster_C", "")   ) %>%
+  mutate( cluster_id = as.integer(cluster_id)) %>%
+  dplyr::select( gobpid, term, cluster_id, pvalue, bh  ) %>%
+  mutate( Enrichment = case_when( bh < 0.05 ~ "High",
+                                  pvalue < 0.01 & bh >= 0.05 ~ "Medium",
+                                  TRUE ~ "Low")) %>%
+  mutate( Enrichment_Levels = case_when( bh < 0.05 ~ 2,
+                                  pvalue < 0.01 & bh >= 0.05 ~ 1,
+                                  TRUE ~ 0)) %>%  
+  distinct()
+
+
+
+
+## Read in the table showing direction of gene expression (for the genes in the cluster)
+compare_A_direction <- read_tsv ( file.path( soms_results_dir,"compare_A/5x5/soms_clusters_mapping.txt"  )) %>%
+                       mutate( Direction = case_when( str_detect(Direction, "Up")  ~ "Up",
+                                                      str_detect(Direction, "Down")  ~ "Down",
+                                                      TRUE ~ NA_character_
+                                                      ) )        
+  
+compare_AL_direction <- read_tsv ( file.path( soms_results_dir,"compare_AL/5x5/soms_clusters_mapping.txt"  )) %>%
+                       mutate( Direction = case_when( str_detect(Direction, "Up") ~ "Up",
+                                                      str_detect(Direction, "Down") ~ "Down",
+                                                      TRUE ~ NA_character_
+                                                      ) )        
+
+```
+
+
+## Get Codebook vector
+```{r}
+
+## Read SOMS object
+compare_A_soms_obj <- readRDS ( file.path( soms_results_dir, "compare_A/5x5/soms_results.RDS" ) )
+compare_AL_soms_obj <- readRDS ( file.path( soms_results_dir, "compare_AL/5x5/soms_results.RDS" ) )
+
+## Get a list of all the clusters which actually has data in them 
+compare_A_cluster_with_data <- compare_A_direction %>%
+                               mutate( cluster =  purrr::map_chr( cluster, ~paste( "V", ., sep="")) ) %>%
+                               pull(cluster)
+
+compare_AL_cluster_with_data <- compare_AL_direction %>%
+                               mutate( cluster =  purrr::map_chr( cluster, ~paste( "V", ., sep="")) ) %>%
+                               pull(cluster)
+
+
+str(compare_A_soms_obj$som$codes)
+
+compare_A_codebook_vector_raw  <- compare_A_soms_obj$som$codes[[1]]
+compare_AL_codebook_vector_raw <- compare_AL_soms_obj$som$codes[[1]]
+
+compare_A_codebook_vector <- compare_A_codebook_vector_raw[compare_A_cluster_with_data,]
+compare_AL_codebook_vector <- compare_AL_codebook_vector_raw[compare_AL_cluster_with_data,]
+                 
+
+```
+
+
+## Gene per SOM cluster and the standardised gene expression value for each sample
+Merge the gene per cluster information with the gene annotation information
+```{r}
+compare_A_soms <- read.table(file.path(soms_results_dir, "compare_A/5x5/cluster_for_each_gene.tab"), stringsAsFactors = FALSE )
+
+compare_AL_soms <- read.table(file.path(soms_results_dir, "compare_AL/5x5/cluster_for_each_gene.tab"), stringsAsFactors = FALSE)
+
+gene_annotation <- read_tsv( file.path(data_dir, "Gene_Annotation/cneo_gene_annotation_summary.txt" ))
+
+
+compare_A_soms_annot <- compare_A_soms %>%
+  dplyr::distinct( id_a, cluster) %>%
+  left_join( gene_annotation, by = c( "id_a" = "orf_id")) %>%
+  dplyr::distinct( id_a, cluster, is_tf, is_kinases, is_virulence_gene, order_peaktime, scer_orthologs)
+
+
+compare_AL_soms_annot <- compare_AL_soms %>%
+  dplyr::distinct( id_a, cluster) %>%
+  left_join( gene_annotation, by = c( "id_a" = "orf_id")) %>%
+  dplyr::distinct( id_a, cluster, is_tf, is_kinases, is_virulence_gene, order_peaktime, scer_orthologs)
+
+
+```
+
+
+
+
+

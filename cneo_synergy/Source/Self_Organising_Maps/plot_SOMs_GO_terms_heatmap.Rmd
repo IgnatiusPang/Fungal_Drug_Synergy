@@ -140,6 +140,7 @@ compare_AL_direction <- read_tsv ( file.path( soms_results_dir,"compare_AL/5x5/s
 ## Collate data for AMB treatment's SOM cluster versus enriched GO terms heat map
 ```{r}
 
+## Table of Cluster versus GO term and enrichment significance
 soms_A_select_go <- soms_A_go_results_cleaned %>%
     inner_join( selected_GO_terms, by = c( "gobpid" = "GO_ID") ) %>%
     filter( Treatment == "AMB treatment" ) %>%
@@ -147,6 +148,7 @@ soms_A_select_go <- soms_A_go_results_cleaned %>%
     dplyr::select( - Cluster) %>%
     distinct()
 
+## Convert Cluster versus enriched GO term data into matrix format 
 soms_A_select_go_matrix <- soms_A_select_go %>% 
     dplyr::select( Responses, cluster_id, term, Enrichment_Levels ) %>%
      arrange( cluster_id, Responses, term  ) %>%
@@ -159,11 +161,12 @@ soms_A_select_go_matrix <- soms_A_select_go %>%
     column_to_rownames("term") %>%
     as.matrix()
 
+## Response (e.g. Stress response, ER response) versus GO terms table 
 soms_A_group_term <- soms_A_select_go %>%
       distinct( Responses, GO_term  ) %>%
       arrange( Responses, GO_term  ) 
 
-
+## Tidy up the direction of gene expression change for each cluster
 soms_A_direction <-  soms_A_select_go %>%
                       distinct( cluster_id) %>%
                       inner_join ( compare_A_direction, by=c("cluster_id" = "cluster" ) ) %>%
@@ -181,19 +184,23 @@ if( any ( colnames( soms_A_select_go_matrix) != soms_A_direction$cluster_id )) {
 ```{r}
 
 count_soms_A_only_genes <- soms_A_go_genes %>%
- left_join( compare_fold_change_clean, by = c( "gene_id" = "genes" )) %>%
+  left_join( compare_fold_change_clean, by = c( "gene_id" = "genes" )) %>%
   distinct( gene_id, cluster_id, coarse_groups) %>%
   group_by(cluster_id, coarse_groups) %>%
   summarise( counts = n()) %>%
   ungroup %>%
   spread( coarse_groups, counts, fill = 0) %>%
   dplyr::select( -Same) %>%
+  ## Add the clusters that did not have any significant
+  ## differentially expressed genes back into the table
   right_join ( compare_A_direction, 
                by = c( "cluster_id" = "cluster" )  ) %>%
   mutate( `AMB only` = ifelse(is.na(`AMB only`), 0, `AMB only`)) %>%
+  ## Filter the table so only the clusters associated with selected GO terms are in the table
   filter( cluster_id %in% colnames( soms_A_select_go_matrix)) %>%
   dplyr::select( cluster_id, Direction, `AMB only`) %>%
   dplyr::rename( `AMB specific` = "AMB only") %>%
+  arrange( cluster_id ) %>%
   column_to_rownames("cluster_id")
 
 
@@ -228,6 +235,7 @@ save_iheatmap(p=cneo_soms_A_select, filename=file.path( soms_results_dir, "compa
 ## AMB + LF treatment
 ```{r}
 
+## Table of Cluster versus GO term and enrichment significance
 soms_AL_select_go <- soms_AL_go_results_cleaned %>%
     inner_join( selected_GO_terms, by = c( "gobpid" = "GO_ID") ) %>%
     filter( Treatment == "AMB+LF treatment" ) %>%
@@ -235,6 +243,7 @@ soms_AL_select_go <- soms_AL_go_results_cleaned %>%
     dplyr::select( - Cluster) %>%
     distinct()
 
+## Convert Cluster versus enriched GO term data into matrix format 
 soms_AL_select_go_matrix <- soms_AL_select_go %>% 
     dplyr::select( Responses, cluster_id, term, Enrichment_Levels ) %>%
      arrange( cluster_id, Responses, term  ) %>%
@@ -247,11 +256,12 @@ soms_AL_select_go_matrix <- soms_AL_select_go %>%
     column_to_rownames("term") %>%
     as.matrix()
 
+## Response (e.g. Stress response, ER response) versus GO terms table 
 soms_AL_group_term <- soms_AL_select_go %>%
       distinct( Responses, GO_term  ) %>%
       arrange( Responses, GO_term  ) 
 
-
+## Tidy up the direction of gene expression change for each cluster
 soms_AL_direction <-  soms_AL_select_go %>%
                       distinct( cluster_id) %>%
                       inner_join ( compare_AL_direction, by=c("cluster_id" = "cluster" ) ) %>%
@@ -267,19 +277,23 @@ if( any ( colnames( soms_AL_select_go_matrix) != soms_AL_direction$cluster_id ))
 ## Count for each cluster, number of significantly differentially expressed genes specific to AMB+LF treatment only
 ```{r}
 count_soms_AL_only_genes <- soms_AL_go_genes %>%
- left_join( compare_fold_change_clean, by = c( "gene_id" = "genes" )) %>%
+  left_join( compare_fold_change_clean, by = c( "gene_id" = "genes" )) %>%
   distinct( gene_id, cluster_id, coarse_groups) %>%
   group_by(cluster_id, coarse_groups) %>%
   summarise( counts = n()) %>%
   ungroup %>%
   spread( coarse_groups, counts, fill = 0) %>%
   dplyr::select( -Same) %>%
+  ## Add the clusters that did not have any significant
+  ## differentially expressed genes back into the table  
   right_join ( compare_AL_direction, 
                by = c( "cluster_id" = "cluster" )  ) %>%
   mutate( `AMB+LF only` = ifelse(is.na(`AMB+LF only`), 0, `AMB+LF only`)) %>%
+  ## Filter the table so only the clusters associated with selected GO terms are in the table
   filter( cluster_id %in% colnames( soms_AL_select_go_matrix)) %>%
   dplyr::select( cluster_id, Direction, `AMB+LF only`) %>%
   dplyr::rename( `AMB+LF specific` = "AMB+LF only") %>%
+  arrange( cluster_id ) %>%
   column_to_rownames("cluster_id")
 
 

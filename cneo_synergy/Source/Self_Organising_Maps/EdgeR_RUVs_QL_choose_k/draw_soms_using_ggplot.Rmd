@@ -38,8 +38,6 @@ EdgeR_RUVs_QL_gene_lists_dir <- file.path( EdgeR_RUVs_QL_de_genes_dir, "Gene_Lis
 
 soms_results_dir <- file.path( results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL/To_Use_k_0_Remove_5a/Condition_on_child_terms_true" ) 
 
-compare_A_soms <- readRDS ( file.path( soms_results_dir, "compare_A/5x5/soms_results.RDS" ) )
-compare_AL_soms <- readRDS ( file.path( soms_results_dir, "compare_AL/5x5/soms_results.RDS" ) )
 
 ## Read in the table showing direction of gene expression (for the genes in the cluster)
 compare_A_direction <- read_tsv ( file.path( soms_results_dir,"compare_A/5x5/soms_clusters_mapping.txt"  )) %>%
@@ -54,6 +52,10 @@ compare_AL_direction <- read_tsv ( file.path( soms_results_dir,"compare_AL/5x5/s
                                                       TRUE ~ NA_character_
                                                       ) )        
 
+## Read SOMS object
+compare_A_soms_obj <- readRDS ( file.path( soms_results_dir, "compare_A/5x5/soms_results.RDS" ) )
+compare_AL_soms_obj <- readRDS ( file.path( soms_results_dir, "compare_AL/5x5/soms_results.RDS" ) )
+
 ## Get a list of all the clusters which actually has data in them 
 compare_A_cluster_with_data <- compare_A_direction %>%
                                mutate( cluster =  purrr::map_chr( cluster, ~paste( "V", ., sep="")) ) %>%
@@ -64,10 +66,10 @@ compare_AL_cluster_with_data <- compare_AL_direction %>%
                                pull(cluster)
 
 
-str(compare_A_soms$som$codes)
+str(compare_A_soms_obj$som$codes)
 
-compare_A_codebook_vector_raw  <- compare_A_soms$som$codes[[1]]
-compare_AL_codebook_vector_raw <- compare_AL_soms$som$codes[[1]]
+compare_A_codebook_vector_raw  <- compare_A_soms_obj$som$codes[[1]]
+compare_AL_codebook_vector_raw <- compare_AL_soms_obj$som$codes[[1]]
 
 compare_A_codebook_vector <- compare_A_codebook_vector_raw[compare_A_cluster_with_data,]
 compare_AL_codebook_vector <- compare_AL_codebook_vector_raw[compare_AL_cluster_with_data,]
@@ -88,6 +90,7 @@ compare_AL_codebook_vector <- compare_AL_codebook_vector_raw[compare_AL_cluster_
 
 compare_A_soms <- read.table(file.path(soms_results_dir, "compare_A/5x5/cluster_for_each_gene.tab"), stringsAsFactors = FALSE )
 compare_AL_soms <- read.table(file.path(soms_results_dir, "compare_AL/5x5/cluster_for_each_gene.tab"), stringsAsFactors = FALSE)
+
 
 ## Read in the read counts
 cpm_read_counts_file <- file.path(EdgeR_RUVs_QL_de_genes_dir, "edger_without_ruvs_normalised_counts.txt")
@@ -206,11 +209,10 @@ compare_AL_norm_counts <- genescale(compare_AL_raw_counts, axis=1, method="Z") %
 
 compare_AL_clusters <- compare_AL_soms %>%
                       mutate( x = purrr::map_chr( x, ~convert_num_to_sample_name[.]   )  ) %>%
-                      inner_join( compare_A_norm_counts, by = c("id_a" = "orf_id", "x" = "samples")) %>%
+                      inner_join( compare_AL_norm_counts, by = c("id_a" = "orf_id", "x" = "samples")) %>%
                       inner_join( cluster_id_to_soms_coord, by =c("cluster" = "cluster_id"))
  
 compare_AL_clusters  %>% filter ( abs(y - norm_counts) > 1*10^-3 ) 
-
 
 
 ```
@@ -260,6 +262,8 @@ compare_A_ggplot <- compare_A_clusters %>%
 compare_A_ggplot
 
 ggsave(filename = file.path(soms_results_dir, "compare_A/5x5/ggplot_SOMs_5_by_5.pdf"), plot=compare_A_ggplot, width = 6,  height =6.1  )
+
+
 
 compare_AL_ggplot <- compare_AL_clusters %>%
   mutate( x = factor ( x, levels = all_time_points )) %>%
