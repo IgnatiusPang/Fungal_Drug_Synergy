@@ -103,36 +103,6 @@ compare_AL_soms_annot <- compare_AL_soms %>%
 ```
 
 
-## Summarise gene annotation per cluster 
-```{r}
-
-compare_A_col_annot <- compare_A_soms_annot  %>%
-                       group_by (cluster  ) %>%
-                        summarise( count_tfs =   sum(ifelse(is.na(is_tf), 0, 1)),
-                                   count_kinases =   sum(ifelse(is.na(is_kinases), 0, 1)),
-                                   count_virulence_genes = sum(ifelse(is.na(is_virulence_gene), 0, 1)),
-                                   count_cell_cycle_genes = sum(ifelse(is.na(order_peaktime), 0, 1))) %>%
-                        filter(  count_tfs > 0 |
-                                  count_kinases > 0 |
-                                  count_virulence_genes > 0 |
-                                  count_cell_cycle_genes > 0  )
-
-
-compare_AL_col_annot <- compare_AL_soms_annot  %>%
-                       group_by (cluster  ) %>%
-                        summarise( count_tfs =   sum(ifelse(is.na(is_tf), 0, 1)),
-                                   count_kinases =   sum(ifelse(is.na(is_kinases), 0, 1)),
-                                   count_virulence_genes = sum(ifelse(is.na(is_virulence_gene), 0, 1)),
-                                   count_cell_cycle_genes = sum(ifelse(is.na(order_peaktime), 0, 1))) %>%
-                        filter(  count_tfs > 0 |
-                                  count_kinases > 0 |
-                                  count_virulence_genes > 0 |
-                                  count_cell_cycle_genes > 0  )
-
-```
-
-
-
 ## Read list of selected GO terms
 ```{r}
 selected_GO_terms <- readxl::read_xlsx( file.path(data_dir, "Data_for_SOMs/Selected SOMs enriched terms.xlsx" ), sheet="Lookup_Table" ) 
@@ -190,7 +160,15 @@ if( any ( colnames( soms_A_select_go_matrix) != soms_A_direction$cluster_id )) {
   stop("Order of SOMs cluster not matched for merging with table describing the direction of gene expression change.")
 }
 
-cneo_soms_A_select <- main_heatmap(  soms_A_select_go_matrix, colors= c("lightblue", "darkblue"), layout = list(margin = list(l = 500)) )  %>%
+
+grid_params <- setup_colorbar_grid(nrows = 3, 
+                                   x_spacing = 0.7,
+                                   y_spacing = 0.4)
+
+
+cneo_soms_A_select <- main_heatmap(  soms_A_select_go_matrix, colors= c("lightblue", "darkblue"), 
+                                     layout = list(margin = list(l = 350)),
+                                      colorbar_grid = grid_params )  %>%
   add_row_labels() %>%
   add_col_labels() %>%
   add_row_annotation( data.frame( Responses =  soms_A_group_term$Responses)) %>%
@@ -205,42 +183,6 @@ save_iheatmap(p=cneo_soms_A_select, filename=file.path( soms_results_dir, "compa
 ```
 
 
-```{r}
-
-soms_A_gene_annotation <- soms_A_select_go %>%
-  inner_join  ( soms_A_go_genes, by =c( "cluster_id" = "cluster_id",
-                                       "gobpid" = "go_id") ) %>%
-  dplyr::distinct( gobpid, term, cluster_id, Treatment, gene_id, is_tf, is_kinases, is_virulence_gene, order_peaktime)
-
-soms_A_gene_row_annot_sum <- soms_A_gene_annotation %>%
-  dplyr::select( -cluster_id, -Treatment) %>%
-  dplyr::distinct( ) %>%
-  group_by( term ) %>%
-  summarise( count_tfs =   sum(ifelse(is.na(is_tf), 0, 1)),
-             count_kinases =   sum(ifelse(is.na(is_kinases), 0, 1)),
-             count_virulence_genes = sum(ifelse(is.na(is_virulence_gene), 0, 1)),
-             count_cell_cycle_genes = sum(ifelse(is.na(order_peaktime), 0, 1)))  %>%
-  # filter(  count_tfs > 0 |
-  #           count_kinases > 0 |
-  #           count_virulence_genes > 0 |
-  #           count_cell_cycle_genes > 0 ) %>%
- arrange(term) %>%
- column_to_rownames( "term")
-
-dim(soms_A_select_go_matrix)
-dim(soms_A_gene_row_annot_sum )
-
-soms_A_gene_col_annot_sum <- compare_A_col_annot %>%
-                             filter( cluster %in% (soms_A_gene_annotation %>% pull(cluster_id) %>% unique) ) %>%
-                             column_to_rownames("cluster")
-                         
-
-cneo_soms_A_select_annot <- cneo_soms_A_select %>%
-                            add_row_annotation(  soms_A_gene_row_annot_sum) # %>%
-                            # add_col_annotation( soms_A_gene_col_annot_sum)
-
-cneo_soms_A_select_annot
-```
 
 
 
@@ -281,7 +223,15 @@ if( any ( colnames( soms_AL_select_go_matrix) != soms_AL_direction$cluster_id ))
   stop("Order of SOMs cluster not matched for merging with table describing the direction of gene expression change.")
 }
 
-cneo_soms_AL_select <- main_heatmap(  soms_AL_select_go_matrix, colors= c("lightblue", "darkblue"), layout = list(margin = list(l = 500)) )  %>%
+grid_params <- setup_colorbar_grid(nrows = 3, 
+                                   x_spacing = 0.7,
+                                   y_spacing = 0.4)
+
+
+
+cneo_soms_AL_select <- main_heatmap(  soms_AL_select_go_matrix, colors= c("lightblue", "darkblue"), 
+                                      layout = list(margin = list(l = 350)),
+                                      colorbar_grid = grid_params)  %>%
   add_row_labels() %>%
   add_col_labels() %>%
   add_row_annotation( data.frame( Responses =  soms_AL_group_term$Responses)) %>%
@@ -297,7 +247,54 @@ dim(soms_AL_select_go_matrix)
 
 
 
+
+
+## Try to add more annotation, AMB only
 ```{r}
+
+soms_A_gene_annotation <- soms_A_select_go %>%
+  inner_join  ( soms_A_go_genes, by =c( "cluster_id" = "cluster_id",
+                                       "gobpid" = "go_id") ) %>%
+  dplyr::distinct( gobpid, term, cluster_id, Treatment, gene_id, is_tf, is_kinases, is_virulence_gene, order_peaktime)
+
+soms_A_gene_row_annot_sum <- soms_A_gene_annotation %>%
+  dplyr::select( -cluster_id, -Treatment) %>%
+  dplyr::distinct( ) %>%
+  group_by( term ) %>%
+  summarise( # count_tfs =   sum(ifelse(is.na(is_tf), 0, 1)),
+             count_kinases =   sum(ifelse(is.na(is_kinases), 0, 1)),
+             count_virulence_genes = sum(ifelse(is.na(is_virulence_gene), 0, 1)),
+             count_cell_cycle_genes = sum(ifelse(is.na(order_peaktime), 0, 1)))  %>%
+ arrange(term) %>%
+ column_to_rownames( "term")
+
+dim(soms_A_select_go_matrix)
+dim(soms_A_gene_row_annot_sum )
+
+
+soms_A_gene_row_annot_sum <- soms_A_gene_row_annot_sum[rownames(soms_A_select_go_matrix), ]
+
+rownames( soms_A_gene_row_annot_sum) == rownames(soms_A_select_go_matrix)
+
+cneo_soms_A_select_annot <- cneo_soms_A_select %>%
+                            add_row_annotation(  soms_A_gene_row_annot_sum) 
+
+
+cneo_soms_A_select_annot
+
+
+save_iheatmap(p=cneo_soms_A_select_annot, 
+              filename=file.path( soms_results_dir, 
+                                  "compare_A/5x5/compare_A_selected_go_terms_iheatmapr_annot.png"))
+
+```
+
+
+
+## Try to add more annotation, AMB+LF
+```{r}
+
+
 
 soms_AL_gene_annotation <- soms_AL_select_go %>%
   inner_join  ( soms_AL_go_genes, by =c( "cluster_id" = "cluster_id",
@@ -308,25 +305,28 @@ soms_AL_gene_row_annot_sum <- soms_AL_gene_annotation %>%
   dplyr::select( -cluster_id, -Treatment ) %>%
   dplyr::distinct( ) %>%
   group_by( term ) %>%
-  summarise(  count_tfs =   sum(ifelse(is.na(is_tf), 0, 1)),
+  summarise(  #  count_tfs =   sum(ifelse(is.na(is_tf), 0, 1)),
              count_kinases =   sum(ifelse(is.na(is_kinases), 0, 1)),
              count_virulence_genes = sum(ifelse(is.na(is_virulence_gene), 0, 1)),
              count_cell_cycle_genes = sum(ifelse(is.na(order_peaktime), 0, 1))) %>%
-  # filter(  count_tfs > 0 |
-  #           count_kinases > 0 |
-  #           count_virulence_genes > 0 |
-  #           count_cell_cycle_genes > 0 ) %>%
  arrange(term) %>%
  column_to_rownames( "term")
 
-soms_AL_gene_col_annot_sum <- compare_AL_col_annot %>%
-                             filter( cluster %in% (soms_AL_gene_annotation %>% pull(cluster_id) %>% unique) ) %>%
-                             column_to_rownames("cluster")
+
+soms_AL_gene_row_annot_sum <- soms_AL_gene_row_annot_sum[rownames( soms_AL_select_go_matrix), ]
+
+rownames( soms_AL_gene_row_annot_sum) == rownames( soms_AL_select_go_matrix)
+
 
 cneo_soms_AL_select_annot <- cneo_soms_AL_select %>%
-                            add_row_annotation(  soms_AL_gene_row_annot_sum) # %>%
-                            # add_col_annotation( soms_AL_gene_col_annot_sum)
+                            add_row_annotation(  soms_AL_gene_row_annot_sum) 
 
 cneo_soms_AL_select_annot
+
+
+save_iheatmap(p=cneo_soms_AL_select_annot, 
+              filename=file.path( soms_results_dir,
+                                  "compare_AL/5x5/compare_AL_selected_go_terms_iheatmapr_annot.png"))
+
 ```
 

@@ -1,0 +1,108 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+p_load(plotly)
+
+source( '../Common/global_parameters.R')
+
+```
+
+## Read in input files
+```{r}
+
+de_genes_dir <- file.path( results_dir, "Differential_Expression/EdgeR_RUVs_QL/cneo/To_Use_k_0_Remove_5a/Gene_Lists")
+
+compare_A_de_genes <- read_tsv( file.path(de_genes_dir, "compare_A.tab" )) 
+compare_AL_de_genes <- read_tsv( file.path(de_genes_dir, "compare_AL.tab" ))
+
+compare_A_de_genes_clean <- compare_A_de_genes %>%
+                            dplyr::select( genes, logFC, FDR)
+
+compare_AL_de_genes_clean <- compare_AL_de_genes %>%
+                            dplyr::select( genes, logFC, FDR)
+
+```
+
+## Merge the AMB and AMB + LF treatments gene expressions fold-change table. 
+```{r}
+# dim( compare_A_de_genes)
+# dim( compare_AL_de_genes)
+
+compare_fold_change <- compare_A_de_genes_clean %>%
+  inner_join( compare_AL_de_genes_clean, by = "genes", suffix = c( ".A", ".AL") ) %>%
+  mutate( groups = case_when( FDR.A < 0.05 & FDR.AL < 0.05 & sign(logFC.A) != sign(logFC.AL) & logFC.A > 0  ~ "AMB up, AMB+LF down",
+                              FDR.A < 0.05 & FDR.AL < 0.05 & sign(logFC.A) != sign(logFC.AL) & logFC.AL > 0  ~ "AMB down, AMB+LF up",
+                              FDR.A < 0.05 & FDR.AL < 0.05 & sign(logFC.A) == sign(logFC.AL) & logFC.A > 0 ~ "Both up",
+                              FDR.A < 0.05 & FDR.AL < 0.05 & sign(logFC.A) == sign(logFC.AL) & logFC.A < 0 ~ "Both down",
+                              FDR.A < 0.05 & FDR.AL >= 0.05 & logFC.A > 0 ~ "AMB up only",
+                              FDR.A < 0.05 & FDR.AL >= 0.05 & logFC.A < 0 ~ "AMB down only",
+                              FDR.A >= 0.05 & FDR.AL < 0.05 & logFC.AL > 0 ~ "AMB+LF up only",
+                              FDR.A >= 0.05 & FDR.AL < 0.05 & logFC.AL < 0 ~ "AMB+LF down only",
+                              TRUE ~ "Not significant" )    ) %>%
+  mutate( groups = factor (groups, levels=c( "AMB up, AMB+LF down", 
+                                             "AMB down, AMB+LF up",
+                                             "Both up",
+                                             "Both down",
+                                             "AMB up only",
+                                             "AMB down only",
+                                             "AMB+LF up only",
+                                             "AMB+LF down only",
+                                             "Not significant"
+                                            ))) %>%
+  mutate( coarse_groups = case_when( FDR.A < 0.05 & FDR.AL < 0.05 & sign(logFC.A) != sign(logFC.AL)  ~ "Opposite",
+                              FDR.A < 0.05 & FDR.AL < 0.05 & sign(logFC.A) == sign(logFC.AL)  ~ "Same",
+                              FDR.A < 0.05 & FDR.AL >= 0.05 ~ "AMB only",
+                              FDR.A >= 0.05 & FDR.AL < 0.05 ~ "AMB+LF only",
+                              TRUE ~ "Not significant" )    )
+
+write.table( compare_fold_change, file = file.path( results_dir, "Compare_Fold_Change", "compare_A_AL_fold_change.tab" ), 
+             sep="\t", row.names = FALSE, quote = FALSE ) 
+
+```
+
+```{r}
+scatter_plot <-  compare_fold_change  %>%
+                 ggplot(aes(logFC.A, logFC.AL, col=groups)) +
+                 geom_point() +
+                 xlab ( "AMB treatment log fold-change") +
+                 ylab ( "AMB+LF treatment log fold-change") +
+                 labs( col = "Is Statistically Significant")
+
+scatter_plot
+
+```
+
+There were 3 genes that had opposite sig. log fold-change in AMB and AMB+LF treatment
+CNAG_02691
+CNAG_05638
+CNAG_04363
+All three genes were hypothetical only. Therefore we focused on genes that are significantly differentially expressed in AMB treatment or AMB+LF treatment only. 
+
+
+```{r}
+coarse_scatter_plot <-  compare_fold_change  %>%
+                 ggplot(aes(logFC.A, logFC.AL, col=coarse_groups, text=genes)) +
+                 geom_point() +
+                 facet_grid ( . ~ coarse_groups) +
+                 xlab ( "AMB treatment log fold-change") +
+                 ylab ( "AMB+LF treatment log fold-change") +
+                 labs( col = "Is Statistically Significant")
+
+ggplotly( coarse_scatter_plot )
+```
+
+
+
+

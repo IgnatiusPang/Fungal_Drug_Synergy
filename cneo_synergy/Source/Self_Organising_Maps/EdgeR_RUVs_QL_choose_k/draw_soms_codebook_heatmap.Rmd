@@ -21,6 +21,13 @@ source( '../../Common/global_parameters.R')
 ```
 
 
+## Global parameters
+```{r}
+heatmap_column_labels <-  c( "CA1", "CA2", "CA3", "A1", "A2", "A3", "CAL1", "CAL2", "CAL3", "AL1",  "AL3" ) 
+
+```
+
+## Read in input files
 ```{r}
 
 soms_results_dir <- file.path( results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL/To_Use_k_0_Remove_5a/Condition_on_child_terms_true" ) 
@@ -64,7 +71,27 @@ compare_AL_codebook_vector <- compare_AL_codebook_vector_raw[compare_AL_cluster_
 rownames(compare_A_codebook_vector)  <- str_replace( rownames(compare_A_codebook_vector), "V", "")
 rownames(compare_AL_codebook_vector)  <- str_replace( rownames(compare_AL_codebook_vector), "V", "")
 
+
+## Genes associated with enriched GO terms per cluster
+soms_A_go_genes <- read_tsv( file.path(soms_results_dir, "compare_A/5x5/enriched_genes_SOMs_updated.txt")) %>%
+                   mutate( cluster_id = str_replace( query_list_id, "SOMs_cluster_C", "")   ) %>%
+                   mutate( cluster_id = as.integer(cluster_id))
+
+soms_AL_go_genes <- read_tsv( file.path(soms_results_dir, "compare_AL/5x5/enriched_genes_SOMs_updated.txt")) %>%
+                    mutate( cluster_id = str_replace( query_list_id, "SOMs_cluster_C", "")   )  %>%
+                    mutate( cluster_id = as.integer(cluster_id))
+
+## Read log fold-change of AMB and AMB+LF treatment and how they compare with each other
+compare_fold_change <- read_tsv( file = file.path( results_dir, "Compare_Fold_Change", "compare_A_AL_fold_change.tab" ) ) 
+
+compare_fold_change_clean <- compare_fold_change %>%
+                             dplyr::distinct( genes, coarse_groups) 
+                             
+
 ```
+
+
+
 
 ## Check consistency of code book vector sample names order
 ```{r}
@@ -86,7 +113,6 @@ my_colour_palette <- colorRampPalette(c("#2166ac","#f7f7f7","#b2182b"))(75)
 margins_size_factor <- 5
 texts_size_factor_col <- 10
 texts_size_factor_row <- 30
-heatmap_column_labels <-  c( "CA1", "CA2", "CA3", "A1", "A2", "A3", "CAL1", "CAL2", "CAL3", "AL1",  "AL3" ) 
 
 ### AMB only model, A - CA
 pdf( file.path( soms_results_dir, "compare_A/5x5/edgeR_compare_A_som_codebook_vector.pdf") ) 
@@ -126,15 +152,48 @@ dev.off()
 
 ```
 
+## Count for each cluster, number of significantly differentially expressed genes specific to AMB treament or AMB+LF treatment only
+```{r}
 
+count_soms_A_only_genes <- soms_A_go_genes %>%
+ left_join( compare_fold_change_clean, by = c( "gene_id" = "genes" )) %>%
+  distinct( gene_id, cluster_id, coarse_groups) %>%
+  group_by(cluster_id, coarse_groups) %>%
+  summarise( counts = n()) %>%
+  ungroup %>%
+  spread( coarse_groups, counts, fill = 0) %>%
+  dplyr::select( -Same) %>%
+  right_join ( data.frame( cluster_id = as.integer(rownames( compare_A_codebook_vector[,heatmap_column_labels]))), 
+               by = "cluster_id") %>%
+  mutate( `AMB only` = ifelse(is.na(`AMB only`), 0, `AMB only`))
+
+
+count_soms_AL_only_genes <- soms_AL_go_genes %>%
+ left_join( compare_fold_change_clean, by = c( "gene_id" = "genes" )) %>%
+  distinct( gene_id, cluster_id, coarse_groups) %>%
+  group_by(cluster_id, coarse_groups) %>%
+  summarise( counts = n()) %>%
+  ungroup %>%
+  spread( coarse_groups, counts, fill = 0) %>%
+  dplyr::select( -Same, -Opposite) %>%
+  right_join ( data.frame( cluster_id = as.integer(rownames( compare_AL_codebook_vector[,heatmap_column_labels]))), 
+               by = "cluster_id") %>%
+  mutate( `AMB+LF only` = ifelse(is.na(`AMB+LF only`), 0, `AMB+LF only`))
+
+# soms_AL_go_genes
+# compare_fold_change_clean
+
+```
+
+## Draw the heat map using iheatmapr
 ```{r}
 
 my_margins <- list(
   l = 5,
   r = 5,
-  b = 10,
+  b = 10, # 10
   t = 5,
-  pad = 1
+  pad = 2
 )
 
 my_font <- list(
@@ -143,9 +202,18 @@ my_font <- list(
   color = 'black')
 
 my_vwidth <- 6
-my_vheight <- 7
+my_vheight <- 7 # 7
+
+dim(compare_A_codebook_vector[,heatmap_column_labels])
 
 ### AMB only model, A - CA
+
+compare_A_row_annot <- data.frame( Direction =  compare_A_direction$Direction,
+                                   AMB_only = count_soms_A_only_genes$`AMB only`)
+
+colnames( compare_A_row_annot) <- c("Direction", "AMB<br>specific")
+
+
 compare_A_iheatmapr <- main_heatmap( compare_A_codebook_vector[,heatmap_column_labels], 
                                      layout = list(margin = my_margins, font=my_font),
                                      name = "Standardized<br>Gene<br>Expression") %>%
@@ -154,7 +222,7 @@ compare_A_iheatmapr <- main_heatmap( compare_A_codebook_vector[,heatmap_column_l
   add_row_clustering() %>%
   add_col_title("Clusters", buffer = 0.03) %>%
   add_row_title ("Samples",  buffer = 0.01) %>%
-  add_row_annotation(  data.frame( Direction =  compare_A_direction$Direction) )
+  add_row_annotation(  compare_A_row_annot ) 
 
 compare_A_iheatmapr
 
@@ -167,6 +235,12 @@ save_iheatmap( p=compare_A_iheatmapr,
 
 
 ### AMB + LF model, AL - CAL
+
+compare_AL_row_annot <- data.frame( Direction =  compare_AL_direction$Direction,
+                                   AMB_LF_only = count_soms_AL_only_genes$`AMB+LF only`)
+
+colnames( compare_AL_row_annot) <- c("Direction", "AMB+LF<br>specific")
+
 compare_AL_iheatmapr <- main_heatmap( compare_AL_codebook_vector[,heatmap_column_labels], 
                                      layout = list(margin = my_margins, font=my_font),
                                      name = "Standardized<br>Gene<br>Expression" )  %>%
@@ -175,7 +249,7 @@ compare_AL_iheatmapr <- main_heatmap( compare_AL_codebook_vector[,heatmap_column
   add_row_clustering() %>%
   add_col_title("Clusters", buffer = 0.03) %>%
   add_row_title ("Samples",  buffer = 0.01) %>%
-  add_row_annotation(  data.frame( Direction =  compare_AL_direction$Direction) )
+  add_row_annotation(  compare_AL_row_annot)
 
 
 compare_AL_iheatmapr
@@ -189,4 +263,7 @@ save_iheatmap( p=compare_AL_iheatmapr,
 
 
 ```
+
+
+
 
