@@ -30,6 +30,12 @@ soms_results_dir <- file.path(results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL/T
 
 ```
 
+## Read list of selected GO terms
+```{r}
+selected_GO_terms <- readxl::read_xlsx( file.path(data_dir, "Data_for_SOMs/Selected SOMs enriched terms.xlsx" ), sheet="Lookup_Table" ) 
+  
+```
+
 ## Read log fold-change of AMB and AMB+LF treatment and how they compare with each other
 ```{r}
 compare_fold_change <- read_tsv( file = file.path( results_dir, "Compare_Fold_Change", "compare_A_AL_fold_change.tab" ) ) 
@@ -38,7 +44,6 @@ compare_fold_change_clean <- compare_fold_change %>%
                              dplyr::distinct( genes, coarse_groups) 
                              
 ```
-
 
 ## Read list of enriched GO terms related to each SOM cluster
 ```{r}
@@ -88,13 +93,79 @@ soms_AL_go_results_cleaned <- soms_AL_go_results %>%
 
 ```
 
-## Gene per SOM cluster and the standardised gene expression value for each sample
+## Read log fold-change of AMB and AMB+LF treatment and how they compare with each other
+```{r}
+compare_fold_change <- read_tsv( file = file.path( results_dir, "Compare_Fold_Change", "compare_A_AL_fold_change.tab" ) ) 
+
+compare_fold_change_clean <- compare_fold_change %>%
+                             dplyr::distinct( genes, coarse_groups) 
+                             
+```
+
+## Get Codebook vector
+```{r}
+
+## Read SOMS object
+compare_A_soms_obj <- readRDS ( file.path( soms_results_dir, "compare_A/5x5/soms_results.RDS" ) )
+compare_AL_soms_obj <- readRDS ( file.path( soms_results_dir, "compare_AL/5x5/soms_results.RDS" ) )
+
+## Get a list of all the clusters which actually has data in them 
+compare_A_cluster_with_data <- compare_A_direction %>%
+                               mutate( cluster =  purrr::map_chr( cluster, ~paste( "V", ., sep="")) ) %>%
+                               pull(cluster)
+
+compare_AL_cluster_with_data <- compare_AL_direction %>%
+                               mutate( cluster =  purrr::map_chr( cluster, ~paste( "V", ., sep="")) ) %>%
+                               pull(cluster)
+
+
+str(compare_A_soms_obj$som$codes)
+
+compare_A_codebook_vector_raw  <- compare_A_soms_obj$som$codes[[1]]
+compare_AL_codebook_vector_raw <- compare_AL_soms_obj$som$codes[[1]]
+
+compare_A_codebook_vector <- compare_A_codebook_vector_raw[compare_A_cluster_with_data,]
+compare_AL_codebook_vector <- compare_AL_codebook_vector_raw[compare_AL_cluster_with_data,]
+                 
+
+```
+
+## Dictionary for converting sample number in x-axis (1 to 11) to sample name (CA1, CA2, CA3, A1, A2, A3, CAL1, CAL2, CAL3, AL1, and AL3)
+```{r}
+
+
+if ( any( colnames( compare_A_codebook_vector )  != colnames( compare_AL_codebook_vector )  ) ) {
+  
+  stop ( "Code book vector sample names order for AMB treatment and AMB + LF treatment are not consistent.")
+}
+
+
+convert_num_to_sample_name <-      colnames( compare_A_codebook_vector ) 
+names(convert_num_to_sample_name) <- seq_along(  colnames( compare_A_codebook_vector ) )
+
+
+```
+
+## Read gene per SOM cluster and the standardised gene expression value for each sample
 Merge the gene per cluster information with the gene annotation information
 ```{r}
 compare_A_soms <- read.table(file.path(soms_results_dir, "compare_A/5x5/cluster_for_each_gene.tab"), stringsAsFactors = FALSE )
 
 compare_AL_soms <- read.table(file.path(soms_results_dir, "compare_AL/5x5/cluster_for_each_gene.tab"), stringsAsFactors = FALSE)
+```
 
+## Need to convert SOM cluster for each gene x-axis samples number (e.g. 1, 2, 3) to sample name (CA1, CA2, CA3, A1, A2, A3, CAL1, CAL2, CAL3, AL1, and AL3)
+```{r}
+compare_A_soms_cleaned <- compare_A_soms %>%
+                          mutate( sample_name = purrr::map_chr( x, ~convert_num_to_sample_name[.]   )  ) 
+
+
+compare_AL_soms_cleaned <- compare_AL_soms %>%
+                           mutate( sample_name = purrr::map_chr( x, ~convert_num_to_sample_name[.]   )  ) 
+```
+
+## Merge gene annotation with gene and SOM cluster information
+```{r}
 gene_annotation <- read_tsv( file.path(data_dir, "Gene_Annotation/cneo_gene_annotation_summary.txt" ))
 
 
@@ -112,12 +183,6 @@ compare_AL_soms_annot <- compare_AL_soms %>%
 
 ```
 
-
-## Read list of selected GO terms
-```{r}
-selected_GO_terms <- readxl::read_xlsx( file.path(data_dir, "Data_for_SOMs/Selected SOMs enriched terms.xlsx" ), sheet="Lookup_Table" ) 
-  
-```
 ## Read in the table showing direction of gene expression (for the genes in the cluster)
 ```{r}
 compare_A_direction <- read_tsv ( file.path( soms_results_dir,"compare_A/5x5/soms_clusters_mapping.txt"  )) %>%
@@ -133,9 +198,6 @@ compare_AL_direction <- read_tsv ( file.path( soms_results_dir,"compare_AL/5x5/s
                                                       ) )        
 
 ```
-
-
-
 
 ## Collate data for AMB treatment's SOM cluster versus enriched GO terms heat map
 ```{r}
@@ -178,8 +240,6 @@ if( any ( colnames( soms_A_select_go_matrix) != soms_A_direction$cluster_id )) {
 }
 ```
 
-
-
 ## Count for each cluster, number of significantly differentially expressed genes specific to AMB treament only
 ```{r}
 
@@ -206,7 +266,7 @@ count_soms_A_only_genes <- soms_A_go_genes %>%
 
 ```
 
-
+## Plot AMB only treatment SOM cluster vs. selected enriched GO terms using iheatmapr
 ```{r}
 grid_params <- setup_colorbar_grid(x_spacing = 0.3)
 
@@ -227,10 +287,6 @@ dim(soms_A_select_go_matrix)
 save_iheatmap(p=cneo_soms_A_select, filename=file.path( soms_results_dir, "compare_A/5x5/compare_A_selected_go_terms_iheatmapr.png"))
 
 ```
-
-
-
-
 
 ## AMB + LF treatment
 ```{r}
@@ -273,7 +329,6 @@ if( any ( colnames( soms_AL_select_go_matrix) != soms_AL_direction$cluster_id ))
 }
 ```
 
-
 ## Count for each cluster, number of significantly differentially expressed genes specific to AMB+LF treatment only
 ```{r}
 count_soms_AL_only_genes <- soms_AL_go_genes %>%
@@ -303,7 +358,7 @@ count_soms_AL_only_genes <- soms_AL_go_genes %>%
 
 ```
 
-
+## Plot AMB+LF treatment SOM cluster vs. selected enriched GO terms using iheatmapr
 ```{r}
 
 
@@ -324,11 +379,6 @@ save_iheatmap(p=cneo_soms_AL_select, filename=file.path( soms_results_dir, "comp
 
 dim(soms_AL_select_go_matrix)
 ```
-
-
-
-
-
 
 ## Try to add more annotation, AMB only
 ```{r}
@@ -370,13 +420,9 @@ save_iheatmap(p=cneo_soms_A_select_annot,
 
 ```
 
-
-
 ## Try to add more annotation, AMB+LF
 
 iron ion transmembrane transport, GO:0034755, AMB+LF treatment Cluster 10, have 1 virulence gene (CNAG_03464 /  Cu-oxidase / Laccase-2 / EC 1.10.3.2 / Diphenol oxidase 2). 
-
-
 ```{r}
 
 
@@ -414,4 +460,24 @@ save_iheatmap(p=cneo_soms_AL_select_annot,
                                   "compare_AL/5x5/compare_AL_selected_go_terms_iheatmapr_annot.png"))
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
