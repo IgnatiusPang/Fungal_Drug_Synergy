@@ -28,6 +28,11 @@ sessionInfo()
 ```{r}
 soms_results_dir <- file.path(results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL/To_Use_k_0_Remove_5a/Condition_on_child_terms_true" ) 
 
+
+soms_individual_clusters_dir <- file.path( soms_results_dir, "Individual_Clusters" )
+create_dir_if_not_exists(soms_individual_clusters_dir)
+
+
 ```
 
 ## Read list of selected GO terms
@@ -93,13 +98,21 @@ soms_AL_go_results_cleaned <- soms_AL_go_results %>%
 
 ```
 
-## Read log fold-change of AMB and AMB+LF treatment and how they compare with each other
-```{r}
-compare_fold_change <- read_tsv( file = file.path( results_dir, "Compare_Fold_Change", "compare_A_AL_fold_change.tab" ) ) 
 
-compare_fold_change_clean <- compare_fold_change %>%
-                             dplyr::distinct( genes, coarse_groups) 
-                             
+## Read in the table showing direction of gene expression (for the genes in the cluster)
+```{r}
+compare_A_direction <- read_tsv ( file.path( soms_results_dir,"compare_A/5x5/soms_clusters_mapping.txt"  )) %>%
+                       mutate( Direction = case_when( str_detect(Direction, "Up")  ~ "Up",
+                                                      str_detect(Direction, "Down")  ~ "Down",
+                                                      TRUE ~ NA_character_
+                                                      ) )        
+  
+compare_AL_direction <- read_tsv ( file.path( soms_results_dir,"compare_AL/5x5/soms_clusters_mapping.txt"  )) %>%
+                       mutate( Direction = case_when( str_detect(Direction, "Up") ~ "Up",
+                                                      str_detect(Direction, "Down") ~ "Down",
+                                                      TRUE ~ NA_character_
+                                                      ) )        
+
 ```
 
 ## Get Codebook vector
@@ -154,14 +167,36 @@ compare_A_soms <- read.table(file.path(soms_results_dir, "compare_A/5x5/cluster_
 compare_AL_soms <- read.table(file.path(soms_results_dir, "compare_AL/5x5/cluster_for_each_gene.tab"), stringsAsFactors = FALSE)
 ```
 
+
+## Sample Order to use in the figure 
+```{r}
+types_of_treatments <- c(    "CA", "A",   "CAL", "AL")
+replicate_number <- c( '1', '2', '3')
+
+input_for_cross_df <- list (replicate_number, types_of_treatments )
+names( input_for_cross_df) <- c( "replicate_number", "types_of_treatments")
+
+all_time_points <-  purrr::cross_df( input_for_cross_df) %>%
+						dplyr::mutate( sample_name = paste0( types_of_treatments, replicate_number )) %>%
+						dplyr::select ( one_of ( c( "sample_name"))) %>%
+						as.data.frame() %>%
+						t() %>%
+						as.vector()
+
+all_time_points <- all_time_points[all_time_points != "AL2"]
+```
+
+
 ## Need to convert SOM cluster for each gene x-axis samples number (e.g. 1, 2, 3) to sample name (CA1, CA2, CA3, A1, A2, A3, CAL1, CAL2, CAL3, AL1, and AL3)
 ```{r}
 compare_A_soms_cleaned <- compare_A_soms %>%
-                          mutate( sample_name = purrr::map_chr( x, ~convert_num_to_sample_name[.]   )  ) 
+                          mutate( sample_name = purrr::map_chr( x, ~convert_num_to_sample_name[.]   )  ) %>%
+                          mutate( sample_name = factor( sample_name, levels = all_time_points))
 
 
 compare_AL_soms_cleaned <- compare_AL_soms %>%
-                           mutate( sample_name = purrr::map_chr( x, ~convert_num_to_sample_name[.]   )  ) 
+                           mutate( sample_name = purrr::map_chr( x, ~convert_num_to_sample_name[.]   )  ) %>%
+                          mutate( sample_name = factor( sample_name, levels = all_time_points))
 ```
 
 ## Merge gene annotation with gene and SOM cluster information
@@ -183,21 +218,7 @@ compare_AL_soms_annot <- compare_AL_soms %>%
 
 ```
 
-## Read in the table showing direction of gene expression (for the genes in the cluster)
-```{r}
-compare_A_direction <- read_tsv ( file.path( soms_results_dir,"compare_A/5x5/soms_clusters_mapping.txt"  )) %>%
-                       mutate( Direction = case_when( str_detect(Direction, "Up")  ~ "Up",
-                                                      str_detect(Direction, "Down")  ~ "Down",
-                                                      TRUE ~ NA_character_
-                                                      ) )        
-  
-compare_AL_direction <- read_tsv ( file.path( soms_results_dir,"compare_AL/5x5/soms_clusters_mapping.txt"  )) %>%
-                       mutate( Direction = case_when( str_detect(Direction, "Up") ~ "Up",
-                                                      str_detect(Direction, "Down") ~ "Down",
-                                                      TRUE ~ NA_character_
-                                                      ) )        
 
-```
 
 ## Collate data for AMB treatment's SOM cluster versus enriched GO terms heat map
 ```{r}
@@ -351,8 +372,6 @@ count_soms_AL_only_genes <- soms_AL_go_genes %>%
   arrange( cluster_id ) %>%
   column_to_rownames("cluster_id")
 
-
-
 # soms_AL_go_genes
 # compare_fold_change_clean
 
@@ -462,10 +481,127 @@ save_iheatmap(p=cneo_soms_AL_select_annot,
 ```
 
 
+```{r}
+colnames( soms_AL_select_go)
+colnames( soms_AL_go_genes)
+colnames( compare_fold_change)
+colnames( compare_AL_soms_cleaned)
+
+```
+
+
+## Plotting Meta Heat Map
+```{r}
+
+soms_AL_select_go_and_gene <- soms_AL_select_go %>% 
+  inner_join(  soms_AL_go_genes, by = c( "gobpid" = "go_id",
+                                        "cluster_id" = "cluster_id") ) %>%
+  inner_join( compare_fold_change, by=c("gene_id" = "genes") )  %>%
+  inner_join( compare_AL_soms_cleaned, by =c( "gene_id" = "id_a",
+                                              "cluster_id" = "cluster")) %>%
+  dplyr::select(one_of( c( ## The IDs
+                           "cluster_id",  "gene_id", "gobpid", "term", "ontology",
+                           ## Gene Ontology enrichment Information 
+                           "pvalue", "bh", "Enrichment", "Enrichment_Levels",  "Responses", 
+                           ## Cluster level data 
+                           "Treatment", "Regulation/p-value",  
+                           ## Differential Gene Expression level data
+                           "gene_names", "fungidb_gene_name", "logFC.AL", "FDR.AL", "groups", "coarse_groups",
+                           ## Standardized Gene Expression Level data
+                           "sample_name", "y")))  
+
+## Do one plot for each cluster
+my_input_go_and_gene <- soms_AL_select_go_and_gene
+my_cluster <- 1
+my_log_fc_name <- quo( logFC.AL ) 
+
+
+## Plot Standardized Gene Expression Levels
+ soms_AL_std_gene_exp <- my_input_go_and_gene %>%
+        ## do this for cluster 1 first 
+        filter ( cluster_id == my_cluster) %>%
+        dplyr::distinct( cluster_id, gene_id, sample_name, y ) %>%
+        tidyr::spread( sample_name, y) %>%
+        arrange(cluster_id, gene_id) %>%
+        dplyr::select(-cluster_id ) %>%
+        column_to_rownames("gene_id") %>%
+        as.matrix
+  
+dim(soms_AL_std_gene_exp)
+
+## Plot log fold-change per gene 
+soms_AL_log_fc <- my_input_go_and_gene %>%
+        ## do this for cluster 1 first 
+        filter ( cluster_id == my_cluster) %>%
+        dplyr::distinct( cluster_id, gene_id, !!my_log_fc_name)  %>%
+        arrange(cluster_id, gene_id) %>%
+        dplyr::select( -cluster_id, -gene_id) %>%
+        dplyr::rename( !! sym("AMB+LF log FC") := quo_name( my_log_fc_name ))
+
+
+## Plot gene ontology terms 
+soms_AL_go_terms <- my_input_go_and_gene %>%
+        ## do this for cluster 1 first 
+        filter ( cluster_id == my_cluster) %>%
+        dplyr::distinct( cluster_id, gene_id, term, Enrichment_Levels) %>%
+        tidyr::spread( term, Enrichment_Levels, fill = 0) %>%
+        arrange(cluster_id, gene_id) %>%
+        dplyr::select( -cluster_id) %>%
+        column_to_rownames("gene_id") %>%
+        as.matrix()
+
+## Get_gene_name 
+soms_AL_gene_names <- my_input_go_and_gene %>%
+        ## do this for cluster 1 first 
+        filter ( cluster_id == my_cluster) %>%
+        dplyr::distinct( cluster_id, gene_id, gene_names, fungidb_gene_name)   %>%
+        dplyr::mutate( tick_text = paste( ifelse( is.na(gene_names), "", gene_names), gene_id, fungidb_gene_name)) %>%
+        arrange(cluster_id, gene_id)
+
+
+# soms_AL_gene_description <- my_input_go_and_gene %>%
+#         ## do this for cluster 1 first 
+#         filter ( cluster_id == my_cluster) %>%
+#         dplyr::distinct( cluster_id, gene_id, fungidb_gene_name)   %>%
+#         arrange(cluster_id, gene_id)
+
+
+my_margins <- list(
+  l = 15,
+  r = 5,
+  b = 10, # 10
+  t = 5,
+  pad = 2
+)
+
+plot_iheatmapr <- main_heatmap(soms_AL_std_gene_exp, layout = list(margin = my_margins)) %>%
+  add_col_labels(size = max(sapply( colnames(soms_AL_go_terms), str_length ))/65) %>%
+  add_row_annotation(soms_AL_log_fc) %>%
+  add_row_labels( ticktext= soms_AL_gene_names$tick_text, size = max(sapply(soms_AL_gene_names$tick_text, str_length ))/40 ) %>%
+  add_main_heatmap(soms_AL_go_terms, 
+                   name= "Enrichemtn Levels", 
+                   colors =c("white", "lightblue", "darkblue"),
+                   size = ncol( soms_AL_go_terms)/((ncol(soms_AL_std_gene_exp) + 1.5)*1.5) ) %>%
+  add_col_labels(size = max(sapply( colnames(soms_AL_go_terms), str_length ))/65) # %>%
+  # add_row_labels( ticktext = soms_AL_gene_description$fungidb_gene_name, side = "right")
+
+
+save_iheatmap(p=plot_iheatmapr, filename=file.path( soms_individual_clusters_dir, "som_AL_cluster_1_go_terms.pdf" ))
+save_iheatmap(p=plot_iheatmapr, filename=file.path( soms_individual_clusters_dir, "som_AL_cluster_1_go_terms.png" ))
+
+```
+
+
+## 
+```{r}
 
 
 
 
+
+
+
+```
 
 
 
