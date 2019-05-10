@@ -35,6 +35,15 @@ compare_AL_de_genes_clean <- compare_AL_de_genes %>%
 
 ```
 
+
+## Get gene annotation
+```{r}
+gene_annotation   <- read_tsv( file.path( data_dir, "Gene_Annotation/cneo_gene_annotation_summary.txt"  )  )
+
+
+```
+
+
 ## Merge the AMB and AMB + LF treatments gene expressions fold-change table. 
 ```{r}
 # dim( compare_A_de_genes)
@@ -111,5 +120,38 @@ ggsave( plot=coarse_scatter_plot, filename= file.path( results_dir, "Compare_Fol
 ```
 
 
+## Top 10 bottom 10 genes 
+```{r}
+
+all_genes_specific_to_AL <- compare_fold_change %>% 
+  filter ( coarse_groups == "AMB+LF only") %>%
+  arrange( desc(logFC.AL )) %>%
+  mutate( rank_from_biggest_increase = row_number()) %>%
+  arrange( logFC.AL ) %>%
+  mutate( rank_from_biggest_decrease = row_number()) %>%
+  left_join( gene_annotation, by=c("genes" = "orf_id")) %>%
+  dplyr::select( -logFC.A, -FDR.A  )
+
+write.table( all_genes_specific_to_AL, file.path( results_dir, "Compare_Fold_Change", "all_genes_specific_to_AL.tab"  ),
+             row.names = FALSE, quote = FALSE, sep="\t") 
+
+
+bottom_ten_log_fc_AL_specific <- compare_fold_change %>% 
+  filter ( coarse_groups == "AMB+LF only") %>%
+  arrange( logFC.AL ) %>%
+  mutate( rank_from_biggest_decrease = row_number()) %>%
+  left_join( gene_annotation, by=c("genes" = "orf_id")) %>%
+  filter( rank_from_biggest_decrease <= 10 )
+
+
+top_ten_log_fc_AL_specific <-  compare_fold_change %>% 
+  filter ( coarse_groups == "AMB+LF only") %>%
+  arrange( desc(logFC.AL )) %>%
+  mutate( rank_from_biggest_increase = row_number()) %>%
+  left_join( gene_annotation, by=c("genes" = "orf_id")) %>%
+  filter( rank_from_biggest_increase <= 10 )
+
+
+```
 
 
