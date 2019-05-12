@@ -34,9 +34,24 @@ de_method_label <-   "To_Use_k_0_Remove_5a"
 
 ####################################################
 
+specific_subset <-  "AMB only" # "AMB+LF only" #
+
+
+
 # Set output directory for the results
 # No need to change this parameter
-go_terms_results_dir <- file.path( results_dir, "Functional_Enrichment", de_method_label,"GOStat_AMB_LF_set")
+
+if( specific_subset == "AMB only") {
+  
+  go_terms_results_dir <- file.path( results_dir, "Functional_Enrichment", de_method_label,"GOStat_AMB_only_set")
+  
+} else if ( specific_subset == "AMB+LF only") {
+  
+  go_terms_results_dir <- file.path( results_dir, "Functional_Enrichment", de_method_label,"GOStat_AMB_LF_set")
+} else {
+  stop("Not the correc specific subset.")
+}
+
 
 # No need to change this parameter
 create_dir_if_not_exists(go_terms_results_dir)
@@ -78,18 +93,29 @@ universe <- unique( gene_annotation[, "orf_id"])
 
 compare_log_fold_change <- read_tsv( file.path( results_dir, "Compare_Fold_Change/compare_A_AL_fold_change.tab") ) 
 
-compare_AL_specific.up <- compare_log_fold_change %>% 
-  filter ( coarse_groups == "AMB+LF only") %>%
+compare_specific_set.up <- compare_log_fold_change %>% 
+  filter ( coarse_groups == specific_subset) %>%
   filter ( logFC.AL > 0 ) %>%
   pull( genes)
 
-compare_AL_specific.down <-  compare_log_fold_change %>% 
-  filter ( coarse_groups == "AMB+LF only") %>%
+compare_specific_set.down <-  compare_log_fold_change %>% 
+  filter ( coarse_groups == specific_subset) %>%
   filter ( logFC.AL < 0 ) %>%
   pull( genes) 
 
-list_of_up_and_down_genes <- list( compare_AL_specific.up = compare_AL_specific.up, 
-                                   compare_AL_specific.down = compare_AL_specific.down)
+
+
+if( specific_subset == "AMB+LF only") {
+  
+  list_of_up_and_down_genes <- list( compare_AL_specific.up = compare_specific_set.up, 
+                                   compare_AL_specific.down = compare_specific_set.down)
+
+} else {
+  list_of_up_and_down_genes <- list( compare_A_specific.up = compare_specific_set.up, 
+                                   compare_A_specific.down = compare_specific_set.down)
+
+}
+
 
 ```
 
