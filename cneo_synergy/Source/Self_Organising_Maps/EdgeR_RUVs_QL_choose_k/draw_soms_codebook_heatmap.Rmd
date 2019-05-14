@@ -144,11 +144,8 @@ heatmap.2(compare_AL_codebook_vector[,heatmap_column_labels],  symm = FALSE, col
           offsetRow = 0.02,
           offsetCol = 0.02 )
 dev.off()
-          
-
-
+     
 ##################################################################################################################
-
 
 ```
 
