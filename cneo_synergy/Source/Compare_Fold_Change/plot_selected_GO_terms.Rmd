@@ -1,0 +1,95 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+p_load(RColorBrewer)
+p_load(readxl)
+
+source( '../Common/global_parameters.R')
+
+```
+
+## Directory management 
+```{r}
+enriched_go_dir <- file.path( results_dir, "Functional_Enrichment/To_Use_k_0_Remove_5a/")
+
+selected_go_dir <- file.path( data_dir, "Data_for_specific_gene_sets")
+```
+
+
+## Read in input files
+```{r}
+
+## List of selected GO terms
+selected_go_terms <- readxl::read_xlsx(path=file.path(selected_go_dir, "Selected_GO_terms.xlsx"))
+
+  
+## Enriched GO term
+
+go_terms_A_specfic <- read_tsv( file.path(enriched_go_dir, "GOStat_AMB_LF_set", "enriched_go_terms_global.txt" )) 
+go_terms_AL_specific <- read_tsv( file.path(enriched_go_dir, "GOStat_AMB_only_set", "enriched_go_terms_global.txt" ))
+```
+
+
+```{r}
+seleted_go_terms_fdr <- go_terms_A_specfic %>%
+                            bind_rows( go_terms_AL_specific) %>%
+                            dplyr::select( query_list_id, gobpid, bh) %>%
+                            right_join(selected_go_terms, by = c("gobpid" = "goid" ) )  %>%
+                            mutate( score = -log10(bh)) %>%
+                            mutate( Groups = case_when ( query_list_id == "compare_A_specific.up" ~ 'AMB treatment sepcific, up',
+                                                         query_list_id == "compare_A_specific.down" ~ 'AMB treatment sepcific, down',
+                                                         query_list_id == "compare_AL_specific.up" ~ 'AMB+LF treatment sepcific, up',
+                                                         query_list_id == "compare_AL_specific.down" ~ 'AMB+LF treatment sepcific, down',
+                                                         TRUE ~ NA_character_
+                                                         )) %>%
+                            mutate( Groups = factor(Groups, levels = c( 'AMB treatment sepcific, up',
+                                                                        'AMB treatment sepcific, down',
+                                                                        'AMB+LF treatment sepcific, up',
+                                                                        'AMB+LF treatment sepcific, down'))) %>%
+                            mutate( my_fill = case_when ( query_list_id == "compare_A_specific.up" ~ "#377EB8",
+                                                         query_list_id == "compare_A_specific.down" ~ "#984EA3",
+                                                         query_list_id == "compare_AL_specific.up" ~ "#FF7F00",
+                                                         query_list_id == "compare_AL_specific.down" ~ "#A65628",
+                                                         TRUE ~ NA_character_
+                                                         )) %>%
+                            arrange( desc(Groups), score) %>%
+                            mutate( term = factor(term, levels=unique(term)) )
+
+
+selected_go_terms_ggplot <- seleted_go_terms_fdr  %>%
+  ggplot( aes( term, score, fill=my_fill  )) +
+  geom_col() +
+  scale_fill_identity() +
+  facet_grid(  Groups ~ ., labeller = label_wrap_gen(), scale='free_y', space = 'free_y' ) +
+  coord_flip() +
+  theme(strip.text.y = element_text(angle = 0)) +
+  ylab( expression( '-log'[10]*'(adj. p)') ) +
+  xlab( "Enriched GO terms")
+
+selected_go_terms_ggplot
+```
+
+```{r}
+ggsave ( filename = file.path(  results_dir, "Compare_Fold_Change", "enriched_go_terms.pdf"), width = 6.7)
+ggsave ( filename = file.path(  results_dir, "Compare_Fold_Change", "enriched_go_terms.png"), width = 6.7 )
+ggsave ( filename = file.path(  results_dir, "Compare_Fold_Change", "enriched_go_terms.tiff"), width = 6.7 )
+
+write.table( seleted_go_terms_fdr, file=file.path(  results_dir, "Compare_Fold_Change",  "seleted_go_terms_fdr.tab"),
+            sep="\t", row.names = FALSE, quote = FALSE)
+
+```
+
+
+

@@ -15,6 +15,7 @@ if(!require(pacman)) {
 p_load(tidyverse)
 p_load(plotly)
 p_load(UpSetR)
+p_load(RColorBrewer)
 
 source( '../Common/global_parameters.R')
 
@@ -120,9 +121,11 @@ ggsave( plot=coarse_scatter_plot, filename= file.path( results_dir, "Compare_Fol
 
 ```
 
+## Draw venn diagram and upset plot
 ```{r}
 
 venn_diagram_data <- compare_fold_change %>%
+  distinct() %>%
   mutate( AMB_treatment = case_when( 
                                      FDR.A < 0.05 & logFC.A > 0 ~ 'AMB treatment, up',
                                      FDR.A < 0.05 & logFC.A < 0 ~ 'AMB treatment, down',
@@ -133,58 +136,88 @@ venn_diagram_data <- compare_fold_change %>%
                                      FDR.AL < 0.05 & logFC.AL < 0 ~ 'AMB+LF treatment, down',
                                      TRUE ~ 'AMB+LF treatment, n.s.'
                                      ) )  %>%
-  mutate( AMB_treatment = factor(AMB_treatment, levels=c('AMB treatment, up',  'AMB treatment, n.s.', 'AMB treatment, down')),
-          AMB_LF_treatment = factor(AMB_LF_treatment, levels=c('AMB+LF treatment, up',  'AMB+LF treatment, n.s.', 'AMB+LF treatment, down') )                     
-                                 ) %>%
+  mutate( AMB_treatment = factor(AMB_treatment, levels=c('AMB treatment, up',  
+                                                         'AMB treatment, n.s.', 
+                                                         'AMB treatment, down')),
+          AMB_LF_treatment = factor(AMB_LF_treatment, levels=c('AMB+LF treatment, up',  
+                                                               'AMB+LF treatment, n.s.', 
+                                                               'AMB+LF treatment, down') ) )  %>%
+  filter( !( AMB_treatment == 'AMB treatment, n.s.' &  AMB_LF_treatment == 'AMB+LF treatment, n.s.') ) %>%
   dplyr::mutate( id = row_number() ) %>%
-  dplyr::select( id, genes, AMB_treatment, AMB_LF_treatment)  
+  dplyr::select( id, genes, AMB_treatment, AMB_LF_treatment) 
+```
 
 
-venn_diagram <- venn_diagram_data %>%
-  group_by ( AMB_treatment, AMB_LF_treatment ) %>%
-  count() %>%
-  spread( AMB_LF_treatment, n)
+```{r}
+venn_diagram_data_pivot <- venn_diagram_data %>%
+  mutate ( value = 1) %>%
+  spread( AMB_treatment, value, fill =  0) %>%
+  mutate ( value = 1) %>%
+  spread( AMB_LF_treatment, value, fill =  0) %>%
+  dplyr::select( -one_of(c( "AMB treatment, n.s.", "AMB+LF treatment, n.s."))) %>% 
+  dplyr::select( - id) %>%
+  dplyr::group_by(genes) %>%
+  dplyr::summarise_at( vars(contains("treatment")), sum ) %>%
+  dplyr::mutate_at( vars(contains("treatment")), as.integer ) %>%
+  ungroup %>%
+  mutate( genes = factor(genes)) %>%
+  as.data.frame()
 
-venn_diagram
+upset_plot_queries_statement <-list(
+        list(query = intersects, params = list('AMB treatment, up'), color = "#377EB8", active = T),
+        list(query = intersects, params = list('AMB treatment, down'), color = "#984EA3", active = T),
+        list(query = intersects, params = list('AMB+LF treatment, up'), color = "#FF7F00", active = T),
+        list(query = intersects, params = list('AMB+LF treatment, down'), color = "#A65628", active = T)
+        )
+
+upset(venn_diagram_data_pivot, 
+      order.by = "freq", 
+      sets=rev(names(venn_diagram_data_pivot)[2:ncol(venn_diagram_data_pivot)]), 
+      nsets = length( names(venn_diagram_data_pivot)), 
+      keep.order=FALSE )
+
+upset(venn_diagram_data_pivot, 
+      order.by = "freq", 
+      sets=rev(names(venn_diagram_data_pivot)[2:ncol(venn_diagram_data_pivot)]), 
+      nsets = length( upset_input), 
+      keep.order=FALSE,
+      mainbar.y.label = "No. of Genes", 
+      sets.x.label = "No. of Genes",
+    sets.bar.color = c(   "springgreen4", "springgreen4", "red", "red" )  ,
+    queries = upset_plot_queries_statement
+    )
   
-
-268+359
-1392+1626+2+1
-235+257
-
-
-AMB_treatment_list <- venn_diagram_data %>%
-  group_by (AMB_treatment ) %>%
-  summarise( genes_list = list(id)) %>%
-  pull(genes_list) %>%
-  set_names(  levels(venn_diagram_data$AMB_treatment ) )
-
-
-AMB_LF_treatment_list <- venn_diagram_data %>%
-  group_by (AMB_LF_treatment ) %>%
-  summarise( genes_list = list(id)) %>%
-  pull(genes_list) %>%
-  set_names(  levels(venn_diagram_data$AMB_LF_treatment ) )
-
-upset_input <-  c(AMB_treatment_list, AMB_LF_treatment_list)
-
-upset_input[[4]]
-
-names(upset_input)
-upset(fromList(upset_input), order.by = "freq", nsets = length( upset_input), keep.order=T,
-          mainbar.y.label = "No. of Genes", sets.x.label = "No. of Genes", 
-)
-
-
 ```
 
 
 
 ```{r}
+pdf( file.path(  results_dir, "Compare_Fold_Change", "upset_plot.pdf"), width = 6.7, height = 3)
+upset(venn_diagram_data_pivot, 
+      order.by = "freq", 
+      sets=rev(names(venn_diagram_data_pivot)[2:ncol(venn_diagram_data_pivot)]), 
+      nsets = length( upset_input), 
+      keep.order=FALSE,
+      mainbar.y.label = "No. of Genes", 
+      sets.x.label = "No. of Genes",
+    sets.bar.color = c(   "springgreen4", "springgreen4", "red", "red" )  ,
+    queries = upset_plot_queries_statement
+    )
+dev.off()
+```
 
-compare_fold_change %>%
-  group_by(groups) %>%
-  count()
+
+## Venn Diagram represented as a table 
+```{r}
+
+
+
+venn_diagram_table <- venn_diagram_data %>%
+  group_by ( AMB_treatment, AMB_LF_treatment ) %>%
+  count() %>%
+  spread( AMB_LF_treatment, n)
+
+venn_diagram_table
 
 ```
 
