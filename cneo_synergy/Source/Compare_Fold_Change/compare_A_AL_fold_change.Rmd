@@ -53,31 +53,31 @@ gene_annotation   <- read_tsv( file.path( data_dir, "Gene_Annotation/cneo_gene_a
 
 compare_fold_change <- compare_A_de_genes_clean %>%
   inner_join( compare_AL_de_genes_clean, by = "genes", suffix = c( ".A", ".AL") ) %>%
-  mutate( groups = case_when( FDR.A < 0.05 & FDR.AL < 0.05 & sign(logFC.A) != sign(logFC.AL) & logFC.A > 0  ~ "AMB up, AMB+LF down",
-                              FDR.A < 0.05 & FDR.AL < 0.05 & sign(logFC.A) != sign(logFC.AL) & logFC.AL > 0  ~ "AMB down, AMB+LF up",
+  mutate( groups = case_when( FDR.A < 0.05 & FDR.AL < 0.05 & sign(logFC.A) != sign(logFC.AL) & logFC.A > 0  ~ "AMB up, AMB-LF down",
+                              FDR.A < 0.05 & FDR.AL < 0.05 & sign(logFC.A) != sign(logFC.AL) & logFC.AL > 0  ~ "AMB down, AMB-LF up",
                               FDR.A < 0.05 & FDR.AL < 0.05 & sign(logFC.A) == sign(logFC.AL) & logFC.A > 0 ~ "Both up",
                               FDR.A < 0.05 & FDR.AL < 0.05 & sign(logFC.A) == sign(logFC.AL) & logFC.A < 0 ~ "Both down",
                               FDR.A < 0.05 & FDR.AL >= 0.05 & logFC.A > 0 ~ "AMB up only",
                               FDR.A < 0.05 & FDR.AL >= 0.05 & logFC.A < 0 ~ "AMB down only",
-                              FDR.A >= 0.05 & FDR.AL < 0.05 & logFC.AL > 0 ~ "AMB+LF up only",
-                              FDR.A >= 0.05 & FDR.AL < 0.05 & logFC.AL < 0 ~ "AMB+LF down only",
+                              FDR.A >= 0.05 & FDR.AL < 0.05 & logFC.AL > 0 ~ "AMB-LF up only",
+                              FDR.A >= 0.05 & FDR.AL < 0.05 & logFC.AL < 0 ~ "AMB-LF down only",
                               TRUE ~ "Not significant" )    ) %>%
-  mutate( groups = factor (groups, levels=c( "AMB up, AMB+LF down", 
-                                             "AMB down, AMB+LF up",
+  mutate( groups = factor (groups, levels=c( "AMB up, AMB-LF down", 
+                                             "AMB down, AMB-LF up",
                                              "Both up",
                                              "Both down",
                                              "AMB up only",
                                              "AMB down only",
-                                             "AMB+LF up only",
-                                             "AMB+LF down only",
+                                             "AMB-LF up only",
+                                             "AMB-LF down only",
                                              "Not significant"
                                             ))) %>%
   mutate( coarse_groups = case_when( FDR.A < 0.05 & FDR.AL < 0.05 & sign(logFC.A) != sign(logFC.AL)  ~ "Opposite",
                               FDR.A < 0.05 & FDR.AL < 0.05 & sign(logFC.A) == sign(logFC.AL)  ~ "Same",
                               FDR.A < 0.05 & FDR.AL >= 0.05 ~ "AMB only",
-                              FDR.A >= 0.05 & FDR.AL < 0.05 ~ "AMB+LF only",
+                              FDR.A >= 0.05 & FDR.AL < 0.05 ~ "AMB-LF only",
                               TRUE ~ "Not significant" )    ) %>%
-  mutate( coarse_groups = factor( coarse_groups, levels = c( "Same", "AMB only", "AMB+LF only", "Opposite", "Not significant")))
+  mutate( coarse_groups = factor( coarse_groups, levels = c( "Same", "AMB only", "AMB-LF only", "Opposite", "Not significant")))
 
 write.table( compare_fold_change, file = file.path( results_dir, "Compare_Fold_Change", "compare_A_AL_fold_change.tab" ), 
              sep="\t", row.names = FALSE, quote = FALSE ) 
@@ -89,18 +89,18 @@ scatter_plot <-  compare_fold_change  %>%
                  ggplot(aes(logFC.A, logFC.AL, col=groups)) +
                  geom_point() +
                  xlab ( "AMB treatment log fold-change") +
-                 ylab ( "AMB+LF treatment log fold-change") +
+                 ylab ( "AMB-LF treatment log fold-change") +
                  labs( col = "Is Statistically Significant")
 
 scatter_plot
 
 ```
 
-There were 3 genes that had opposite sig. log fold-change in AMB and AMB+LF treatment
+There were 3 genes that had opposite sig. log fold-change in AMB and AMB-LF treatment
 CNAG_02691
 CNAG_05638
-CNAG_04363 up in AMB only, down in AMB+LF. 
-All three genes were hypothetical only. Therefore we focused on genes that are significantly differentially expressed in AMB treatment or AMB+LF treatment only. 
+CNAG_04363 up in AMB only, down in AMB-LF. 
+All three genes were hypothetical only. Therefore we focused on genes that are significantly differentially expressed in AMB treatment or AMB-LF treatment only. 
 
 
 ```{r}
@@ -109,7 +109,7 @@ coarse_scatter_plot <-  compare_fold_change  %>%
                  geom_point() +
                  facet_grid ( . ~ coarse_groups) +
                  xlab ( "AMB treatment log fold-change") +
-                 ylab ( "AMB+LF treatment log fold-change") +
+                 ylab ( "AMB-LF treatment log fold-change") +
                  labs( col = "Is Statistically Significant")
 
 ggplotly( coarse_scatter_plot )
@@ -132,17 +132,17 @@ venn_diagram_data <- compare_fold_change %>%
                                      TRUE ~ 'AMB treatment, n.s.'
                                      ),
           AMB_LF_treatment = case_when( 
-                                     FDR.AL < 0.05 & logFC.AL > 0 ~ 'AMB+LF treatment, up',
-                                     FDR.AL < 0.05 & logFC.AL < 0 ~ 'AMB+LF treatment, down',
-                                     TRUE ~ 'AMB+LF treatment, n.s.'
+                                     FDR.AL < 0.05 & logFC.AL > 0 ~ 'AMB-LF treatment, up',
+                                     FDR.AL < 0.05 & logFC.AL < 0 ~ 'AMB-LF treatment, down',
+                                     TRUE ~ 'AMB-LF treatment, n.s.'
                                      ) )  %>%
   mutate( AMB_treatment = factor(AMB_treatment, levels=c('AMB treatment, up',  
                                                          'AMB treatment, n.s.', 
                                                          'AMB treatment, down')),
-          AMB_LF_treatment = factor(AMB_LF_treatment, levels=c('AMB+LF treatment, up',  
-                                                               'AMB+LF treatment, n.s.', 
-                                                               'AMB+LF treatment, down') ) )  %>%
-  filter( !( AMB_treatment == 'AMB treatment, n.s.' &  AMB_LF_treatment == 'AMB+LF treatment, n.s.') ) %>%
+          AMB_LF_treatment = factor(AMB_LF_treatment, levels=c('AMB-LF treatment, up',  
+                                                               'AMB-LF treatment, n.s.', 
+                                                               'AMB-LF treatment, down') ) )  %>%
+  filter( !( AMB_treatment == 'AMB treatment, n.s.' &  AMB_LF_treatment == 'AMB-LF treatment, n.s.') ) %>%
   dplyr::mutate( id = row_number() ) %>%
   dplyr::select( id, genes, AMB_treatment, AMB_LF_treatment) 
 ```
@@ -154,7 +154,7 @@ venn_diagram_data_pivot <- venn_diagram_data %>%
   spread( AMB_treatment, value, fill =  0) %>%
   mutate ( value = 1) %>%
   spread( AMB_LF_treatment, value, fill =  0) %>%
-  dplyr::select( -one_of(c( "AMB treatment, n.s.", "AMB+LF treatment, n.s."))) %>% 
+  dplyr::select( -one_of(c( "AMB treatment, n.s.", "AMB-LF treatment, n.s."))) %>% 
   dplyr::select( - id) %>%
   dplyr::group_by(genes) %>%
   dplyr::summarise_at( vars(contains("treatment")), sum ) %>%
@@ -166,8 +166,8 @@ venn_diagram_data_pivot <- venn_diagram_data %>%
 upset_plot_queries_statement <-list(
         list(query = intersects, params = list('AMB treatment, up'), color = "#377EB8", active = T),
         list(query = intersects, params = list('AMB treatment, down'), color = "#984EA3", active = T),
-        list(query = intersects, params = list('AMB+LF treatment, up'), color = "#FF7F00", active = T),
-        list(query = intersects, params = list('AMB+LF treatment, down'), color = "#A65628", active = T)
+        list(query = intersects, params = list('AMB-LF treatment, up'), color = "#FF7F00", active = T),
+        list(query = intersects, params = list('AMB-LF treatment, down'), color = "#A65628", active = T)
         )
 
 upset(venn_diagram_data_pivot, 
@@ -227,7 +227,7 @@ venn_diagram_table
 ```{r}
 
 all_genes_specific_to_AL <- compare_fold_change %>% 
-  filter ( coarse_groups == "AMB+LF only") %>%
+  filter ( coarse_groups == "AMB-LF only") %>%
   arrange( desc(logFC.AL )) %>%
   mutate( rank_from_biggest_increase = row_number()) %>%
   arrange( logFC.AL ) %>%
@@ -240,7 +240,7 @@ write.table( all_genes_specific_to_AL, file.path( results_dir, "Compare_Fold_Cha
 
 
 bottom_ten_log_fc_AL_specific <- compare_fold_change %>% 
-  filter ( coarse_groups == "AMB+LF only") %>%
+  filter ( coarse_groups == "AMB-LF only") %>%
   arrange( logFC.AL ) %>%
   mutate( rank_from_biggest_decrease = row_number()) %>%
   left_join( gene_annotation, by=c("genes" = "orf_id")) %>%
@@ -248,7 +248,7 @@ bottom_ten_log_fc_AL_specific <- compare_fold_change %>%
 
 
 top_ten_log_fc_AL_specific <-  compare_fold_change %>% 
-  filter ( coarse_groups == "AMB+LF only") %>%
+  filter ( coarse_groups == "AMB-LF only") %>%
   arrange( desc(logFC.AL )) %>%
   mutate( rank_from_biggest_increase = row_number()) %>%
   left_join( gene_annotation, by=c("genes" = "orf_id")) %>%

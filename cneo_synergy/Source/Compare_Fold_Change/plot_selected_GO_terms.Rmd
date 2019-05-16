@@ -48,16 +48,16 @@ seleted_go_terms_fdr <- go_terms_A_specfic %>%
                             dplyr::select( query_list_id, gobpid, bh) %>%
                             right_join(selected_go_terms, by = c("gobpid" = "goid" ) )  %>%
                             mutate( score = -log10(bh)) %>%
-                            mutate( Groups = case_when ( query_list_id == "compare_A_specific.up" ~ 'AMB treatment sepcific, up',
-                                                         query_list_id == "compare_A_specific.down" ~ 'AMB treatment sepcific, down',
-                                                         query_list_id == "compare_AL_specific.up" ~ 'AMB+LF treatment sepcific, up',
-                                                         query_list_id == "compare_AL_specific.down" ~ 'AMB+LF treatment sepcific, down',
+                            mutate( Groups = case_when ( query_list_id == "compare_A_specific.up" ~ 'AMB treatment specific, up',
+                                                         query_list_id == "compare_A_specific.down" ~ 'AMB treatment specific, down',
+                                                         query_list_id == "compare_AL_specific.up" ~ 'AMB-LF treatment specific, up',
+                                                         query_list_id == "compare_AL_specific.down" ~ 'AMB-LF treatment specific, down',
                                                          TRUE ~ NA_character_
                                                          )) %>%
-                            mutate( Groups = factor(Groups, levels = c( 'AMB treatment sepcific, up',
-                                                                        'AMB treatment sepcific, down',
-                                                                        'AMB+LF treatment sepcific, up',
-                                                                        'AMB+LF treatment sepcific, down'))) %>%
+                            mutate( Groups = factor(Groups, levels = c( 'AMB treatment specific, up',
+                                                                        'AMB treatment specific, down',
+                                                                        'AMB-LF treatment specific, up',
+                                                                        'AMB-LF treatment specific, down'))) %>%
                             mutate( my_fill = case_when ( query_list_id == "compare_A_specific.up" ~ "#377EB8",
                                                          query_list_id == "compare_A_specific.down" ~ "#984EA3",
                                                          query_list_id == "compare_AL_specific.up" ~ "#FF7F00",

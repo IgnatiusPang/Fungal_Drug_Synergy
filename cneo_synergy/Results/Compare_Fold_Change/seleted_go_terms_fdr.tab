@@ -1,34 +1,34 @@
 query_list_id	gobpid	bh	treatment	term	score	Groups	my_fill
-compare_AL_specific.down	GO:0006974	0.0481630800660742	compare_AL_specific.down	cellular response to DNA damage stimulus	1.31728574739544	AMB+LF treatment sepcific, down	#A65628
-compare_AL_specific.down	GO:0006556	0.0354757824010015	compare_AL_specific.down	S-adenosylmethionine biosynthetic process	1.45006801761283	AMB+LF treatment sepcific, down	#A65628
-compare_AL_specific.down	GO:0006281	0.00891191906591622	compare_AL_specific.down	DNA repair	2.05002876622169	AMB+LF treatment sepcific, down	#A65628
-compare_AL_specific.down	GO:0044271	0.0051129890239971	compare_AL_specific.down	cellular nitrogen compound biosynthetic process	2.29132513956813	AMB+LF treatment sepcific, down	#A65628
-compare_AL_specific.down	GO:0042254	0.000105835093532024	compare_AL_specific.down	ribosome biogenesis	3.97537030205336	AMB+LF treatment sepcific, down	#A65628
-compare_AL_specific.down	GO:0006412	1.30372928312876e-10	compare_AL_specific.down	translation	9.88481257965408	AMB+LF treatment sepcific, down	#A65628
-compare_AL_specific.up	GO:0042438	0.0465836971350871	compare_AL_specific.up	melanin biosynthetic process	1.33176604646581	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0019722	0.0396365455571914	compare_AL_specific.up	calcium-mediated signaling	1.401904202593	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0034406	0.0396365455571914	compare_AL_specific.up	cell wall beta-glucan metabolic process	1.401904202593	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0006511	0.0368046369131439	compare_AL_specific.up	ubiquitin-dependent protein catabolic process	1.43409746233381	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0006873	0.0334565480605844	compare_AL_specific.up	cellular ion homeostasis	1.47551887017508	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0030163	0.0201247662892048	compare_AL_specific.up	protein catabolic process	1.69626915443329	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0044038	0.0200253238351097	compare_AL_specific.up	cell wall macromolecule biosynthetic process	1.69842045208947	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0097576	0.0184245146804709	compare_AL_specific.up	vacuole fusion	1.73460394305477	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0006897	0.0158747711726077	compare_AL_specific.up	endocytosis	1.79929252614245	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0035966	0.0119516773287216	compare_AL_specific.up	response to topologically incorrect protein	1.92257114044897	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0006508	0.00522054499837066	compare_AL_specific.up	proteolysis	2.28228415649391	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0061077	0.0047323064439601	compare_AL_specific.up	chaperone-mediated protein folding	2.32492714007713	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0051084	0.000776382649536536	compare_AL_specific.up	'de novo' posttranslational protein folding	3.10992417871224	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0006906	0.000464489762018956	compare_AL_specific.up	vesicle fusion	3.33302385400118	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0016192	9.21322374014112e-05	compare_AL_specific.up	vesicle-mediated transport	4.035588382009	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0035493	8.88204540890853e-05	compare_AL_specific.up	SNARE complex assembly	4.05148701085295	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0032956	7.32206740665297e-07	compare_AL_specific.up	regulation of actin cytoskeleton organization	6.13536627733885	AMB+LF treatment sepcific, up	#FF7F00
-compare_AL_specific.up	GO:0008154	1.67400077709775e-07	compare_AL_specific.up	actin polymerization or depolymerization	6.77624434473632	AMB+LF treatment sepcific, up	#FF7F00
-compare_A_specific.down	GO:0006888	0.0356136226288706	compare_A_specific.down	ER to Golgi vesicle-mediated transport	1.44838384750777	AMB treatment sepcific, down	#984EA3
-compare_A_specific.down	GO:0006457	0.0256781661859341	compare_A_specific.down	protein folding	1.59043599476857	AMB treatment sepcific, down	#984EA3
-compare_A_specific.down	GO:0010467	0.0247047966340022	compare_A_specific.down	gene expression	1.60721871680367	AMB treatment sepcific, down	#984EA3
-compare_A_specific.down	GO:0006396	0.0186421971078084	compare_A_specific.down	RNA processing	1.72950290445166	AMB treatment sepcific, down	#984EA3
-compare_A_specific.down	GO:0008380	0.0040086809639508	compare_A_specific.down	RNA splicing	2.39699850626111	AMB treatment sepcific, down	#984EA3
-compare_A_specific.down	GO:0000398	0.0040086809639508	compare_A_specific.down	mRNA splicing, via spliceosome	2.39699850626111	AMB treatment sepcific, down	#984EA3
-compare_A_specific.down	GO:0000375	0.0031929492053092	compare_A_specific.down	RNA splicing, via transesterification reactions	2.4958079903329	AMB treatment sepcific, down	#984EA3
-compare_A_specific.down	GO:0006397	6.32724643444633e-07	compare_A_specific.down	mRNA processing	6.19878525025146	AMB treatment sepcific, down	#984EA3
-compare_A_specific.down	GO:0016071	2.55524469432834e-08	compare_A_specific.down	mRNA metabolic process	7.59256750480202	AMB treatment sepcific, down	#984EA3
+compare_AL_specific.down	GO:0006974	0.0481630800660742	compare_AL_specific.down	cellular response to DNA damage stimulus	1.31728574739544	AMB-LF treatment specific, down	#A65628
+compare_AL_specific.down	GO:0006556	0.0354757824010015	compare_AL_specific.down	S-adenosylmethionine biosynthetic process	1.45006801761283	AMB-LF treatment specific, down	#A65628
+compare_AL_specific.down	GO:0006281	0.00891191906591622	compare_AL_specific.down	DNA repair	2.05002876622169	AMB-LF treatment specific, down	#A65628
+compare_AL_specific.down	GO:0044271	0.0051129890239971	compare_AL_specific.down	cellular nitrogen compound biosynthetic process	2.29132513956813	AMB-LF treatment specific, down	#A65628
+compare_AL_specific.down	GO:0042254	0.000105835093532024	compare_AL_specific.down	ribosome biogenesis	3.97537030205336	AMB-LF treatment specific, down	#A65628
+compare_AL_specific.down	GO:0006412	1.30372928312876e-10	compare_AL_specific.down	translation	9.88481257965408	AMB-LF treatment specific, down	#A65628
+compare_AL_specific.up	GO:0042438	0.0465836971350871	compare_AL_specific.up	melanin biosynthetic process	1.33176604646581	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0019722	0.0396365455571914	compare_AL_specific.up	calcium-mediated signaling	1.401904202593	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0034406	0.0396365455571914	compare_AL_specific.up	cell wall beta-glucan metabolic process	1.401904202593	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0006511	0.0368046369131439	compare_AL_specific.up	ubiquitin-dependent protein catabolic process	1.43409746233381	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0006873	0.0334565480605844	compare_AL_specific.up	cellular ion homeostasis	1.47551887017508	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0030163	0.0201247662892048	compare_AL_specific.up	protein catabolic process	1.69626915443329	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0044038	0.0200253238351097	compare_AL_specific.up	cell wall macromolecule biosynthetic process	1.69842045208947	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0097576	0.0184245146804709	compare_AL_specific.up	vacuole fusion	1.73460394305477	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0006897	0.0158747711726077	compare_AL_specific.up	endocytosis	1.79929252614245	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0035966	0.0119516773287216	compare_AL_specific.up	response to topologically incorrect protein	1.92257114044897	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0006508	0.00522054499837066	compare_AL_specific.up	proteolysis	2.28228415649391	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0061077	0.0047323064439601	compare_AL_specific.up	chaperone-mediated protein folding	2.32492714007713	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0051084	0.000776382649536536	compare_AL_specific.up	'de novo' posttranslational protein folding	3.10992417871224	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0006906	0.000464489762018956	compare_AL_specific.up	vesicle fusion	3.33302385400118	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0016192	9.21322374014112e-05	compare_AL_specific.up	vesicle-mediated transport	4.035588382009	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0035493	8.88204540890853e-05	compare_AL_specific.up	SNARE complex assembly	4.05148701085295	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0032956	7.32206740665297e-07	compare_AL_specific.up	regulation of actin cytoskeleton organization	6.13536627733885	AMB-LF treatment specific, up	#FF7F00
+compare_AL_specific.up	GO:0008154	1.67400077709775e-07	compare_AL_specific.up	actin polymerization or depolymerization	6.77624434473632	AMB-LF treatment specific, up	#FF7F00
+compare_A_specific.down	GO:0006888	0.0356136226288706	compare_A_specific.down	ER to Golgi vesicle-mediated transport	1.44838384750777	AMB treatment specific, down	#984EA3
+compare_A_specific.down	GO:0006457	0.0256781661859341	compare_A_specific.down	protein folding	1.59043599476857	AMB treatment specific, down	#984EA3
+compare_A_specific.down	GO:0010467	0.0247047966340022	compare_A_specific.down	gene expression	1.60721871680367	AMB treatment specific, down	#984EA3
+compare_A_specific.down	GO:0006396	0.0186421971078084	compare_A_specific.down	RNA processing	1.72950290445166	AMB treatment specific, down	#984EA3
+compare_A_specific.down	GO:0008380	0.0040086809639508	compare_A_specific.down	RNA splicing	2.39699850626111	AMB treatment specific, down	#984EA3
+compare_A_specific.down	GO:0000398	0.0040086809639508	compare_A_specific.down	mRNA splicing, via spliceosome	2.39699850626111	AMB treatment specific, down	#984EA3
+compare_A_specific.down	GO:0000375	0.0031929492053092	compare_A_specific.down	RNA splicing, via transesterification reactions	2.4958079903329	AMB treatment specific, down	#984EA3
+compare_A_specific.down	GO:0006397	6.32724643444633e-07	compare_A_specific.down	mRNA processing	6.19878525025146	AMB treatment specific, down	#984EA3
+compare_A_specific.down	GO:0016071	2.55524469432834e-08	compare_A_specific.down	mRNA metabolic process	7.59256750480202	AMB treatment specific, down	#984EA3

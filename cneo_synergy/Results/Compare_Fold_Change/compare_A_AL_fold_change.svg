@@ -7099,7 +7099,7 @@
   </clipPath>
 </defs>
 <rect x='176.08' y='5.48' width='63.38' height='17.31' style='stroke-width: 1.07; stroke: none; fill: #D9D9D9;' clip-path='url(#cpMTc2LjA4MnwyMzkuNDU3fDIyLjc5MTF8NS40Nzk0NQ==)' />
-<g clip-path='url(#cpMTc2LjA4MnwyMzkuNDU3fDIyLjc5MTF8NS40Nzk0NQ==)'><text x='181.24' y='17.16' style='font-size: 8.80px; fill: #1A1A1A; font-family: Arimo;' textLength='53.07px' lengthAdjust='spacingAndGlyphs'>AMB+LF only</text></g>
+<g clip-path='url(#cpMTc2LjA4MnwyMzkuNDU3fDIyLjc5MTF8NS40Nzk0NQ==)'><text x='182.34' y='17.16' style='font-size: 8.80px; fill: #1A1A1A; font-family: Arimo;' textLength='50.86px' lengthAdjust='spacingAndGlyphs'>AMB-LF only</text></g>
 <defs>
   <clipPath id='cpMHw1MjV8MzI0fDA='>
     <rect x='0.00' y='0.00' width='525.00' height='324.00' />
@@ -7178,7 +7178,7 @@
 <polyline points='35.63,146.95 38.37,146.95 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MjV8MzI0fDA=)' />
 <polyline points='35.63,83.73 38.37,83.73 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' clip-path='url(#cpMHw1MjV8MzI0fDA=)' />
 <g clip-path='url(#cpMHw1MjV8MzI0fDA=)'><text x='131.95' y='316.03' style='font-size: 11.00px; font-family: Arimo;' textLength='151.64px' lengthAdjust='spacingAndGlyphs'>AMB treatment log fold-change</text></g>
-<g clip-path='url(#cpMHw1MjV8MzI0fDA=)'><text transform='translate(13.05,242.97) rotate(-90)' style='font-size: 11.00px; font-family: Arimo;' textLength='170.90px' lengthAdjust='spacingAndGlyphs'>AMB+LF treatment log fold-change</text></g>
+<g clip-path='url(#cpMHw1MjV8MzI0fDA=)'><text transform='translate(13.05,241.59) rotate(-90)' style='font-size: 11.00px; font-family: Arimo;' textLength='168.14px' lengthAdjust='spacingAndGlyphs'>AMB-LF treatment log fold-change</text></g>
 <rect x='388.13' y='101.07' width='131.39' height='112.90' style='stroke-width: 1.07; stroke: none; fill: #FFFFFF;' clip-path='url(#cpMHw1MjV8MzI0fDA=)' />
 <g clip-path='url(#cpMHw1MjV8MzI0fDA=)'><text x='393.61' y='115.36' style='font-size: 11.00px; font-family: Arimo;' textLength='120.44px' lengthAdjust='spacingAndGlyphs'>Is Statistically Significant</text></g>
 <rect x='393.61' y='122.09' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: #FFFFFF; fill: #F2F2F2;' clip-path='url(#cpMHw1MjV8MzI0fDA=)' />
@@ -7193,7 +7193,7 @@
 <circle cx='402.25' cy='199.85' r='1.95pt' style='stroke-width: 0.71; stroke: #E76BF3; fill: #E76BF3;' clip-path='url(#cpMHw1MjV8MzI0fDA=)' />
 <g clip-path='url(#cpMHw1MjV8MzI0fDA=)'><text x='416.36' y='133.75' style='font-size: 8.80px; font-family: Arimo;' textLength='22.99px' lengthAdjust='spacingAndGlyphs'>Same</text></g>
 <g clip-path='url(#cpMHw1MjV8MzI0fDA=)'><text x='416.36' y='151.03' style='font-size: 8.80px; font-family: Arimo;' textLength='37.66px' lengthAdjust='spacingAndGlyphs'>AMB only</text></g>
-<g clip-path='url(#cpMHw1MjV8MzI0fDA=)'><text x='416.36' y='168.31' style='font-size: 8.80px; font-family: Arimo;' textLength='53.07px' lengthAdjust='spacingAndGlyphs'>AMB+LF only</text></g>
+<g clip-path='url(#cpMHw1MjV8MzI0fDA=)'><text x='416.36' y='168.31' style='font-size: 8.80px; font-family: Arimo;' textLength='50.86px' lengthAdjust='spacingAndGlyphs'>AMB-LF only</text></g>
 <g clip-path='url(#cpMHw1MjV8MzI0fDA=)'><text x='416.36' y='185.59' style='font-size: 8.80px; font-family: Arimo;' textLength='35.22px' lengthAdjust='spacingAndGlyphs'>Opposite</text></g>
 <g clip-path='url(#cpMHw1MjV8MzI0fDA=)'><text x='416.36' y='202.87' style='font-size: 8.80px; font-family: Arimo;' textLength='55.27px' lengthAdjust='spacingAndGlyphs'>Not significant</text></g>
 </svg>
