@@ -126,26 +126,33 @@ compare_A_CA_ggplot <- compare_A_CA_orthologs_clean %>%
                                     FDR.cneo < 0.05  & FDR.scer >= 0.05 ~ "C. neoformans Only",
                                     FDR.cneo >= 0.05 & FDR.scer < 0.05  ~ "S. cerevisiae Only",
                                     TRUE ~ "Not sigificant"
-                                    ), levels=c( "Both significant", "C. neoformans Only", "S. cerevisiae Only", "Not sigificant")  )  ) %>%
-  ggplot( aes( logFC.cneo, logFC.scer, col=is_significant)) +
-  geom_point()  + 
+                                    ), levels=c( "Both significant", "C. neoformans Only", "S. cerevisiae Only", "Not sigificant")  )  ) %>% 
+  mutate( Comparison = "AMB only treatment vs. control" ) %>%
+  ggplot( aes( logFC.cneo, logFC.scer)) +
+  geom_point( aes(col=is_significant))  + 
+  geom_smooth(aes(group = 1), method = "lm") +
   # This is how to get part of the legend text into italic fact
   scale_color_discrete( labels=c( "Both significant", 
-                                  expression(paste(italic("C. neoformans")," Only", sep=" ")), 
-                                  expression(paste(italic("S. cerevisiae")," Only", sep=" ")), 
+                                  expression(paste(italic("C. neoformans")," only", sep=" ")), 
+                                  expression(paste(italic("S. cerevisiae")," only", sep=" ")), 
                                   "Not sigificant") ) +
   guides( color=guide_legend(title="Is Significant")) +
   xlab ( expression( paste(italic("C. neoformans"), "log fold-change", sep=" ") ) ) +
   ylab ( expression( paste(italic("S. cerevisiae"), "log fold-change", sep=" ") ) ) +
-  theme(legend.text.align = 0) # Align legend text to the left
+  ylim( -4, 2.8) + 
+  # theme(legend.position = "none")  + # Remove the legned
+  theme(legend.text.align = 0)  +  # Align legend text to the left,  
+  facet_grid( . ~  Comparison, labeller = label_wrap_gen() )  
 
 compare_A_CA_ggplot
 
 ggsave( filename = file.path(compare_orthologs_results_dir, "compare_A_CA_ggplot.png"), plot=compare_A_CA_ggplot)
 ggsave( filename = file.path(compare_orthologs_results_dir, "compare_A_CA_ggplot.tiff"), plot=compare_A_CA_ggplot)
 ggsave( filename = file.path(compare_orthologs_results_dir, "compare_A_CA_ggplot.pdf"), plot=compare_A_CA_ggplot)
+```
 
 
+```{r}
 compare_A_CA_orthologs_sig <- compare_A_CA_orthologs %>% 
   filter( logFC.cneo < 0.05 & logFC.scer < 0.05)
 
@@ -172,26 +179,33 @@ compare_AL_CAL_ggplot <- compare_AL_CAL_orthologs_clean %>%
                                     FDR.cneo < 0.05  & FDR.scer >= 0.05 ~ "C. neoformans Only",
                                     FDR.cneo >= 0.05 & FDR.scer < 0.05  ~ "S. cerevisiae Only",
                                     TRUE ~ "Not sigificant"
-                                    ), levels=c( "Both significant", "C. neoformans Only", "S. cerevisiae Only", "Not sigificant") )  ) %>%
-  ggplot( aes( logFC.cneo, logFC.scer, col=is_significant)) +
-  geom_point()  + 
+                                    ), levels=c( "Both significant", "C. neoformans Only", "S. cerevisiae Only", "Not sigificant") )  ) %>% 
+  mutate( Comparison = "AMB-LF treatment vs. control" ) %>%
+  ggplot( aes( logFC.cneo, logFC.scer)) +
+  geom_point( aes(col=is_significant))  + 
+  geom_smooth(aes(group = 1), method = "lm") +
+
   # This is how to get part of the legend text into italic fact
   scale_color_discrete( labels=c( "Both significant", 
-                                  expression(paste(italic("C. neoformans")," Only", sep=" ")), 
-                                  expression(paste(italic("S. cerevisiae")," Only", sep=" ")), 
+                                  expression(paste(italic("C. neoformans")," only", sep=" ")), 
+                                  expression(paste(italic("S. cerevisiae")," only", sep=" ")), 
                                   "Not sigificant") ) + 
   guides( color=guide_legend(title="Is Significant")) +
   xlab ( expression( paste(italic("C. neoformans"), "log fold-change", sep=" ") ) ) +
   ylab ( expression( paste(italic("S. cerevisiae"), "log fold-change", sep=" ") ) ) +
-  theme(legend.text.align = 0) # Align legend text to the left
+  ylim( -4, 2.8) + 
+  theme(legend.text.align = 0) + # Align legend text to the left
+  facet_grid( . ~  Comparison, labeller = label_wrap_gen() ) 
 
 compare_AL_CAL_ggplot
 
 ggsave( filename = file.path(compare_orthologs_results_dir, "compare_AL_CAL_ggplot.png"), plot=compare_AL_CAL_ggplot)
 ggsave( filename = file.path(compare_orthologs_results_dir, "compare_AL_CAL_ggplot.tiff"), plot=compare_AL_CAL_ggplot)
 ggsave( filename = file.path(compare_orthologs_results_dir, "compare_AL_CAL_ggplot.pdf"), plot=compare_AL_CAL_ggplot)
+```
 
 
+```{r}
 compare_AL_CAL_orthologs_sig <- compare_AL_CAL_orthologs %>% 
   filter( logFC.cneo < 0.05 & logFC.scer < 0.05)
 
@@ -214,16 +228,25 @@ sink()
 
 ```
 
+```{r}
+p_load(cowplot)
+
+
+plot_grid(compare_A_CA_ggplot, compare_AL_CAL_ggplot, labels = c('(A)', '(B)'), rel_widths = c(0.35, 0.55))
+
+```
+
+
 
 ```{r}
 
 compare_A_CA_for_merge <-  compare_A_CA_orthologs_clean %>% mutate( Comparison = "AMB only treatment vs. control" )
-compare_AL_CAL_for_merge <-  compare_AL_CAL_orthologs_clean %>% mutate( Comparison = "AMB + LF treatment vs. control" )
+compare_AL_CAL_for_merge <-  compare_AL_CAL_orthologs_clean %>% mutate( Comparison = "AMB-LF treatment vs. control" )
 
 merged_data <- compare_A_CA_for_merge %>%
                bind_rows( compare_AL_CAL_for_merge) %>%
                mutate( Comparison = factor( Comparison, levels = c( "AMB only treatment vs. control", 
-                                                                    "AMB + LF treatment vs. control")))
+                                                                    "AMB-LF treatment vs. control")))
 
 merged_ggplot <- merged_data %>%
   dplyr::mutate( is_significant = factor( case_when( FDR.cneo < 0.05  & FDR.scer < 0.05  ~ "Both significant",
@@ -237,14 +260,15 @@ merged_ggplot <- merged_data %>%
 
   # This is how to get part of the legend text into italic fact
   scale_color_discrete( labels=c( "Both significant", 
-                                  expression(paste(italic("C. neoformans")," Only", sep=" ")), 
-                                  expression(paste(italic("S. cerevisiae")," Only", sep=" ")), 
+                                  expression(paste(italic("C. neoformans")," only", sep=" ")), 
+                                  expression(paste(italic("S. cerevisiae")," only", sep=" ")), 
                                   "Not sigificant") ) + 
   guides( color=guide_legend(title="Is Significant")) +
   xlab ( expression( paste(italic("C. neoformans"), "log fold-change", sep=" ") ) ) +
   ylab ( expression( paste(italic("S. cerevisiae"), "log fold-change", sep=" ") ) ) +
   theme(legend.text.align = 0) +
-  facet_grid( . ~ Comparison)
+  facet_grid(  . ~ Comparison, 
+               labeller = label_wrap_gen()) # 
 
 merged_ggplot
 ```

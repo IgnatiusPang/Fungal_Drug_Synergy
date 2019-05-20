@@ -1,47 +1,44 @@
-gobpid	groups	term
-GO:0009073	Nucleic acid and amino acid related	aromatic amino acid family biosynthetic process
-GO:0008652	Nucleic acid and amino acid related	cellular amino acid biosynthetic process
-GO:0055086	Nucleic acid and amino acid related	nucleobase-containing small molecule metabolic process
-GO:0019362	Nucleic acid and amino acid related	pyridine nucleotide metabolic process
-GO:0009112	Nucleic acid and amino acid related	nucleobase metabolic process
-GO:0007017	Cell organisation and replication related	microtubule-based process
-GO:0008154	Cell organisation and replication related	actin polymerization or depolymerization
-GO:0000226	Cell organisation and replication related	microtubule cytoskeleton organization
-GO:0006122	Energy related	mitochondrial electron transport, ubiquinol to cytochrome c
-GO:0006091	Energy related	generation of precursor metabolites and energy
-GO:0044262	Energy related	cellular carbohydrate metabolic process
-GO:0006091	Energy related	generation of precursor metabolites and energy
-GO:0006733	Energy related	oxidoreduction coenzyme metabolic process
-GO:0072350	Energy related	tricarboxylic acid metabolic process
-GO:0044267	Protein related	cellular protein metabolic process
-GO:0006457	Protein related	protein folding
-GO:0030433	Protein related	ubiquitin-dependent ERAD pathway
-GO:0007039	Protein related	protein catabolic process in the vacuole
-GO:0043161	Protein related	proteasome-mediated ubiquitin-dependent protein catabolic process
-GO:0006620	Protein related	posttranslational protein targeting to endoplasmic reticulum membrane
-GO:0002181	Protein related	cytoplasmic translation
-GO:0042254	Protein related	ribosome biogenesis
-GO:0002183	Protein related	cytoplasmic translational initiation
-GO:0006696	Lipid related	ergosterol biosynthetic process
-GO:0044242	Lipid related	cellular lipid catabolic process
-GO:0016125	Lipid related	sterol metabolic process
-GO:0034599	Stress related	cellular response to oxidative stress
-GO:0006974	Stress related	cellular response to DNA damage stimulus
-GO:0051788	Stress related	response to misfolded protein
-GO:0071712	Stress related	ER-associated misfolded protein catabolic process
-GO:0042743	Stress related	hydrogen peroxide metabolic process
-GO:0035617	Stress related	stress granule disassembly
-GO:0071218	Stress related	cellular response to misfolded protein
-GO:0034976	Stress related	response to endoplasmic reticulum stress
-GO:0097501	Stress related	stress response to metal ion
-GO:0000196	Stress related	cell wall integrity MAPK cascade
-GO:0070413	Stress related	trehalose metabolism in response to stress
-GO:0016226	Metal related	iron-sulfur cluster assembly
-GO:0015891	Metal related	siderophore transport
-GO:0000041	Metal related	transition metal ion transport
-GO:0006825	Metal related	copper ion transport
-GO:0055072	Metal related	iron ion homeostasis
-GO:0055076	Metal related	transition metal ion homeostasis
-GO:0032258	Autophagy related	protein localization by the Cvt pathway
-GO:0000422	Autophagy related	autophagy of mitochondrion
-GO:0006915	Autophagy related	apoptotic process
+gobpid	groups	term	ordering
+GO:0008154	Cell organization related	actin polymerization or depolymerization	1
+GO:0000226	Cell organization related	microtubule cytoskeleton organization	2
+GO:0044262	Energy related	cellular carbohydrate metabolic process	3
+GO:0006091	Energy related	generation of precursor metabolites and energy	4
+GO:0006091	Energy related	generation of precursor metabolites and energy	5
+GO:0016226	Energy related	iron-sulfur cluster assembly	6
+GO:0006122	Energy related	mitochondrial electron transport, ubiquinol to cytochrome c	7
+GO:0006733	Energy related	oxidoreduction coenzyme metabolic process	8
+GO:0072350	Energy related	tricarboxylic acid metabolic process	9
+GO:0044242	Lipid related	cellular lipid catabolic process	10
+GO:0006696	Lipid related	ergosterol biosynthetic process	11
+GO:0016125	Lipid related	sterol metabolic process	12
+GO:0006825	Metal related	copper ion transport	13
+GO:0055072	Metal related	iron ion homeostasis	14
+GO:0015891	Metal related	siderophore transport	15
+GO:0055076	Metal related	transition metal ion homeostasis	16
+GO:0000041	Metal related	transition metal ion transport	17
+GO:0009073	Nucleic acid and amino acid related	aromatic amino acid family biosynthetic process	18
+GO:0008652	Nucleic acid and amino acid related	cellular amino acid biosynthetic process	19
+GO:0009112	Nucleic acid and amino acid related	nucleobase metabolic process	20
+GO:0055086	Nucleic acid and amino acid related	nucleobase-containing small molecule metabolic process	21
+GO:0019362	Nucleic acid and amino acid related	pyridine nucleotide metabolic process	22
+GO:0042254	Protein related	ribosome biogenesis	23
+GO:0002183	Protein related	cytoplasmic translational initiation	24
+GO:0002181	Protein related	cytoplasmic translation	25
+GO:0006620	Protein related	posttranslational protein targeting to endoplasmic reticulum membrane	26
+GO:0006457	Protein related	protein folding	27
+GO:0071712	Protein related	ER-associated misfolded protein catabolic process	28
+GO:0043161	Protein related	proteasome-mediated ubiquitin-dependent protein catabolic process	29
+GO:0007039	Protein related	protein catabolic process in the vacuole	30
+GO:0006915	Stress related	apoptotic process	31
+GO:0000422	Stress related	autophagy of mitochondrion	32
+GO:0000196	Stress related	cell wall integrity MAPK cascade	33
+GO:0006974	Stress related	cellular response to DNA damage stimulus	34
+GO:0071218	Stress related	cellular response to misfolded protein	35
+GO:0034599	Stress related	cellular response to oxidative stress	36
+GO:0042743	Stress related	hydrogen peroxide metabolic process	37
+GO:0032258	Stress related	protein localization by the Cvt pathway	38
+GO:0034976	Stress related	response to endoplasmic reticulum stress	39
+GO:0035617	Stress related	stress granule disassembly	40
+GO:0097501	Stress related	stress response to metal ion	41
+GO:0070413	Stress related	trehalose metabolism in response to stress	42
+GO:0030433	Stress related	ubiquitin-dependent ERAD pathway	43

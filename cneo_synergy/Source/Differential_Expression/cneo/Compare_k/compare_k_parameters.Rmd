@@ -32,7 +32,7 @@ compare_k_results_output_dir <- file.path ( results_dir, "Differential_Expressio
 create_dir_if_not_exists(compare_k_results_output_dir)
 
 ## Directory position 
-param_k_path_position <- 12
+param_k_path_position <- 13
 
 ```
 
@@ -82,18 +82,26 @@ head( num_sde_genes_table)
 
 num_sde_genes_table <- dplyr::mutate( num_sde_genes_table, 
 									  k=purrr::map_int( k, function(x) { strsplit(x, "_")[[1]][2] %>% as.integer() }  )) %>%
-                    filter ( Comparison != "compare_AL_A")
+                    filter ( Comparison != "compare_AL_A") %>%
+                    dplyr::mutate( Comparison = case_when ( Comparison == "compare_A" ~ "AMB treatment",
+                                                            Comparison == "compare_AL" ~ "AMB-LF treatment",
+                                                            TRUE ~ NA_character_
+                                                            ))
 
 
 my_graph <- num_sde_genes_table %>%
 			ggplot( aes( k, Num_of_genes) ) +
 			geom_line( ) +
-			facet_wrap( ~ Comparison  )
+			facet_wrap( ~ Comparison  ) +
+      ylab("No. of genes") +
+      xlab("Number of unwanted factors (k)") + 
+      guides(color=guide_legend(title="Direction"))
 
 my_graph
 
 
-ggsave( file.path( compare_k_results_output_dir, "compare_num_sde_genes.png" ) )
+ggsave( file.path( compare_k_results_output_dir, "compare_num_sde_genes.png" ), width = 6, height =  3 )
+ggsave( file.path( compare_k_results_output_dir, "compare_num_sde_genes.pdf" ), width = 6, height =  3 )
 	
 
 ```
@@ -125,25 +133,33 @@ head( num_sde_genes_up_down_table)
 num_sde_genes_up_down_table <- num_sde_genes_up_down_table %>%
 								tidyr::separate(  Comparison, c("treatment_type",  "direction"), sep="\\."  ) %>%
 								tidyr::unite("Comparison", treatment_type, sep="." ) %>%
-                filter ( Comparison != "compare_AL_A")
+                filter ( Comparison != "compare_AL_A") %>%
+                dplyr::mutate( Comparison = case_when ( Comparison == "compare_A" ~ "AMB treatment",
+                                                        Comparison == "compare_AL" ~ "AMB-LF treatment",
+                                                        TRUE ~ NA_character_  )) %>%
+                mutate( direction = stringr::str_to_title(direction ) )
+
 
 
 
 my_graph <- num_sde_genes_up_down_table %>%
 			ggplot( aes( k, Num_of_genes, color=direction) ) +
 			geom_line(  ) +
-			facet_wrap( ~ Comparison  )
+			facet_wrap( ~ Comparison  ) +
+      ylab("No. of genes") +
+      xlab("Number of unwanted factors (k)") + 
+      guides(color=guide_legend(title="Direction"))
 
 my_graph
 	
-ggsave( file.path( compare_k_results_output_dir, "compare_num_sde_genes_up_and_down.png" ) ) 
+ggsave( file.path( compare_k_results_output_dir, "compare_num_sde_genes_up_and_down.png" ), width = 6, height =  3 ) 
 
 
 ```
 
 
 ## Analysis of p-values 
-```{r}
+```{r, eval=FALSE}
 
 p_values_files <- Sys.glob( file.path( choose_k_glob_pattern, "Gene_Lists", "experiment_label_and_logFC_FDR_table.tab") ) 
 

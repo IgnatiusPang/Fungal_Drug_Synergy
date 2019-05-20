@@ -39,9 +39,7 @@ scer_enriched_go <- read_tsv(file.path(scer_results_dir, "Functional_Enrichment/
 
 list_of_selected_go_terms <- read_tsv( file.path( compare_data_dir, "Selected_GO_Terms/list_of_selected_GO_terms.txt"), 
                                        col_names = TRUE) %>%
-                              dplyr::select(-term)
-
-
+                             dplyr::select(-term)
 
 ```
 
@@ -99,8 +97,7 @@ compare_enriched_go_spread <- compare_enriched_go_long %>%
 thesis_results_recreate <- list_of_selected_go_terms  %>%
   left_join(compare_enriched_go_bh, by="gobpid" ) %>%
   #mutate( term = purrr::map_chr(gobpid, ~GOTERM[[.]]@Term    ))
-   mutate( term =  purrr::map2_chr( term, gobpid,  ~ifelse( is.na(.x), GOTERM[[.y]]@Term, .x)) ) %>%
-   mutate(    )
+   mutate( term =  purrr::map2_chr( term, gobpid,  ~ifelse( is.na(.x), GOTERM[[.y]]@Term, .x)) ) 
 
 write.table(thesis_results_recreate, file=file.path( compare_results_dir, "Compare_Global_Enrichment/thesis_results_recreate.tab"  ),
             sep="\t", row.names = FALSE, quote = FALSE)
@@ -165,8 +162,12 @@ max_odds_ratio_score <- subset_to_plot %>%
         ceiling
   
 subset_to_plot_clean_max <- subset_to_plot %>%
-                            mutate(Odds_Ratio_Score = ifelse( is.finite(Odds_Ratio_Score), Odds_Ratio_Score, max_odds_ratio_score))
+                            mutate(Odds_Ratio_Score = ifelse( is.finite(Odds_Ratio_Score), Odds_Ratio_Score, max_odds_ratio_score)) %>%
+                            arrange( groups, ordering)
+```
 
+
+```{r}
 odds_ratio_ggplot <- subset_to_plot_clean_max  %>%
     ggplot( aes(  x_labels, term,
                   color = direction,

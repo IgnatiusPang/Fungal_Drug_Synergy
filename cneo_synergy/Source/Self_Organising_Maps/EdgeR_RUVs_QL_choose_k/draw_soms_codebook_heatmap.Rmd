@@ -81,12 +81,14 @@ soms_AL_go_genes <- read_tsv( file.path(soms_results_dir, "compare_AL/5x5/enrich
                     mutate( cluster_id = str_replace( query_list_id, "SOMs_cluster_C", "")   )  %>%
                     mutate( cluster_id = as.integer(cluster_id))
 
-## Read log fold-change of AMB and AMB+LF treatment and how they compare with each other
+## Read log fold-change of AMB and AMB-LF treatment and how they compare with each other
 compare_fold_change <- read_tsv( file = file.path( results_dir, "Compare_Fold_Change", "compare_A_AL_fold_change.tab" ) ) 
 
 compare_fold_change_clean <- compare_fold_change %>%
                              dplyr::distinct( genes, coarse_groups) 
                              
+
+compare_fold_change %>% distinct(coarse_groups)
 
 ```
 
@@ -149,7 +151,7 @@ dev.off()
 
 ```
 
-## Count for each cluster, number of significantly differentially expressed genes specific to AMB treament or AMB+LF treatment only
+## Count for each cluster, number of significantly differentially expressed genes specific to AMB treament or AMB-LF treatment only
 ```{r}
 
 count_soms_A_only_genes <- soms_A_go_genes %>%
@@ -175,7 +177,7 @@ count_soms_AL_only_genes <- soms_AL_go_genes %>%
   dplyr::select( -Same, -Opposite) %>%
   right_join ( data.frame( cluster_id = as.integer(rownames( compare_AL_codebook_vector[,heatmap_column_labels]))), 
                by = "cluster_id") %>%
-  mutate( `AMB+LF only` = ifelse(is.na(`AMB+LF only`), 0, `AMB+LF only`))
+  mutate( `AMB-LF only` = ifelse(is.na(`AMB-LF only`), 0, `AMB-LF only`))
 
 # soms_AL_go_genes
 # compare_fold_change_clean
@@ -205,10 +207,11 @@ dim(compare_A_codebook_vector[,heatmap_column_labels])
 
 ### AMB only model, A - CA
 
-compare_A_row_annot <- data.frame( Direction =  compare_A_direction$Direction,
+compare_A_row_annot <- data.frame( # Direction =  compare_A_direction$Direction,
                                    AMB_only = count_soms_A_only_genes$`AMB only`)
 
-colnames( compare_A_row_annot) <- c("Direction", "AMB<br>specific")
+colnames( compare_A_row_annot) <- c(# "Direction", 
+                                    "AMB<br>specific")
 
 
 compare_A_iheatmapr <- main_heatmap( compare_A_codebook_vector[,heatmap_column_labels], 
@@ -233,10 +236,11 @@ save_iheatmap( p=compare_A_iheatmapr,
 
 ### AMB + LF model, AL - CAL
 
-compare_AL_row_annot <- data.frame( Direction =  compare_AL_direction$Direction,
-                                   AMB_LF_only = count_soms_AL_only_genes$`AMB+LF only`)
+compare_AL_row_annot <- data.frame( # Direction =  compare_AL_direction$Direction,
+                                   AMB_LF_only = count_soms_AL_only_genes$`AMB-LF only`)
 
-colnames( compare_AL_row_annot) <- c("Direction", "AMB+LF<br>specific")
+colnames( compare_AL_row_annot) <- c(# "Direction", 
+                                     "AMB-LF<br>specific")
 
 compare_AL_iheatmapr <- main_heatmap( compare_AL_codebook_vector[,heatmap_column_labels], 
                                      layout = list(margin = my_margins, font=my_font),
