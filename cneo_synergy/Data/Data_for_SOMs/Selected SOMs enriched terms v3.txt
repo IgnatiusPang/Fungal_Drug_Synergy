@@ -1,0 +1,39 @@
+Response	AMB				AMB-LF				
+	Regulation	GO term	SOMs cluster	Genes	Regulation	GO term	SOMs cluster	Genes	
+Related to stress	Up	Cellular oxidant detoxification	10	GPX2 + 2 uncharacterized genes	Up	Autophagy of mitochondrion	22	"APG9, HSV2 + 1 uncharacterized genes"	
+	Up	ER-dependent peroxisome organisation	19	YOP1 + 2 uncharacterized genes	Up	Cellular oxidant detoxification	"7, 16"	"SRX1, CAT1, GPX2 + 5 uncharacterized genes"	
+	Up	Glutathione metabolic process	14	TRX1 + 4 uncharacterized genes	Up	Cellular response to nitrosative stress	17	FHB1 + 1 uncharacterized genes	
+	Up	Nitrosative stress	24	FHB1 + 1 uncharacterized genes	Up	Cellular response to oxidative stress	11	"CCP1, PIM1, TAL1, TPS1 + 5 uncharacterized genes"	
+	Up	Piecemeal microautophagy of the nucleus	20	APG9 + 4 uncharacterized genes	Up	Glutathione metabolic process	11	TRX1 + 4 uncharacterized genes	
+	Up	Positive regulation of apoptotic process	15	2 uncharacterized genes	Up	Glycoprotein biosynthetic process	7	"KRE5, KTR3 + 3 uncharacterized genes"	
+	Up	Reactive oxygen species metabolic process	15	"TSA1, GPX2, TRR1"	Up	Golgi vesicle docking	1	2 uncharacterized genes	
+	Up	Regulation of autophagy	20	2 uncharacterized genes	Up	Hydrogen peroxide catabolic process	1	"TSA1, GPX2"	
+					Up	Late endosome vacuole transport	16	DDI1 + 6 uncharacterized genes	
+					Up	Organelle fusion	11	TRX1 + 7 uncharacterized genes	
+					Up	Organelle membrane fusion	1	SEC6 + 4 uncharacterized genes	
+					Up	Protein catabolic process in the vacuole	11	3 uncharacterized genes	
+					Up	Protein localisation to ER	3	2 uncharacterized genes	
+					Up	Protein localisation to vacuole	22	4 uncharacterized genes	
+					Up	Regulation of actin filament polymerisation	1	CIN1 + 3 uncharacterized genes	
+					Up	Regulation of kinase activity	17	"MKK2, PTP2 + 1 uncharacterized genes"	
+					Up	Regulation of vacuole fusion	16	4 uncharacterized genes	
+					Up	Response to topologically incorrect protein	3	4 uncharacterized genes	
+					Up	Stress granule disassembly	3	2 uncharacterized genes	
+					Up	Transition metal ion transport	11	"YKE4, ZIP2, CTR4 + 3 uncharacterized genes"	
+					Up	Ubiquitin-dependent ERAD pathway	3	2 uncharacterized genes	
+ER related	Down	ER-to-Golgi vesicle mediated transport	16	5 uncharacterized genes	Down	Ergosterol biosynthesis	10	"ERG28, ERG26, ERG27, ERG20 + 1 uncharacterized genes"	
+	Down	Glycerolipid biosynthesis	12	"CHO2, PSD1 + 4 uncharacterized genes"	Down	GPI anchor biosynthesis	10	4 uncharacterized genes	
+	Down	Peptide metabolic process	12	"RPB4, GCN3 + 24 uncharacterized genes"	Down	Iron ion transmembrane transport	10	"CFT1, LAC2 + 1 uncharacterized genes"	
+	Down	Proteasomal ubiquitin independent protein catabolism	11	5 uncharacterized genes	Down	Peptide biosynthesis	10	RPB4 + 23 uncharacterized genes	
+	Down	Protein folding	"11, 22"	20 uncharacterized genes	Up	Post-translational protein targeting to the membrane	3	2 uncharacterized genes	
+	Down	Protein localisation to the ER	11	6 uncharacterized genes	Up	Proteolysis	3	4 uncharacterized genes	
+	Down	Protein localisation to vacuolar membrane	12	2 uncharacterized genes					
+	Down	Protein refolding	22	5 uncharacterized genes					
+	Down	Protein transmembrane transport	22	4 uncharacterized genes					
+	Down	Signal peptide processing	11	5 uncharacterized genes					
+	Down	Tail anchored membrane protein insertion into ER membrane	12	"GET3, GET1"					
+Metal ion related	Up	Cation transmembrane transport	14	"ZIP2, ENA1, SIT1, CTR4, PMC1, ZRC1 + 8 uncharacterized genes"	Down	Iron ion transmembrane transport	10	"CFT1, LAC2 + 1 uncharacterized genes"	
+	Up	Copper ion transport	10	"COX17, SCO1"	Up	Copper ion transport	7	"COX17, SCO1"	
+	Up	Transition metal ion transport	14	"ZIP2, CTR4 + 3 uncharacterized genes"	Up	Ion transport	"11, 12"	"ZIP2, FRE3, CTR4, PXA2, ENA1, PMC1, ZRC1, SIT1, PDR5-2, AQY1 + 27 uncharacterized genes"	
+					Up	Transition metal ion transport	11	"YKE4, ZIP2, CTR4 + 3 uncharacterized genes"	
+									

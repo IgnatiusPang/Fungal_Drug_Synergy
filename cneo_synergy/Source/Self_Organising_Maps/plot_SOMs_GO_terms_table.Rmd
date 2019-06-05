@@ -1,0 +1,123 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+p_load(gt)
+p_load(xlsx)
+
+source( '../Common/global_parameters.R')
+source( '../Common/helper_functions.R')
+
+sessionInfo()
+
+```
+
+
+```{r}
+go_terms <-  readxl::read_xlsx( file.path( data_dir, "Data_for_SOMs/Selected SOMs enriched terms v2.xlsx") )
+
+
+```
+
+```{r}
+
+get_genes_string <- function( .x, .y) {
+  
+  
+  known_genes_string <- paste(.x, collapse=", ")
+  uncharacterized_genes_string <- paste( .y , "uncharacterized genes" )
+  
+  output_string <- ""
+  
+  if( length(.x) >0 & .y > 0 ) {
+    
+      output_string <- paste( c( known_genes_string, "+",  uncharacterized_genes_string), collapse=" "  )
+
+  } else if ( length(.x) > 0  & .y == 0) {
+    
+      output_string <- known_genes_string
+  }  else if ( length(.x) == 0  & .y > 0) {
+    
+      output_string <- uncharacterized_genes_string
+  } 
+  
+  return( output_string)
+  
+}
+
+
+
+go_terms_updated <- go_terms %>%
+                    mutate ( num_sig_transcripts = str_split(Genes, ",") %>% map_int( length),
+                             characterized_genes_temp=  str_split(Genes, ",") %>% 
+                                                     map( ~map_chr(., ~str_replace_all(., "\\(|\\)|CNAG_\\d{5}|\\s+", "" ))) %>%
+                                                     map( ~.[.!=""]   ) ) %>%
+                    mutate( num_characterized_transcripts = map_int(characterized_genes_temp, length)) %>%
+                    mutate( num_uncharacterized_transcripts = num_sig_transcripts - num_characterized_transcripts) %>% 
+                    mutate( original_genes = Genes ) %>%
+                    mutate( Genes = map2_chr( characterized_genes_temp, num_uncharacterized_transcripts,  ~get_genes_string(.x, .y)) ) %>%
+                    dplyr::select( -num_sig_transcripts, -characterized_genes_temp, -num_characterized_transcripts,
+                                   -num_uncharacterized_transcripts, -original_genes) %>%
+                    arrange( Treatment_type, Responses, Regulation, `GO term`) %>%
+                    group_by( Treatment_type, Responses) %>%
+                    mutate( group_id = row_number()) %>%
+                    ungroup()
+
+
+go_terms_updated
+
+write.table(go_terms_updated, file.path( data_dir, "Data_for_SOMs/Selected SOMs enriched terms v3.txt"),
+            sep="\t", row.names = FALSE, quote = FALSE )
+                                                     
+```
+
+
+
+```{r}
+
+go_terms_updated %>%
+  filter ( Treatment_type == "AMB treatment")
+
+
+
+ gt(go_terms_updated) %>%
+  tab_row_group("Related to stress", rows = Responses == "Related to stress" )  %>%
+  tab_row_group("ER related", rows = Responses == "ER related" ) %>%
+  tab_row_group("Metal ion related", rows = Responses == "Metal ion related" ) 
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

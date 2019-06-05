@@ -6,11 +6,9 @@ compare_AL_specific.down	GO:0044271	0.0051129890239971	compare_AL_specific.down	
 compare_AL_specific.down	GO:0042254	0.000105835093532024	compare_AL_specific.down	ribosome biogenesis	3.97537030205336	AMB-LF treatment specific, down	#A65628
 compare_AL_specific.down	GO:0006412	1.30372928312876e-10	compare_AL_specific.down	translation	9.88481257965408	AMB-LF treatment specific, down	#A65628
 compare_AL_specific.up	GO:0042438	0.0465836971350871	compare_AL_specific.up	melanin biosynthetic process	1.33176604646581	AMB-LF treatment specific, up	#FF7F00
-compare_AL_specific.up	GO:0019722	0.0396365455571914	compare_AL_specific.up	calcium-mediated signaling	1.401904202593	AMB-LF treatment specific, up	#FF7F00
 compare_AL_specific.up	GO:0034406	0.0396365455571914	compare_AL_specific.up	cell wall beta-glucan metabolic process	1.401904202593	AMB-LF treatment specific, up	#FF7F00
 compare_AL_specific.up	GO:0006511	0.0368046369131439	compare_AL_specific.up	ubiquitin-dependent protein catabolic process	1.43409746233381	AMB-LF treatment specific, up	#FF7F00
 compare_AL_specific.up	GO:0006873	0.0334565480605844	compare_AL_specific.up	cellular ion homeostasis	1.47551887017508	AMB-LF treatment specific, up	#FF7F00
-compare_AL_specific.up	GO:0030163	0.0201247662892048	compare_AL_specific.up	protein catabolic process	1.69626915443329	AMB-LF treatment specific, up	#FF7F00
 compare_AL_specific.up	GO:0044038	0.0200253238351097	compare_AL_specific.up	cell wall macromolecule biosynthetic process	1.69842045208947	AMB-LF treatment specific, up	#FF7F00
 compare_AL_specific.up	GO:0097576	0.0184245146804709	compare_AL_specific.up	vacuole fusion	1.73460394305477	AMB-LF treatment specific, up	#FF7F00
 compare_AL_specific.up	GO:0006897	0.0158747711726077	compare_AL_specific.up	endocytosis	1.79929252614245	AMB-LF treatment specific, up	#FF7F00
@@ -28,7 +26,5 @@ compare_A_specific.down	GO:0006457	0.0256781661859341	compare_A_specific.down	pr
 compare_A_specific.down	GO:0010467	0.0247047966340022	compare_A_specific.down	gene expression	1.60721871680367	AMB treatment specific, down	#984EA3
 compare_A_specific.down	GO:0006396	0.0186421971078084	compare_A_specific.down	RNA processing	1.72950290445166	AMB treatment specific, down	#984EA3
 compare_A_specific.down	GO:0008380	0.0040086809639508	compare_A_specific.down	RNA splicing	2.39699850626111	AMB treatment specific, down	#984EA3
-compare_A_specific.down	GO:0000398	0.0040086809639508	compare_A_specific.down	mRNA splicing, via spliceosome	2.39699850626111	AMB treatment specific, down	#984EA3
-compare_A_specific.down	GO:0000375	0.0031929492053092	compare_A_specific.down	RNA splicing, via transesterification reactions	2.4958079903329	AMB treatment specific, down	#984EA3
 compare_A_specific.down	GO:0006397	6.32724643444633e-07	compare_A_specific.down	mRNA processing	6.19878525025146	AMB treatment specific, down	#984EA3
 compare_A_specific.down	GO:0016071	2.55524469432834e-08	compare_A_specific.down	mRNA metabolic process	7.59256750480202	AMB treatment specific, down	#984EA3

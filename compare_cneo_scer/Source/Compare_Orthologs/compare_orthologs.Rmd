@@ -14,6 +14,7 @@ if(!require(pacman)) {
 }
 
 p_load(tidyverse)
+# p_load(cowplot)
 		
 source( '../Common/global_parameters.R')
 source( '../Common/helper_functions.R')
@@ -148,7 +149,8 @@ compare_A_CA_ggplot
 
 ggsave( filename = file.path(compare_orthologs_results_dir, "compare_A_CA_ggplot.png"), plot=compare_A_CA_ggplot)
 ggsave( filename = file.path(compare_orthologs_results_dir, "compare_A_CA_ggplot.tiff"), plot=compare_A_CA_ggplot)
-ggsave( filename = file.path(compare_orthologs_results_dir, "compare_A_CA_ggplot.pdf"), plot=compare_A_CA_ggplot)
+ggsave( filename = file.path(compare_orthologs_results_dir, "compare_A_CA_ggplot.pdf"), plot=compare_A_CA_ggplot, 
+        width= 5 ,  height = 3.3)
 ```
 
 
@@ -201,7 +203,8 @@ compare_AL_CAL_ggplot
 
 ggsave( filename = file.path(compare_orthologs_results_dir, "compare_AL_CAL_ggplot.png"), plot=compare_AL_CAL_ggplot)
 ggsave( filename = file.path(compare_orthologs_results_dir, "compare_AL_CAL_ggplot.tiff"), plot=compare_AL_CAL_ggplot)
-ggsave( filename = file.path(compare_orthologs_results_dir, "compare_AL_CAL_ggplot.pdf"), plot=compare_AL_CAL_ggplot)
+ggsave( filename = file.path(compare_orthologs_results_dir, "compare_AL_CAL_ggplot.pdf"), plot=compare_AL_CAL_ggplot, 
+        width= 5 ,  height = 3.3 )
 ```
 
 
@@ -229,10 +232,8 @@ sink()
 ```
 
 ```{r}
-p_load(cowplot)
 
-
-plot_grid(compare_A_CA_ggplot, compare_AL_CAL_ggplot, labels = c('(A)', '(B)'), rel_widths = c(0.35, 0.55))
+# plot_grid(compare_A_CA_ggplot, compare_AL_CAL_ggplot, labels = c('(A)', '(B)'), rel_widths = c(0.35, 0.55))
 
 ```
 
