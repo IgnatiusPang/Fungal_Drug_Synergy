@@ -16,6 +16,7 @@ p_load(tidyverse)
 p_load(plotly)
 p_load(UpSetR)
 p_load(RColorBrewer)
+p_load(here)
 
 source( '../Common/global_parameters.R')
 
@@ -253,6 +254,26 @@ top_ten_log_fc_AL_specific <-  compare_fold_change %>%
   mutate( rank_from_biggest_increase = row_number()) %>%
   left_join( gene_annotation, by=c("genes" = "orf_id")) %>%
   filter( rank_from_biggest_increase <= 10 )
+
+
+```
+
+
+
+```{r}
+
+all_genes_specific_to_A <- compare_fold_change %>% 
+  filter ( coarse_groups == "AMB only") %>%
+  arrange( desc(logFC.A )) %>%
+  mutate( rank_from_biggest_increase = row_number()) %>%
+  arrange( logFC.A ) %>%
+  mutate( rank_from_biggest_decrease = row_number()) %>%
+  left_join( gene_annotation, by=c("genes" = "orf_id")) %>%
+  dplyr::select( -logFC.AL, -FDR.AL  )
+
+write.table( all_genes_specific_to_A, file.path( results_dir, "Compare_Fold_Change", "all_genes_specific_to_A.tab"  ),
+             row.names = FALSE, quote = FALSE, sep="\t") 
+
 
 
 ```

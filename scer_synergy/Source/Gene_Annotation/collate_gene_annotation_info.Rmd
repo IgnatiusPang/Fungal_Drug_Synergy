@@ -71,8 +71,8 @@ orthologs_summary <- orthologs %>%
 						dplyr::left_join ( cneo_gene_annotation, by= c("cneo_orf_id" = "orf_id") )%>%
             dplyr::rename( cneo_gene_name = "gene_names"  ) %>%
  						dplyr::arrange( cneo_gene_name ) %>%
-						dplyr::group_by( cneo_orf_id) %>%
             dplyr::rename( cneo_uniprot_description = "uniprot_gene_name"  ) %>%
+  					dplyr::group_by( cneo_orf_id, scer_oln_id) %>%
 						dplyr::summarise( cneo_orthologs = paste(unique(cneo_gene_name), collapse="; " ), 
 										  cneo_ortholog_descriptions = paste(cneo_uniprot_description, collapse="; " ) ) %>%
 						dplyr::ungroup() 
@@ -81,8 +81,11 @@ scer_gene_annotation_updated <- scer_gene_annotation %>%
 	dplyr::left_join ( transcription_factors_summary, by=c("scer_oln_id" = "oln_id") ) %>%
 	dplyr::left_join ( kinases_summary, by=c("scer_oln_id" = "oln_id")) %>%
 		dplyr::left_join ( cell_cycle_regulated_genes_cleaned, by=c("scer_oln_id" = "oln_id")) %>%
-		dplyr::left_join( orthologs_summary, by =c("scer_oln_id" = "cneo_orf_id") ) %>%
+		dplyr::left_join( orthologs_summary, by =c("scer_oln_id" = "scer_oln_id") ) %>%
     dplyr::rename( oln_id = "scer_oln_id")
+
+scer_gene_annotation_updated %>%
+  filter (!is.na(cneo_orthologs) )
 
 
 write.table ( scer_gene_annotation_updated, 

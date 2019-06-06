@@ -13,6 +13,7 @@ if(!require(pacman)) {
 p_load(knitr)
 p_load(limma)
 p_load(tidyverse)
+p_load(here)
 
 source( '../../Common/global_parameters.R')
 source( '../../Common/helper_functions.R')
@@ -27,7 +28,7 @@ sessionInfo()
 command_line_args <-  commandArgs(trailingOnly=T)
 
 #### This is a parameter to change #### *******************
-base_results_dir <-   base::get(command_line_args[2] ) # file.path( results_dir, "Differential_Expression/EdgeR_RUVs_QL/scer/To_Use_k_5_Remove_5a" ) 
+base_results_dir <-   base::get(as.character(command_line_args[2]) ) # file.path( results_dir, "Differential_Expression/EdgeR_RUVs_QL/scer/To_Use_k_5_Remove_5a" ) 
 
 ##### This is a parameter to change #### *******************
 de_method_label <-  command_line_args[3] #  "To_Use_k_5_Remove_5a" 
@@ -151,7 +152,7 @@ columns_to_include <-   c( "query_list_id", "rank", "go_id",  "ontology", "term"
   "broad_gene_name", "uniprot_gene_name", 
   "fungidb_gene_name",	"blast2go_annotation",
   "is_tf", "is_kinases",                 
- "is_virulence_gene", "order_peaktime", "scer_orthologs", "scer_ortholog_descriptions", "expt_label" ) 
+  "peaktime", "cneo_orf_id", "cneo_orthologs", "cneo_ortholog_descriptions", "expt_label" ) 
 
 go_enrichment_results$enriched_genes <- go_enrichment_results$enriched_genes %>%
 										dplyr::select( one_of( columns_to_include))

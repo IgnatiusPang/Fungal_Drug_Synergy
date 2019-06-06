@@ -34,7 +34,7 @@ de_method_label <-   "To_Use_k_0_Remove_5a"
 
 ####################################################
 
-specific_subset <-  "AMB only" # "AMB+LF only" #
+specific_subset <-  "AMB only" # "AMB-LF only" #
 
 
 
@@ -45,7 +45,7 @@ if( specific_subset == "AMB only") {
   
   go_terms_results_dir <- file.path( results_dir, "Functional_Enrichment", de_method_label,"GOStat_AMB_only_set")
   
-} else if ( specific_subset == "AMB+LF only") {
+} else if ( specific_subset == "AMB-LF only") {
   
   go_terms_results_dir <- file.path( results_dir, "Functional_Enrichment", de_method_label,"GOStat_AMB_LF_set")
 } else {
@@ -84,7 +84,7 @@ universe <- unique( gene_annotation[, "orf_id"])
 ```
 
 
-## Get list of differentially expressed genes specific to AMB+LF treatment 
+## Get list of differentially expressed genes specific to AMB-LF treatment 
 ```{r}
 
 # # No need to change this parameter
@@ -105,7 +105,7 @@ compare_specific_set.down <-  compare_log_fold_change %>%
 
 
 
-if( specific_subset == "AMB+LF only") {
+if( specific_subset == "AMB-LF only") {
   
   list_of_up_and_down_genes <- list( compare_AL_specific.up = compare_specific_set.up, 
                                    compare_AL_specific.down = compare_specific_set.down)
