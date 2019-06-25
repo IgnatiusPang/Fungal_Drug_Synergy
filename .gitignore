@@ -43,7 +43,7 @@ rsconnect/
 
 ## C. neoformans
 cneo_synergy/Data/Broad_C_neoformans_Mar_2014
-cneo_synergy/Data/Curated_Data
+#cneo_synergy/Data/Curated_Data
 # cneo_synergy/Data/Experimental_Design
 cneo_synergy/Data/FungiDB
 # cneo_synergy/Data/Gene_Annotation

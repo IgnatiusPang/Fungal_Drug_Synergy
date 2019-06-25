@@ -1,0 +1,179 @@
+orf_id	Gene_Name	TF_domains	scer_ortholog
+CNAG_02566	FKH2	Winged helix DNA-binding domain / Fork head domain	
+CNAG_00791	HLH1	Helix-loop-helix DNA-binding domain	
+CNAG_01069	FZC11	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_07464	MBS1	APSES domain / Ankyrin repeat#2	MBP1
+CNAG_03401	GAT203	Glucocorticoid receptor-like (DNA-binding domain) / GATA zinc finger	
+CNAG_04588	ERT1	Fungal Zn(2)-Cys(6) binuclear cluster domain	ERT1
+CNAG_00828	SIP401	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_03561	FZC33	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_06762	GAT204	Glucocorticoid receptor-like (DNA-binding domain) / GATA zinc finger	
+CNAG_06276	CEP3	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_05785	STB4	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_03132	FZC5	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_01438	MBS2	KilA-N domain / Ankyrin repeats (many copies)	
+CNAG_07593	YAP4	bZIP transcription factor / Domain of unknown function (DUF3425)	
+CNAG_04837	MLN1	Helix-loop-helix DNA-binding domain	RTG3
+CNAG_05093	HOB6	Homeobox domain	
+CNAG_05642	FZC37	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_05431	RIM101	Zinc-finger double domain / C2H2-type zinc finger	RIM101
+CNAG_04398	ARO80	Fungal specific transcription factor domain / Fungal Zn(2)-Cys(6) binuclear cluster domain	ARO80
+CNAG_04878	FZC1	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_03183	FZC24	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_03710	ECM22	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	ECM22
+CNAG_03279	CCD4	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_04637	MBF1	Helix-turn-helix / lambda repressor-like DNA-binding domains	
+CNAG_06425	PPR1	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	PPR1
+CNAG_04345	ARO8001	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_04184	FZC47	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_02774	MAL13	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_00670	FZC12	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_00068	MET32	Zinc-finger double domain / C2H2-type zinc finger	
+CNAG_05010	ZFC7	C2H2-type zinc finger	
+CNAG_04090	ATF1	bZIP transcription factor / Basic region leucine zipper	
+CNAG_06134	BZP1(HXL1)	bZIP transcription factor / Basic region leucine zipper	
+CNAG_04630	YAP2	bZIP transcription factor / Basic region leucine zipper	
+CNAG_07901	FZC29	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_01173	PAN1	Beta-trefoil DNA-binding domain / p53-like transcription factors / DNA-binding protein LAG-1 (CSL)	
+CNAG_03115	FZC46	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_07924	MCM1	SRF-type transcription factor (DNA-binding and dimerisation 	MCM1
+CNAG_07435	HAP2	CCAAT-binding transcription factor (CBF-B/NF-YA) subunit B	HAP2
+CNAG_02555	SIP402	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_04594	FZC27	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_06188	FZC15	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_05170	PIP2	Fungal Zn(2)-Cys(6) binuclear cluster domain	PIP2
+CNAG_02241	HOB5	Homeodomain-like / Helix-turn-helix domain	
+CNAG_06921	HOB4	Homeobox domain	
+CNAG_05186	GRF1	GRF zinc finger	GRF1
+CNAG_00896	FZC34	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_00039	ZFC6	C2H2-type zinc finger	
+CNAG_07940	BZP5	Basic region leucine zipper / bZIP transcription factor	
+CNAG_06814	SXI1alpha	Homeobox KN domain	
+CNAG_01454	STE12	STE like transcription factor / Zinc-finger double domain / C2H2-type zinc finger	
+CNAG_03527	HEL2	C2H2-type zinc finger / C3HC4-type zinc finger	HEL2
+CNAG_05255	FZC2	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_05112	FZC42	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_01883	GAT8	Glucocorticoid receptor-like (DNA-binding domain) / GATA zinc finger	
+CNAG_04353	CLR1	C2H2-type zinc finger	
+CNAG_05375	HLH2	Helix-loop-helix DNA-binding domain	
+CNAG_03998	RLM1	SRF-type transcription factor (DNA-binding and dimerisation 	RLM1
+CNAG_00239	YAP1	bZIP transcription factor / Basic region leucine zipper	
+CNAG_06871	FZC41	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_00156	SP1(CRZ1)	C2H2-type zinc finger	CRZ1
+CNAG_04268	APN2	GRF zinc finger	APN2
+CNAG_05420	USV101	Zinc-finger double domain / C2H2-type zinc finger	RGM1
+CNAG_00018	FZC6	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_03346	BZP4	bZIP transcription factor	
+CNAG_00514	GAT6	Glucocorticoid receptor-like (DNA-binding domain) / GATA zinc finger	
+CNAG_05538	JJJ1	SRR1 domain / C2H2-type zinc finger / DnaJ domain	JJJ1
+CNAG_03409	SKN7	"Winged helix" DNA-binding domain / CheY-like / HSF-type DNA-binding	SKN7
+CNAG_06339	FZC35	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_07011	FZC22	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_07506	FAP1	NF-X1 type zinc finger #3 / R3H domain	FAP1
+CNAG_04807	FZC8	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_02435	BWC2 (CWC2)	PYP-like sensor domain (PAS domain) / Glucocorticoid receptor-like (DNA-binding domain) / GATA zinc finger / AT hook motif	
+CNAG_02364	FZC19	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_03116	HCM1	"Winged helix" DNA-binding domain / Fork head domain	HCM1
+CNAG_02877	FZC51	Zinc-finger double domain / Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_00559	BZP3	bZIP transcription factor / Basic region leucine zipper	
+CNAG_03914	FZC14	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_00871	CLR3	bZIP transcription factor / Basic region leucine zipper	
+CNAG_06483	FZC25	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_07797	CRL6	Putative FMN-binding domain	
+CNAG_05019	FZC21	Fungal specific transcription factor domain	
+CNAG_05380	FZC44	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_04518	ZFC5	Fungal specific transcription factor domain / C2H2-type zinc finger	
+CNAG_05176	HOB3	Homeobox domain	
+CNAG_05861	FKH101	Fork head domain	
+CNAG_00460	LIV1	Helix-loop-helix DNA-binding domain	
+CNAG_02305	FZC45	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_03849	ASG1	Fungal specific transcription factor domain / Fungal Zn(2)-Cys(6) binuclear cluster domain	ASG1
+CNAG_01014	ZFC4	C2H2-type zinc finger	
+CNAG_01858	HOB2	Homeobox domain	
+CNAG_06719	FZC49	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_04093	YRM103	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_04176	HSF2	"Winged helix" DNA-binding domain / HSF-type DNA-binding	
+CNAG_01431	HOB1	Homeobox domain	
+CNAG_07443	HLH4	Helix-loop-helix DNA-binding domain	
+CNAG_04916	FZC16	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_05392	ZAP104	Zinc-finger double domain / C2H2-type zinc finger	
+CNAG_02322	FZC17	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_04012	FZC18	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_00505	FZC28	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_06751	HLH3	Helix-loop-helix DNA-binding domain	
+CNAG_04841	FZC43	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_03212	HCM101	"Winged helix" DNA-binding domain	
+CNAG_01626	ADA2	Zinc finger, ZZ type / Myb-like DNA-binding domain / SWIRM domain	ADA2
+CNAG_03894	PDR802	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_02066	FZC13	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_06818	HAP1	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_05940	ZFC3	C2H2-type zinc finger	
+CNAG_01948	FZC36	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_04804	SRE1	Helix-loop-helix DNA-binding domain	
+CNAG_04352	ZAP103	Zinc-finger double domain / C2H2-type zinc finger	
+CNAG_03768	FZC32	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_01977	FZC39	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_04895	FZC3	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_04583	DDT1	WSTF, HB1, Itc1p, MBD9 motif 2/3 / DDT domain	
+CNAG_01973	ZFC2	Zinc-finger double domain / C2H2-type zinc finger / Fungal specific transcription factor domain	
+CNAG_02603	ZFC1	Fungal specific transcription factor domain / C2H2-type zinc finger	
+CNAG_04036	HSF3	"Winged helix" DNA-binding domain / HSF-type DNA-binding	
+CNAG_06156	FZC7	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_03431	FZC48	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_07922	FZC4	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_00031	MLR1	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_03018	ASG101	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_04263	BZP2	Glucocorticoid receptor-like (DNA-binding domain) / Basic region leucine zipper / bZIP transcription factor / GATA zinc finger	
+CNAG_01708	GAT7	GATA zinc finger	
+CNAG_00332	SIP4	Fungal Zn(2)-Cys(6) binuclear cluster domain	SIP4
+CNAG_07724	CUF1	Copper fist DNA binding domain	CUP2
+CNAG_03902	RDS2	Fungal Zn(2)-Cys(6) binuclear cluster domain/PAS fold	RDS2
+CNAG_03366	ZNF2	Zinc-finger double domain / C2H2-type zinc finger	
+CNAG_05222	NRG1	C2H2-type zinc finger / Zinc-finger double domain	NRG1
+CNAG_05049	PIP201	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_02516	HLH5	Helix-loop-helix DNA-binding domain	
+CNAG_04774	FZC26	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_03059	FZC9	Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_00193	GAT1	Glucocorticoid receptor-like (DNA-binding domain) / GATA zinc finger	
+CNAG_03336	FZC50	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_03086	FZC20	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_03229	YOX101	Homeobox domain / Homeobox KN domain	
+CNAG_01841	GLN3	Glucocorticoid receptor-like (DNA-binding domain) / GATA zinc finger	
+CNAG_02476	YRM101	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_05153	GAT5	Glucocorticoid receptor-like (DNA-binding domain) / GATA zinc finger / AT hook motif	
+CNAG_02700	ZFC8	C2H2-type zinc finger	
+CNAG_04586	HOB7	Homeobox domain	
+CNAG_02723	FZC23	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_03741	FZC31	Fungal Zn(2)-Cys(6) binuclear cluster domain / AT hook motif	
+CNAG_04457	FZC30	Fungal Zn(2)-Cys(6) binuclear cluster domain / AT hook motif	
+CNAG_06283	LIV4	Homeodomain-like	
+CNAG_07411	RUM1	C5HC2 zinc finger / PHD-finger / ARID/BRIGHT DNA binding	
+CNAG_04836	FZC10	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_00841	FZC40	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_06223	MIZ1	MIZ/SP-RING zinc finger	
+CNAG_00830	FZC38	Fungal Zn(2)-Cys(6) binuclear cluster domain / Fungal specific transcription factor domain	
+CNAG_01551	GAT201	Glucocorticoid receptor-like (DNA-binding domain) / GATA zinc finger	
+CNAG_04908	CLR4	bZIP transcription factor / Basic region leucine zipper	
+CNAG_00883		Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_01317		Helix-loop-helix DNA-binding domain	CBF1
+CNAG_02134		SWIRM domain / Zinc finger, ZZ type / Myb-like DNA-binding domain / GATA Zinc finger	RSC8
+CNAG_02671		Myb-like DNA-binding domain	CEF1
+CNAG_02698		SGT1 protein	
+CNAG_02936		CCR4-Not complex component, Not1 // RNA polymerase Rpb3/Rpb11 dimerization domain	CDC39
+CNAG_03129		Zinc finger, C2H2 type	PZF1
+CNAG_03261		Zinc finger, C2H2 type	
+CNAG_03790		APSES domain	
+CNAG_03826		Zinc finger, C2H2 type // MOZ/SAS family // M protein trans acting positive regulator (MGA) HTH domain	ESA1
+CNAG_04023		Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_04130		Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_04226		SART-1 family	SNU66
+CNAG_04600		Toprim domain / DNA topoisomerase / GRF zinc finger / Zinc knuckle 	TOP3
+CNAG_04798		bZIP transcription factor / Basic region leucine zipper	
+CNAG_04864	CIR1	Glucocorticoid receptor-like (DNA-binding domain) / GATA zinc finger	
+CNAG_05311		Zinc finger, C2H2 type	
+CNAG_05436		helix-turn-helix, Psq domain / DDE superfamily endonuclease	
+CNAG_05535		"Winged helix" DNA-binding domain / FHA domain / Fork head domain	FHL1
+CNAG_06097		Fungal specific transcription factor domain / Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_06252		Fungal specific transcription factor domain / Fungal Zn(2)-Cys(6) binuclear cluster domain	
+CNAG_06327		Zinc finger, C2H2 type / Zinc-finger double domain	MIG1
+CNAG_07460		"Winged helix" DNA-binding domain / HSF-type DNA-binding	HSF1

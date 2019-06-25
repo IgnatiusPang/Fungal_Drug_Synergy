@@ -1,0 +1,86 @@
+Category	orf_id	Gene_name	Reference
+Capsule	CNAG_00769	PBS2	Mol Biol Cell. 2005 May;16(5):2285-300. 
+Capsule	CNAG_03202	CAC1	Eukaryot Cell. 2002 Feb;1(1):75-84.  
+Capsule	CNAG_03818	SSK1	Mol Biol Cell. 2006 Jul;17(7):3122-35. 
+Capsule	CNAG_00570	PKR1	Mol Cell Biol. 2001 May;21(9):3179-91. 
+Capsule	CNAG_05431	RIM101	PLoS Pathog. 2010 Feb 19;6(2):e1000776. 
+Capsule	CNAG_01626	ADA2	PLoS Pathog. 2011 Dec;7(12):e1002411  
+Capsule	CNAG_02885	CAP64	Infect Immun. 1996 Jun;64(6):1977-83  
+Capsule	CNAG_00721	CAP59	Mol Cell Biol. 1994 Jul;14(7):4912-9 
+Capsule	CNAG_04090	ATF1	Genetics. 2010 Aug;185(4):1207-19.   
+Capsule	CNAG_05063	SSK2	Eukaryot Cell. 2007 Dec;6(12):2278-89.  
+Capsule	CNAG_04864	CIR1	PLoS Biol. 2006 Nov;4(12):e410.  
+Capsule	CNAG_01845	PKC1	Eukaryot Cell. 2008 Oct;7(10):1685-98.  
+Capsule	CNAG_04505	GPA1	Eukaryot Cell. 2004 Dec;3(6):1476-91.  
+Capsule	CNAG_05465	GIB2	J Biol Chem. 2006 Oct 27;281(43):32596-605.
+Capsule	CNAG_06301	SCH9	Curr Genet. 2004 Nov;46(5):247-55.  
+Capsule	CNAG_05817	GMT1	Eukaryot Cell. 2007 May;6(5):776-85.  
+Capsule	CNAG_03670	IRE1	PLoS Pathog. 2011 Aug;7(8):e1002177  
+Capsule	CNAG_07554	CAP10	J Bacteriol. 1999 Sep;181(18):5636-43.  
+Capsule	CNAG_02702	CLC-A	Mol Microbiol. 2003 Nov;50(4):1271-81.  
+Capsule	CNAG_05218	ACA1	Eukaryot Cell. 2004 Dec;3(6):1476-91  
+Capsule	CNAG_00600	CAP60	Infect Immun. 1998 May;66(5):2230-6  
+Capsule	CNAG_01523	HOG1	Mol Biol Cell. 2005 May;16(5):2285-300. 
+Capsule	CNAG_04969	UGD1	Eukaryot Cell. 2004 Dec;3(6):1601-8.  
+Capsule	CNAG_02008	OVA1	PLoS Pathog. 2007 Mar;3(3):e42.  
+Capsule	CNAG_07470	PDE2	Eukaryot Cell, Dec. 2005, 4(12) 1971–1981
+Capsule	CNAG_01106	VPH1	Mol Microbiol. 2001 Nov;42(4):1121-31.  
+Capsule	CNAG_05081	PDE1	Eukaryot Cell, Dec. 2005, 4(12) 1971–1981
+Capsule	CNAG_00396	PKA1	Mol Cell Biol. 2001 May;21(9):3179-91  
+Melanin	CNAG_06552	SNF1	Fungal Genet Biol. 2010 Dec; 47(12):994-1000.
+Melanin	CNAG_00996	PMT4	PLoS One. 2009 Jul 27;4(7):e6321. 
+Melanin	CNAG_00815	SIT1	Microbiology. 2007 Jan;153(Pt 1):29-41.  
+Melanin	CNAG_04215	MET3	Microbiology. 2002 Aug;148(Pt 8):2617-25.  
+Melanin	CNAG_00130	HRK1	PLoS ONE 6(4): e18769  
+Melanin	CNAG_00769	PBS2	Mol Biol Cell. 2005 May;16(5):2285-300. 
+Melanin	CNAG_03409	SKN7	Mol Biol Cell. 2006 Jul;17(7):3122-35. 
+Melanin	CNAG_05218	ACA1	Eukaryot Cell. 2004 Dec;3(6):1476-91  
+Melanin	CNAG_04090	ATF1	Genetics. 2010 Aug;185(4):1207-19.   
+Melanin	CNAG_01523	HOG1	Mol Biol Cell. 2005 May;16(5):2285-300. 
+Melanin	CNAG_02357	MKK2	Mol Microbiol. 2005 Oct;58(2):393-408.  
+Melanin	CNAG_05081	PDE1	Eukaryot Cell, Dec. 2005, 4(12) 1971–1981
+Melanin	CNAG_04505	GPA1	Eukaryot Cell. 2004 Dec;3(6):1476-91.  
+Melanin	CNAG_03202	CAC1	Eukaryot Cell. 2002 Feb;1(1):75-84.  
+Melanin	CNAG_02867	PLC1	Mol Microbiol. 2008 Aug;69(4):809-26.  
+Melanin	CNAG_03818	SSK1	Mol Biol Cell. 2006 Jul;17(7):3122-35. 
+Melanin	CNAG_07470	PDE2	Eukaryot Cell, Dec. 2005, 4(12) 1971–1981
+Melanin	CNAG_00396	PKA1	Mol Cell Biol. 2001 May;21(9):3179-91 
+Melanin	CNAG_04864	CIR1	PLoS Biol. 2006 Nov;4(12):e410.  
+Melanin	CNAG_01845	PKC1	Mol Microbiol. 2005 Oct;58(2):393-408.  
+Melanin	CNAG_03465	LAC1	J. Exp. Med. 1996 184:377–386. 
+Melanin	CNAG_03464	LAC2	Eukaryot Cell 2005 4(1) 190-201 
+Melanin	CNAG_05063	SSK2	Eukaryot Cell. 2007 Dec;6(12):2278-89.  
+Thermotolerance	CNAG_02357	MKK2	Mol Microbiol. 2005 Oct;58(2):393-408.  
+Thermotolerance	CNAG_01523	HOG1	Mol Biol Cell. 2005 May;16(5):2285-300. 
+Thermotolerance	CNAG_01845	PCK1	Mol Microbiol. 2005 Oct;58(2):393-408.  
+Thermotolerance	CNAG_01626	ADA2	PLoS Pathog. 2011 Dec;7(12):e1002411  
+Thermotolerance	CNAG_00375	GCN5	Eukaryot Cell. 2010 Aug;9(8):1193-202.  
+Thermotolerance	CNAG_06134	HXL1	PLoS Pathog. 2011 Aug;7(8):e1002177  
+Thermotolerance	CNAG_05348	CDC42	Mol Microbiol. 2010 Feb;75(3):763-80  
+Thermotolerance	CNAG_04388	SOD2	Eukaryot Cell. 2005 Jan;4(1):46-54.  
+Thermotolerance	CNAG_03818	SSK1	Mol Biol Cell. 2006 Jul;17(7):3122-35. 
+Thermotolerance	CNAG_06301	SCH9	Curr Genet 2004.Nov 46(5):247-255  
+Thermotolerance	CNAG_01530	MGA2	Eukaryot Cell. 2004 Oct;3(5):1249-60.  
+Thermotolerance	CNAG_04864	CIR1	PLoS Biol. 2006 Nov;4(12):e410.  
+Thermotolerance	CNAG_04969	UGD1	J Biol Chem. 2004 Dec 3;279(49):51669-76.
+Thermotolerance	CNAG_04755	BCK1	Mol Microbiol. 2005 Oct;58(2):393-408.  
+Thermotolerance	CNAG_05063	SSK2	Eukaryot Cell. 2007 Dec;6(12):2278-89.  
+Thermotolerance	CNAG_00769	PBS2	Mol Biol Cell. 2005 May;16(5):2285-300. 
+Thermotolerance	CNAG_00293	RAS1	Eukaryot Cell. 2010 Mar;9(3):360-78.  
+Thermotolerance	CNAG_05968	CDC420	Mol Microbiol. 2010 Feb;75(3):763-80.  
+Thermotolerance	CNAG_03670	IRE1	PLoS Pathog. 2011 Aug;7(8):e1002177  
+Thermotolerance	CNAG_00815	SIT1	Microbiology. 2007 Jan;153(Pt 1):29-41.  
+Thermotolerance	CNAG_04514	MPK1	Mol Microbiol. 2003 Jun;48(5):1377-87  
+Thermotolerance	CNAG_02867	PLC1	Mol Microbiol. 2008 Aug;69(4):809-26.  
+Capsule	CNAG_05563	HOS2	Sci. Rep. 2015 Mar;5:8767.
+Capsule	CNAG_04678	YPK1	Sci. Rep. 2015 Mar;5:8767.
+Melanin	CNAG_04678	YPK1	Sci. Rep. 2015 Mar;5:8767.
+Thermotolerance	CNAG_04678	YPK1	Sci. Rep. 2015 Mar;5:8767.
+Melanin	CNAG_02915	PDK1	Sci. Rep. 2015 Mar;5:8767.
+Thermotolerance	CNAG_02915	PDK1	Sci. Rep. 2015 Mar;5:8767.
+Melanin	CNAG_06086	SSN3	Sci. Rep. 2015 Mar;5:8767.
+Capsule	CNAG_06086	SSN3	Sci. Rep. 2015 Mar;5:8767.
+Melanin	CNAG_00415	CDC2801	Sci. Rep. 2015 Mar;5:8767.
+Thermotolerance	CNAG_00415	CDC2801	Sci. Rep. 2015 Mar;5:8767.
+Melanin	CNAG_03811	CNAG_03811	Sci. Rep. 2015 Mar;5:8767.
+Thermotolerance	CNAG_03811	CNAG_03811	Sci. Rep. 2015 Mar;5:8767.

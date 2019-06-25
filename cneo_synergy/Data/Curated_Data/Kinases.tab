@@ -1,0 +1,239 @@
+orf_id	Domain	Gene_Name	scer_ortholog
+CNAG_00047	BCDHK_Adom3, HATPase C	PKP1	PKP1
+CNAG_00106	Response_reg, HATPase_C, HisKA	TCO5	N/O
+CNAG_00130	Pkinase	HRK1	RCK2
+CNAG_00363	Response_reg, HATPase_C, HisKA	TCO6	N/O
+CNAG_00396	Pkinase	PKA1	TPK1/TPK2/TPK3
+CNAG_00405	Pkinase	KIC1	KIC1
+CNAG_00415	Protein kinase domain, Protein tyrosine kinase	CDC2801	CDC28
+CNAG_00636	Protein tyrosine kinase, Protein kinase domain	CDC7	CDC7
+CNAG_00745	Pkinase	HRK1/NPH1	HRK1/NPH1
+CNAG_00769	Protein tyrosine kinase, Protein kinase domain	PBS2	PBS2
+CNAG_00782	Protein tyrosine kinase, Protein kinase domain	SPS1	SPS1
+CNAG_00826	Dak1, Dak2	DAK101	DAK1
+CNAG_01062	Pkinase	PSK201	PSK1
+CNAG_01155	FGGY_N, FGGY_C	GUT1	GUT1
+CNAG_01162	PfkB family carbohydrate kinase	MAK3201	MAK32
+CNAG_01165	Diacylglycerol kinase catalytic domain	LCB5	LCB5
+CNAG_01209	PIP5K	FAB1	FAB1
+CNAG_01294	Ins_P5 2-kinase	IPK1	N/O
+CNAG_01333	Pkinase	ALK1	ALK1
+CNAG_01523	Pkinase	HOG1	HOG1
+CNAG_01612	Pkinase	PSK202	PSK2
+CNAG_01704	MS channel	IRK6	N/O
+CNAG_01730	Pkinase	STE7	STE7
+CNAG_01850	HATPase_C, Response_reg, HisKA	TCO1	N/O
+CNAG_01905	Protein kinase domain , Protein tyrosine kinase	KSP1	KSP1
+CNAG_01938	Protein kinase domain , Protein tyrosine kinase	KIN1	KIN1
+CNAG_01988	PHY, HATPase_C, Response_reg, GAF, PAS_2, HisKA	TCO3	N/O
+CNAG_02233	UME (NUC010) domain, FAT domain, Phosphatidylinositol 3- 	MEC1	MEC1
+CNAG_02296	pfkB family carbohydrate kinase	RBK1	RBK1
+CNAG_02357	Protein kinase domain , Protein tyrosine kinase	MKK2	MKK1/2
+CNAG_02389	Pkinase	YPK101	YPK1/YPK2
+CNAG_02511	Pkinase	CPK1	N/O
+CNAG_02531	Pkinase	CPK2	N/O
+CNAG_02542	Fructosamine kinase	IRK2	N/O
+CNAG_02551	DAK2	DAK102	N/O
+CNAG_02675	Protein kinase domain, Kinase-like, Protein tyrosine kinase	HSL101	HSL1
+CNAG_02680	Pkinase	VPS15	VPS15
+CNAG_02712	APH (phosphotransferase enzyme family)	BUD32	BUD32
+CNAG_02799	DAK2 domain, dak_ATP: dihydroxyacetone kinase	DAK202A	DAK2
+CNAG_02802	IPK	ARG2	ARG82
+CNAG_02820	Protein tyrosine kinase, Protein kinase domain	PKH201	PKH2
+CNAG_02859	NADH kinase 	POS5	POS5
+CNAG_02947	Protein tyrosine kinase, Protein kinase domain	SCY1	SCY1
+CNAG_03024	Pkinase, Response reg	RIM15	RIM15
+CNAG_03048	SKI	IRK3	YDR248C
+CNAG_03167	Protein tyrosine kinase, Protein kinase domain	CHK1	CHK1
+CNAG_03184	Protein tyrosine kinase, Protein kinase domain, BUB protein kinase	BUB1	BUB1
+CNAG_03216	Pkinase	SNF101	SNF1
+CNAG_03258	Protein tyrosine kinase	TPK202A	TPK2
+CNAG_03290	Pkinase	KIC102	SPS1
+CNAG_03355	Response_reg, HATPase_C, HisKA, PAS_8	TCO4	N/O
+CNAG_03367	PRK	URK1	URK1
+CNAG_03369	Wee protein kinase  	SWE102	SWE1
+CNAG_03567	Pkinase	CBK1	CBK1
+CNAG_03592	Phos_pyr_kinase	THI20	THI20
+CNAG_03670	Ribonuclease 2-5A, Pkinase	IRE1	IRE1
+CNAG_03811	Protein tyrosine kinase, Protein kinase domain, Kinase-like	IRK5	N/O
+CNAG_03843	Pkinase	ARK1	ARK1
+CNAG_03946	Galactokinase galactose-binding signature, GHMP kinases N terminal domain, gal_kin: galactokinase, GHMP kinases C terminal	GAL101	GAL1
+CNAG_04040	Pkinase	FPK1	FPK1
+CNAG_04108	Histidine kinase-, DNA gyrase B-, and HSP90-like ATPase	PKP2	PKP2
+CNAG_04162	Pkinase	PKA2	TPK2/TPK1/TPK3
+CNAG_04197	Pkinase	YAK1	YAK1
+CNAG_04215	APS_kinase	MET3	MET3
+CNAG_04221	6PF2K, His_Phos_1	FBP26	FBP26
+CNAG_04230	HK	THI6	THI6
+CNAG_04282	Pkinase	MPK2	SLT2/FUS3/KDX1
+CNAG_04316	NAD_kinase	UTR1	UTR1
+CNAG_04408	Choline/ethanolamine kinase, Phosphotransferase enzyme family	CKI1	CKI1
+CNAG_04433	Pkinase	YAK103	YAK1
+CNAG_04514	Pkinase	MPK1	MPK1
+CNAG_04631	FGGY_N, FGGY_C	RIK1	YDR109C
+CNAG_04678	Pkinase, Pkinase_C	YPK1	YPK1/YPK2
+CNAG_04755	Pkinase	BCK1	BCK1
+CNAG_04821	Protein kinase domain	PAN3	PAN3
+CNAG_04927	Phosphoribulokinase / Uridine kinase family	YFH701	YFH7
+CNAG_05005	Pkinase	ATG1	ATG1
+CNAG_05063	Pkinase	SSK2	SSK2
+CNAG_05097	Carb_kinase	CKY1	YKL151C
+CNAG_05216	Kinase-like, Lipopolysaccharide kinase (Kdo/WaaP) family, Protein tyrosine kinase, Protein kinase domain, FHA domain	RAD53	RAD53
+CNAG_05220	PI3_PI4_kinase	TLK1	TOR1/TOR2
+CNAG_05243	FGGY_N, FGGY_C	XKS1	XKS1
+CNAG_05439	Protein kinase domain , Protein tyrosine kinase	CMK1	CMK1
+CNAG_05590	Response_reg, HATpase_C, HisKA	TCO2	N/O
+CNAG_05558	Pkinase	KIN4	KIN4
+CNAG_05600	Indigoidine synthase A like , pfkB family carbohydrate 	IGI1	N/O
+CNAG_05694	Pkinase	CKA1	CKA1/CKA2
+CNAG_05753	Semialdehyde dehydrogenase (dimerisation domain), Semialdehyde dehydrogenase(NAD), Amino acid kinase family	ARG5,6	ARG5,6
+CNAG_05771	Telomere-length maintenance and DNA damage repair, Phosphatidylinositol 3- and 4-kinase, FATC domain	TEL1	TEL1
+CNAG_05965	Diacylglycerol kinase catalytic domain	IRK4	N/O
+CNAG_06033	pfkB family carbohydrate kinase superfamily  	MAK3202	MAK32
+CNAG_06051	galactokinase  	GAL1	GAL1
+CNAG_06086	Protein tyrosine kinase, Protein kinase domain	SSN3	SSN3
+CNAG_06161	PIP5K	VRK1	FAB1
+CNAG_06193	Pkinase	CRK1	IME2
+CNAG_06278	HATpase_C, Response_reg	TCO7	N/O
+CNAG_06301	Pkinase, Pkinase_C, C2	SCH9	SCH9
+CNAG_06310	Protein kinase domain, Protein tyrosine kinase, Kinase-like	IRK7	N/O
+CNAG_06366	No Protein Domains Found	HRR2502	HRR25
+CNAG_06552	Protein tyrosine kinase, Kinase-like, Protein kinase domain	SNF1	SNF1
+CNAG_06553	AMPKBI	GAL83	GAL83
+CNAG_06568	Protein kinase domain, Protein tyrosine kinase	SKS1	SKS1
+CNAG_06632	ABC1 family	ABC1	N/O
+CNAG_06671	Protein kinase domain, Protein tyrosine kinase	YKL1	N/O
+CNAG_06697	Pkinase	MPS1	MPS1
+CNAG_06730	Protein tyrosine kinase	GSK3	RIM11
+CNAG_06809	Protein tyrosine kinase, Protein kinase domain	IKS1	IKS1
+CNAG_06980	Pkinase, Ras_bdg_2, SAM_1	STE11	STE11
+CNAG_07359	ABC1 family, DUF1992	IRK1	YPL109C
+CNAG_07580	FtsJ-like methyltransferase,  Protein kinase domain, Protein tyrosine kinase	TRM7	TRM7
+CNAG_07667	Pkinase	SAT4	SAT4
+CNAG_07744	Phosphatidylinositol 3- and 4-kinase	PIK1	PIK1
+CNAG_07779	D-glycerate 3-kinase  	TDA10	TDA10
+CNAG_08022	Pkinase	PHO85	PHO85
+CNAG_00266	PRK	YFH7	YFH7
+CNAG_00388	PIP5K		MSS4
+CNAG_00556	Pkinase, CK1gamma_C	YCK2	YCK1/2/3
+CNAG_00683	CMGC/CLK protein kinase  		KNS1/YAK1
+CNAG_00877	ADK, ADK_lid		ADK2
+CNAG_01061	serine/threonine protein kinase  	FRK102	N/O
+CNAG_01250	tRNA ligase 		TRL1
+CNAG_01285	Pkinase		IPL1
+CNAG_01364	Guanylate_kinase		GUK1
+CNAG_01664	CMGC/CDK/CDC2 protein kinase  		CDC28
+CNAG_01687	Rio1, Rio2_N		RIO2
+CNAG_01820	Pyruvate kinase alpha/beta domain, Pyruvate barrel domain		CDC19
+CNAG_01845	AGC/PKC protein kinase  		PKC1
+CNAG_01907	PLK/PLK1 protein kinase  		CDC5
+CNAG_02007	ADK, ADK_lid	ADK1	ADK1
+CNAG_02028	Pkinase		SKY1
+CNAG_02194	Pkinase		DBF20
+CNAG_02202	APS_kinase		MET14
+CNAG_02285	nucleoside diphosphate kinase  		YNK1
+CNAG_02459	ABC1 family		COQ8
+CNAG_02686	GHMP kinases N terminal Domain		STR3
+CNAG_02787	Dephospho-CoA kinase		CAB5
+CNAG_02847	Thymidylate kinase		CDC8
+CNAG_02866	panK_eukar: pantothenate kinase		CAB1
+CNAG_02897	Inositol polyphosphate kinase		KCS1
+CNAG_02915	Pkinase	PKH202	PKH1
+CNAG_02962	Pkinase		YAK1
+CNAG_02976	riboflavin kinase  		FMN1
+CNAG_03137	Protein tyrosine kinase, Protein kinase domain	PHO8501	PHO85
+CNAG_03171	Protein kinase domain, Protein tyrosine kinase		SWE1
+CNAG_03358	PGK		PGK1
+CNAG_03701	arom polypeptide		ARO1
+CNAG_03791	Protein tyrosine kinase, Protein kinase domain		SAK1
+CNAG_03796	Pkinase	ENV7 	ENV7 
+CNAG_03821	PI3_PI4_kinase, PI3Ka, PI3K_C2		VPS34
+CNAG_04083			SEC59
+CNAG_04118	Pkinase		CTK1
+CNAG_04148	Pkinase		KIN3
+CNAG_04156	GHMP kinase_N		THR1
+CNAG_04191	No Protein Domains Found	CEX1	CEX1
+CNAG_04272	Lipopolysaccharide kinase (Kdo/WaaP) family, Kinase-like, Protein tyrosine kinase, Protein kinase domain	CMK2	CMK1
+CNAG_04314	NAD_kinase	YEF1	YEF1
+CNAG_04335	Phosphoinositide 3-kinase family, accessory domain (PIK domain), Phosphatidylinositol 3- and 4-kinase		STT4
+CNAG_04347	ACT domain, asp_kinases: aspartate kinase, Amino acid kinase family		HOM3 
+CNAG_04577	NDK		N/O
+CNAG_04843	ABC1 family		MCP2 
+CNAG_05104	Protein kinase domain, Protein tyrosine kinase, Kinase-like	FRK101	FRK1
+CNAG_05125	GHMP kinases N terminal domain, mevDPdecarb: diphosphomevalonate 		MVD1
+CNAG_05200	Phos_pyr_kinase	BUD16	BUD16
+CNAG_05274	Pkinase		KIC1
+CNAG_05386	Amino acid kinase family, proB: glutamate 5-k, PUA domain	PRO1	PRO1
+CNAG_05484	Protein kinase domain, Protein tyrosine kinase, Kinase-like		TOS3
+CNAG_05549	Protein kinase domain , Protein tyrosine kinase		CTK1/SGV1
+CNAG_05935	UMP-CMP kinase family, Thymidylate kinase, Adenylate kinase, AAA domain		URA6
+CNAG_05970	Protein tyrosine kinase, Protein kinase domain, P21-Rho binding 		STE20
+CNAG_06001	GHMP kinases N, GHMP kinases C		ERG8
+CNAG_06174	Pkinase		GCN2 
+CNAG_06432	Acetokinase family, ackA		N/O
+CNAG_06445	Pkinase		KIN28 
+CNAG_06454	RIO1 family		RIO1
+CNAG_06489	pfkB family carbohydrate kinase		ADO1
+CNAG_06490	Pkinase	SNF102	SNF1
+CNAG_06500	Inositol polyphosphate kinase		ARG82
+CNAG_06642	PI3_PI4_kinase		TOR2
+CNAG_06845	Protein kinase domain, Protein tyrosine kinase		CDC15
+CNAG_07372	Histidine phosphatase superfamily (branch 1), 6-phosphofructo-2-kinase	OXK1	YLR345W
+CNAG_07377	Phosphatidylinositol 3- and 4-kinase, FAT domain		TRA1
+CNAG_07408	Pkinase		CLA4
+CNAG_07427	Protein tyrosine kinase, Protein kinase domain	CCK2	HRR25
+CNAG_00388			MSS4
+CNAG_00683			KNS1
+CNAG_00877			ADK2
+CNAG_01250			TRL1
+CNAG_01285			IPL1
+CNAG_01364			GUK1
+CNAG_01664			CDC28
+CNAG_01687			RIO2
+CNAG_01820			CDC19
+CNAG_01845			PKC1
+CNAG_01907			CDC5
+CNAG_02028			SKY1
+CNAG_02194			DBF20
+CNAG_02202			MET14
+CNAG_02285			YNK1
+CNAG_02459			COQ8
+CNAG_02686			STR3
+CNAG_02787			CAB5
+CNAG_02847			CDC8
+CNAG_02866			CAB1
+CNAG_02897			KCS1
+CNAG_02962			YAK1
+CNAG_02976			FMN1
+CNAG_03171			SWE1
+CNAG_03358			PGK1
+CNAG_03701			ARO1
+CNAG_03791			SAK1
+CNAG_03821			VPS34
+CNAG_04083			SEC59
+CNAG_04118			CTK1
+CNAG_04148			KIN3
+CNAG_04156			THR1
+CNAG_04335			STT4
+CNAG_04347			HOM3 
+CNAG_04577			-
+CNAG_04843			MCP2 
+CNAG_05125			MVD1
+CNAG_05274			KIC1
+CNAG_05484			TOS3
+CNAG_05549			CTK1/SGV1
+CNAG_05935			URA6
+CNAG_05970			STE20
+CNAG_06001			ERG8
+CNAG_06174			GCN2 
+CNAG_06432			-
+CNAG_06445			KIN28 
+CNAG_06454			RIO1
+CNAG_06489			ADO1
+CNAG_06500			ARG82
+CNAG_06642			TOR2
+CNAG_06845			CDC15
+CNAG_07377			TRA1
+CNAG_07408			CLA4
+CNAG_07427			HRR25
+CNAG_00636			CDC7
