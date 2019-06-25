@@ -24,7 +24,9 @@ Plotting Script: cneo_synergy/Source/Compare_Fold_Change/compare_A_AL_fold_chang
 Analyse specific gene sets: cneo_synergy/Source/Functional_Enrichment/go_enrichment_specific_set.Rmd
 Plotting Script: cneo_synergy/Source/Compare_Fold_Change/plot_selected_GO_terms.Rmd
 
+## Supplementary Information 
 
+*C. neoformans* and *S. cerevisiae* orthologs information are located in this [link](cneo_synergy/Data/Curated_Data/scer_cneo_orthologs.tab). Those in reliability class 1 were identified using BlastP reciprocal top-hits and are one-to-one orthologs. Those in reliability class 2 were orthologs from OrthoMCL, these are not necessarily one-to-one orthologs but could be. 
 
 
 
