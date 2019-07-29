@@ -80,6 +80,7 @@ cneo_synergy/Results/Diamond
 cneo_synergy/Results/Differential_Expression
 cneo_synergy/Results/Functional_Enrichment
 # cneo_synergy/Results/Read_Counts
+cneo_synergy/Results/Supplementary_Tables/
 cneo_synergy/Results/Read_Counts/cneo/Original_Files
 cneo_synergy/Results/ReciprocalBestHits
 cneo_synergy/Results/Self_Organising_Maps

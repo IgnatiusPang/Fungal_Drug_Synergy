@@ -1,0 +1,254 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+## Load libraries and scripts
+```{r}
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(tidyverse)
+
+source( '../Common/global_parameters.R')
+source( '../Common/helper_functions.R')
+
+sessionInfo()
+
+```
+
+## Directory Management
+```{r}
+
+sup_tbl_dir <- file.path( results_dir, "Supplementary_Tables")
+
+```
+
+
+## C. neoformans log fold-change tables for AMB only versus Contorl and AMB-LF versus Control
+/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy/cneo_synergy/Results/Differential_Expression/EdgeR_RUVs_QL/cneo/To_Use_k_0_Remove_5a/Gene_Lists/compare_A.tab
+/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy/cneo_synergy/Results/Differential_Expression/EdgeR_RUVs_QL/cneo/To_Use_k_0_Remove_5a/Gene_Lists/compare_AL.tab
+
+/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy/cneo_synergy/Results/Compare_Fold_Change/all_genes_specific_to_A.tab
+/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy/cneo_synergy/Results/Compare_Fold_Change/all_genes_specific_to_AL.tab
+
+```{r}
+compare_A <- read_tsv( file.path( results_dir, "Differential_Expression/EdgeR_RUVs_QL/cneo/To_Use_k_0_Remove_5a/Gene_Lists/compare_A.tab" ))
+compare_AL <- read_tsv( file.path( results_dir, "Differential_Expression/EdgeR_RUVs_QL/cneo/To_Use_k_0_Remove_5a/Gene_Lists/compare_AL.tab" ))
+
+genes_specific_to_A <- read_tsv( file.path( results_dir, "Compare_Fold_Change/all_genes_specific_to_A.tab" ))
+genes_specific_to_AL <- read_tsv( file.path( results_dir, "Compare_Fold_Change/all_genes_specific_to_AL.tab" ))
+```
+
+```{r}
+genes_specific_to_A_clean <- genes_specific_to_A %>%
+                             dplyr::select( genes) %>%
+                             dplyr::mutate ( `Is specific to AMB treatment?` = TRUE)
+
+
+genes_specific_to_AL_clean <- genes_specific_to_AL %>%
+                             dplyr::select( genes) %>%
+                             dplyr::mutate ( `Is specific to AMB-LF treatment?` = TRUE)
+
+compare_A_clean <- compare_A %>%
+                   left_join( genes_specific_to_A_clean, by=c( "genes" = "genes")) %>% 
+                   dplyr::mutate( `Is specific to AMB treatment?` = ifelse( !is.na(`Is specific to AMB treatment?`), TRUE, FALSE) ) %>%
+                   dplyr::mutate( Treatment = "AMB",  
+                                  `Is specific to AMB-LF treatment?` = FALSE) %>%
+                   dplyr::select( one_of(c( "Treatment", "genes", "logFC", "FDR", "gene_names", "uniprot_acc",
+                                    "Is specific to AMB treatment?",
+                                    "Is specific to AMB-LF treatment?", 
+                                    "broad_gene_name",
+                                    "uniprot_gene_name", "fungidb_gene_name", "blast2go_annotation",
+                                    "scer_orthologs", "scer_ortholog_descriptions"))) 
+
+
+standard_headers <- c( "Treatment",
+                                    "orf_id"	,
+                                    "Gene expression log fold-change",
+                                    "Gene FDR",
+                                    "gene_names"	,
+                                    "uniprot_acc"	,
+                                    "Is specific to AMB treatment?",
+                                    "Is specific to AMB-LF treatment?",
+                                    "broad_gene_name"	,
+                                    "uniprot_gene_name"	,
+                                    "fungidb_gene_name"	,
+                                    "blast2go_annotation"	,
+                                    "scer_orthologs"	,
+                                    "scer_ortholog_descriptions" )
+
+
+length(standard_headers) == length(colnames(compare_A_clean))
+
+colnames(compare_A_clean) <-  standard_headers
+
+compare_AL_clean <- compare_AL  %>%
+                   left_join( genes_specific_to_AL_clean, by=c( "genes" = "genes")) %>% 
+                   dplyr::mutate( `Is specific to AMB-LF treatment?` = ifelse( !is.na(`Is specific to AMB-LF treatment?`) , TRUE, FALSE) ) %>%
+                   dplyr::mutate( Treatment = "AMB-LF",
+                                  `Is specific to AMB treatment?` = FALSE) %>%
+                   dplyr::select( one_of(c( "Treatment", "genes", "logFC", "FDR", "gene_names", "uniprot_acc",
+                                    "Is specific to AMB treatment?",
+                                    "Is specific to AMB-LF treatment?", 
+                                    "broad_gene_name",
+                                    "uniprot_gene_name", "fungidb_gene_name", "blast2go_annotation",
+                                    "scer_orthologs", "scer_ortholog_descriptions"))) 
+
+colnames(compare_AL_clean )   <- standard_headers
+
+merged_fold_change_table <- compare_A_clean %>%
+  bind_rows( compare_AL_clean)
+
+write_tsv(merged_fold_change_table, path=file.path(sup_tbl_dir, "merged_fold_change_table.tsv"), na="" )
+
+```
+
+
+## Global enriched GO terms 
+/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy/cneo_synergy/Results/Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat/enriched_genes_global.txt
+/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy/cneo_synergy/Results/Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat/enriched_go_terms_global.txt
+
+
+### Enriched GO terms for AMB and AMB-LF treatments  
+```{r}
+orf_id_to_gene_symbol <- merged_fold_change_table %>%
+  dplyr::select( orf_id, gene_names) %>%
+  dplyr::filter( !is.na(gene_names))
+
+
+enriched_genes  <- read_tsv( file.path( results_dir, "Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat/enriched_genes_global.txt"))
+enriched_go_terms  <-  read_tsv( file.path( results_dir, "Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat/enriched_go_terms_global.txt"))
+```
+
+```{r}
+
+combine_go_terms_with_associated_genes <- function( enriched_genes, enriched_go_terms) {
+  
+  go_enrichment_standard_columns <- c("Treatment",	
+                                      "Fold-change direction of transcripts"	,
+                                      "rank"	,
+                                      "GO term"	,
+                                      "GO term FDR"	,
+                                      "oddsratio"	,
+                                      "expcount"	,
+                                      "count"	,
+                                      "size"	,
+                                      "go_id",
+                                      "ontology")
+  
+  
+  enriched_genes_clean <- enriched_genes %>%
+    dplyr::select( one_of( c( "query_list_id", "go_id", "gene_id")) ) %>%
+    separate( query_list_id, into=c( "Treatment", "Fold-change direction of transcripts"), sep="\\.") %>%
+    dplyr::mutate( Treatment = case_when (Treatment == 'compare_A' ~ 'AMB',
+                                          Treatment == 'compare_AL' ~ 'AMB-LF', 
+                                          Treatment == 'compare_A_specific'  ~ paste( 'AMB', 
+                                                                                      `Fold-change direction of transcripts`, 
+                                                                                      'specific', sep=" " ),
+                                          Treatment == 'compare_AL_specific' ~ paste( 'AMB-LF', 
+                                                                                      `Fold-change direction of transcripts`, 
+                                                                                      'specific', sep=" " ),
+                                          TRUE ~ NA_character_))
+  
+  enriched_go_terms_clean <- enriched_go_terms %>%
+    separate( query_list_id, into=c( "Treatment", "Fold-change direction of transcripts"), sep="\\.") %>%
+    dplyr::mutate( Treatment = case_when (Treatment == 'compare_A' ~ 'AMB',
+                                          Treatment == 'compare_AL' ~ 'AMB-LF', 
+                                          Treatment == 'compare_A_specific'  ~ paste( 'AMB', 
+                                                                                      `Fold-change direction of transcripts`, 
+                                                                                      'specific', sep=" " ),
+                                          Treatment == 'compare_AL_specific' ~ paste( 'AMB-LF', 
+                                                                                      `Fold-change direction of transcripts`, 
+                                                                                      'specific', sep=" " ),
+                                          TRUE ~ NA_character_)) %>%
+    dplyr::select( one_of( c( "Treatment", "Fold-change direction of transcripts", "rank", "term", "bh", 
+                              "oddsratio", "expcount", "count", "size",
+                              "gobpid", "ontology"))  )
+  
+  colnames( enriched_go_terms_clean ) <- go_enrichment_standard_columns
+  
+  
+  merged_go_enrichment_table <- enriched_go_terms_clean %>%
+    left_join( enriched_genes_clean, by = c("Treatment" = "Treatment", 
+                                            "Fold-change direction of transcripts" = "Fold-change direction of transcripts",
+                                            "go_id" = "go_id")  ) %>%
+    left_join( orf_id_to_gene_symbol, by=c( "gene_id" = "orf_id")) %>%
+    dplyr::mutate( gene_symbols = ifelse( !is.na(gene_names), 
+                                          paste(gene_names, " (", gene_id, ")", sep=""), gene_id)  ) %>%
+    arrange( Treatment,	
+             `Fold-change direction of transcripts`,
+             ontology,
+             rank, gene_symbols) %>%
+    group_by( Treatment,	
+              `Fold-change direction of transcripts`	,
+              rank,
+              `GO term`,
+              `GO term FDR`,
+              oddsratio,
+              expcount,
+              count,
+              size,
+              go_id,
+              ontology ) %>%
+    dplyr::summarise( associated_genes = paste( gene_symbols, collapse=", ") )%>%
+    arrange( Treatment,	
+             `Fold-change direction of transcripts`,
+             ontology,
+             rank)
+  
+  return( merged_go_enrichment_table)
+  
+}
+
+merged_go_enrichment_table_global <- combine_go_terms_with_associated_genes ( enriched_genes, enriched_go_terms)
+```
+
+
+/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy/cneo_synergy/Results/Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat_AMB_only_set/enriched_genes_global.txt
+/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy/cneo_synergy/Results/Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat_AMB_only_set/enriched_go_terms_global.txt
+
+```{r}
+enriched_genes_AMB_specific  <- read_tsv( file.path( results_dir,
+                                                     "Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat_AMB_only_set/enriched_genes_global.txt"))
+enriched_go_terms_AMB_specific  <- read_tsv( file.path( results_dir,
+                                                        "Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat_AMB_only_set/enriched_go_terms_global.txt"))
+
+
+merged_go_enrichment_table_AMB_specific <- combine_go_terms_with_associated_genes ( enriched_genes_AMB_specific, enriched_go_terms_AMB_specific)
+
+```
+
+
+/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy/cneo_synergy/Results/Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat_AMB_LF_set/enriched_genes_global.txt
+/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy/cneo_synergy/Results/Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat_AMB_LF_set/enriched_go_terms_global.txt
+```{r}
+enriched_genes_AMB_LF_specific  <- read_tsv( file.path( results_dir,
+                                                     "Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat_AMB_LF_set/enriched_genes_global.txt"))
+
+enriched_go_terms_AMB_LF_specific  <- read_tsv( file.path( results_dir,
+                                                        "Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat_AMB_LF_set/enriched_go_terms_global.txt"))
+
+merged_go_enrichment_table_AMB_LF_specific <- combine_go_terms_with_associated_genes ( enriched_genes_AMB_LF_specific, enriched_go_terms_AMB_LF_specific)
+
+
+```
+
+
+```{r}
+sup_table_merged_go_enrichment <- merged_go_enrichment_table_global %>%
+  bind_rows( merged_go_enrichment_table_AMB_specific ) %>%
+  bind_rows( merged_go_enrichment_table_AMB_LF_specific )
+
+
+write_tsv(sup_table_merged_go_enrichment, path=file.path(sup_tbl_dir, "sup_table_merged_go_enrichment.tsv"), na="" )
+
+
+```
+
+
