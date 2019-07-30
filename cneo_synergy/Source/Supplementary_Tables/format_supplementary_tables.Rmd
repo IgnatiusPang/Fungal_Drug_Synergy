@@ -298,7 +298,7 @@ genes_per_cluster_AL_cleaned <- genes_per_cluster_AL %>%
 
 merged_soms_genes_per_cluster <- genes_per_cluster_A_cleaned %>%
   bind_rows( genes_per_cluster_AL_cleaned) %>%
-  set_colnames(  c( "Treatment", "SOM_Cluster", "orf_id"))
+  set_colnames(  c( "Treatment", "SOM_Cluster_Number", "orf_id"))
 
 write_tsv(merged_soms_genes_per_cluster, path=file.path(sup_tbl_dir, "merged_soms_genes_per_cluster.tsv"), na="" )
 
