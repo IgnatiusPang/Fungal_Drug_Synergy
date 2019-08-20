@@ -1,0 +1,40 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+## Load libraries and scripts
+```{r}
+
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+
+p_load(lazyeval)
+p_load(tidyverse)
+p_load(readxl)
+
+source( '../Common/global_parameters.R')
+source( '../Common/helper_functions.R')
+
+sessionInfo()
+
+```
+
+
+```{r}
+data_dir
+```
+
+
+
+```{r}
+
+ file.path( data_dir, "KO_Library/CryptoKO_201607_deposit_Madhani_Lab.xls" ) 
+/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy/cneo_synergy/Results/Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat_AMB_LF_set/enriched_genes_global.txt
+/home/ignatius/PostDoc/2019/Fungal_Drug_Synergy/cneo_synergy/Results/Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat/enriched_genes_global.txt
+
+```
+
