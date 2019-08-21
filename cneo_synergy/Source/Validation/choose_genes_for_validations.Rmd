@@ -3,7 +3,6 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-
 ## Load libraries and scripts
 ```{r}
 
@@ -23,18 +22,162 @@ sessionInfo()
 
 ```
 
+## Directory Management 
+```{r}
+validation_results_dir <- file.path( results_dir, "Validation") 
+create_dir_if_not_exists(validation_results_dir)
+
+```
+
+## Files Management 
+```{r}
+
+de_genes_file <- file.path( results_dir, 
+    "Differential_Expression/EdgeR_RUVs_QL/cneo/To_Use_k_0_Remove_5a",
+    "Gene_Lists/experiment_label_and_logFC_FDR_table.tab" ) 
+
+gene_annotations_file <- file.path( data_dir, 
+                                    "Gene_Annotation/cneo_gene_annotation_summary.txt" )
+
+madhani_ko_file <- file.path( data_dir, "KO_Library/CryptoKO_201607_deposit_Madhani_Lab.xls" )  
+gostat_amb_lf_spec_genes_file <- file.path( results_dir,
+                                             "Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat_AMB_LF_set/enriched_genes_global.txt") 
+gostat_genes_file <- file.path( results_dir, "Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat/enriched_genes_global.txt") 
+
+selected_go_terms_file <- file.path( data_dir, "Data_for_specific_gene_sets/Selected_GO_terms.xlsx" )   
+soms_selected_go_terms_file <- file.path( data_dir, "Data_for_specific_gene_sets/SOMS_selected_GO_terms.xlsx" )  
+
+enriched_go_terms_soms_file <- file.path(results_dir, 
+"Self_Organising_Maps/EdgeR_RUVs_QL/To_Use_k_0_Remove_5a", 
+"Condition_on_child_terms_true/compare_AL/5x5/enriched_go_terms_SOMs.txt")
+
+enriched_genes_soms_file <- file.path( results_dir, "Self_Organising_Maps/EdgeR_RUVs_QL/To_Use_k_0_Remove_5a", 
+  "Condition_on_child_terms_true/compare_AL/5x5/enriched_genes_SOMs.txt") 
+
+amb_lf_specific_genes_file <- file.path( results_dir, 
+                                         "Compare_Fold_Change/all_genes_specific_to_AL.tab")
+
+```
+
+## Read in the files 
+```{r}
+
+madhani_ko_table <-  read_xls(madhani_ko_file ) %>%
+                      rename( orf_id = "CNAG" )
+selected_go_terms <- read_xlsx( selected_go_terms_file)
+soms_selected_go_terms <- read_xlsx( soms_selected_go_terms_file ) %>%
+                          mutate ( `AMB-LF - GO terms` = purrr::map_chr( `AMB-LF - GO terms`, tolower ) ) %>%
+                          rename( term = "AMB-LF - GO terms")
+
+gene_annotations_table <- vroom::vroom( gene_annotations_file, delim="\t")
+de_genes <- vroom::vroom( de_genes_file, delim = "\t")
+gostat_amb_lf_spec_genes <- vroom::vroom(gostat_amb_lf_spec_genes_file,  delim = "\t" )
+gostat_genes <- vroom::vroom( gostat_genes_file,  delim = "\t"  )
+
+enriched_go_terms_soms <- vroom::vroom( enriched_go_terms_soms_file, delim="\t")
+enriched_genes_soms <- vroom::vroom( enriched_genes_soms_file, delim = "\t")
+
+amb_lf_specific_genes <- vroom::vroom( amb_lf_specific_genes_file, delim="\t" )  %>%
+                         dplyr::select( genes ) %>%
+                         dplyr::rename( orf_id = "genes") %>%
+                         mutate( is_AMB_LF_specific = 1)
+
+
+```
+
+## Get the AMB only and AMB-LF DE genes
+```{r}
+
+de_genes_al <- de_genes  %>%
+  filter( expt_label == "compare_AL") %>%
+  filter ( FDR < 0.05) %>%
+  dplyr::select( genes, logFC, FDR ) %>%
+  rename( orf_id = "genes",
+          logFC.AMB_LF = "logFC",
+          FDR.AMB_LF = "FDR")
+
+de_genes_amb_only <- de_genes  %>%
+  filter( expt_label == "compare_A") %>%
+  dplyr::select( genes, logFC, FDR ) %>%
+  rename( orf_id = "genes",
+          logFC.AMB_only = "logFC",
+          FDR.AMB_only = "FDR")
+```
+
+## Choose genes by GO terms from SOMs analysis
+1. Get the enriched GO terms from SOMs, p-value < 0.05, 
+2. choose only the ones selected in the paper, 
+3. choose only the ones found in the Madhani knockout library
 
 ```{r}
-data_dir
+selected_by_go_terms_soms <- enriched_go_terms_soms %>%
+  filter( pvalue < 0.05) %>%
+  inner_join( soms_selected_go_terms, by= "term" ) %>%
+  inner_join( enriched_genes_soms, by = c("ontology", "annotation_list_id", 
+                                          "query_list_id", "organism")) %>%
+  dplyr::select( -one_of(c("gene_names", "uniprot_acc",
+                           "broad_gene_name", "uniprot_gene_name",
+                           "fungidb_gene_name", "blast2go_annotation",
+                           "is_tf", "is_kinases", "is_virulence_gene",
+                           "order_peaktime", "scer_orthologs",
+                           "scer_ortholog_descriptions"
+                           )))  %>%
+  dplyr::rename( orf_id = "gene_id") %>%
+  inner_join ( madhani_ko_table, by= "orf_id"  ) %>%
+  dplyr::distinct( orf_id, `Plate Number`, Well, term) %>%
+  dplyr::group_by( orf_id, `Plate Number`, Well) %>%
+  dplyr::summarise( term = paste( term, collapse = ", ")) %>%
+  ungroup  %>%
+  inner_join( de_genes_al, by= "orf_id" ) %>%
+  left_join( de_genes_amb_only, by= "orf_id") %>%  
+  mutate( compare_logFC =  logFC.AMB_LF - logFC.AMB_only ) %>%
+  left_join( amb_lf_specific_genes, by="orf_id")  %>%
+  left_join(gene_annotations_table, by= "orf_id" ) %>%
+  arrange( desc( abs( logFC.AMB_LF)))
+
+
+vroom::vroom_write(selected_by_go_terms_soms, path=file.path(validation_results_dir, "selected_by_go_terms_soms.tsv" ))
 ```
 
 
 
 ```{r}
+genes_double_fold_change_wrt_AMB_only <-  de_genes_al %>%
+  left_join( de_genes_amb_only, by=c("orf_id")) %>%
+  mutate( compare_logFC =  logFC.AMB_LF - logFC.AMB_only ) %>%
+  filter ( abs(compare_logFC) >= 1)  %>%
+  inner_join ( madhani_ko_table, by= "orf_id"  ) %>%
+  left_join(gene_annotations_table, by= "orf_id" )  %>%
+  filter( !str_detect( uniprot_acc, "^T")) %>%  ### poorer UniProt entries
+  filter( !is.na( blast2go_annotation )) ## No Blast2GO annotation, too hard to characterize using bioinformatics tools
 
- file.path( data_dir, "KO_Library/CryptoKO_201607_deposit_Madhani_Lab.xls" ) 
- file.path( results_dir, "Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat_AMB_LF_set/enriched_genes_global.txt") 
- file.path( results_dir, "Functional_Enrichment/To_Use_k_0_Remove_5a/GOStat/enriched_genes_global.txt") 
+
+vroom::vroom_write(genes_double_fold_change_wrt_AMB_only, path=file.path(validation_results_dir, "genes_double_fold_change_wrt_AMB_only.tsv" ))
+
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
