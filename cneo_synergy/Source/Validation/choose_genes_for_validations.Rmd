@@ -137,6 +137,11 @@ selected_by_go_terms_soms <- enriched_go_terms_soms %>%
 
 
 vroom::vroom_write(selected_by_go_terms_soms, path=file.path(validation_results_dir, "selected_by_go_terms_soms.tsv" ))
+
+
+selected_by_go_terms_soms %>%
+  filter( abs(compare_logFC) > 1)
+
 ```
 
 
@@ -148,17 +153,22 @@ genes_double_fold_change_wrt_AMB_only <-  de_genes_al %>%
   filter ( abs(compare_logFC) >= 1)  %>%
   inner_join ( madhani_ko_table, by= "orf_id"  ) %>%
   left_join(gene_annotations_table, by= "orf_id" )  %>%
-  filter( !str_detect( uniprot_acc, "^T")) %>%  ### poorer UniProt entries
-  filter( !is.na( blast2go_annotation )) ## No Blast2GO annotation, too hard to characterize using bioinformatics tools
+  filter( ! str_detect( uniprot_acc, "^T")) ### poorer UniProt entries 
+  ## No Blast2GO annotation, too hard to characterize using bioinformatics tools
+  # filter( !is.na( blast2go_annotation ) & 
+  #         !str_detect(blast2go_annotation, "Uncharacterized") ) 
 
-
-vroom::vroom_write(genes_double_fold_change_wrt_AMB_only, path=file.path(validation_results_dir, "genes_double_fold_change_wrt_AMB_only.tsv" ))
-
+vroom::vroom_write(genes_double_fold_change_wrt_AMB_only, 
+                   path=file.path(validation_results_dir, 
+                                  "genes_double_fold_change_wrt_AMB_only.tsv" ))
 
 ```
 
 
 
+```{r}
+
+```
 
 
 
