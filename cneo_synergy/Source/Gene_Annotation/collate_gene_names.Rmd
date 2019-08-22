@@ -50,11 +50,10 @@ oln_id_list <- sgd_feature_table %>%
                 filter ( !is.na(oln_id))
 
 
-
-
-
-cneo_part1 <- read_tsv(  file.path( data_dir, "Broad_C_neoformans_Mar_2014/cryptococcus_neoformans_var._grubii_h99__cna3__3_genome_summary_per_gene.txt" )  )
-cneo_part2 <- read_tsv( file.path( data_dir, "Broad_C_neoformans_Mar_2014/cryptococcus_neoformans_var._grubii_h99_mitochondria_2_genome_summary_per_gene.txt" )  )
+cneo_part1 <- read_tsv(  file.path( data_dir, "Broad_C_neoformans_Mar_2014", 
+                                    "cryptococcus_neoformans_var._grubii_h99__cna3__3_genome_summary_per_gene.txt" )  )
+cneo_part2 <- read_tsv( file.path( data_dir, "Broad_C_neoformans_Mar_2014", 
+                                   "cryptococcus_neoformans_var._grubii_h99_mitochondria_2_genome_summary_per_gene.txt" )  )
 
 cneo_orf_id_list <-  cneo_part1 %>%
   bind_rows(cneo_part2) %>%
@@ -65,8 +64,12 @@ cneo_orf_id_list <-  cneo_part1 %>%
 
 
 ```{r}
-cneo_uniprot_annot <- read.table( file.path(data_dir, "Uniprot/cneo/uniprot-cryptococcus+neoformans+h99.tab") , sep="\t", stringsAsFactors = FALSE, quote = "", header=TRUE ) 
-scer_uniprot_annot <- read.table( file.path(data_dir, "Uniprot/scer/uniprot-proteome_UP000002311.tab") , sep="\t", stringsAsFactors = FALSE, quote = "", header=TRUE  ) 
+cneo_uniprot_annot <- read.table( file.path(data_dir, 
+                                            "Uniprot/cneo/uniprot-cryptococcus+neoformans+h99.tab") , 
+                                  sep="\t", stringsAsFactors = FALSE, quote = "", header=TRUE ) 
+scer_uniprot_annot <- read.table( file.path(data_dir, 
+                                            "Uniprot/scer/uniprot-proteome_UP000002311.tab") , 
+                                  sep="\t", stringsAsFactors = FALSE, quote = "", header=TRUE  ) 
 
 
 cneo_uniprot_acc_to_orf_id <- cneo_uniprot_annot %>% 
@@ -75,6 +78,8 @@ cneo_uniprot_acc_to_orf_id <- cneo_uniprot_annot %>%
   dplyr::select( Entry,  gene_names)  %>%
   inner_join(cneo_orf_id_list, by=c("gene_names" = "LOCUS") ) %>%
   dplyr::rename ( orf_id = "gene_names")
+
+write.table( cneo_uniprot_acc_to_orf_id, file.path( data_dir, "Gene_Annotation/cneo_uniprot_acc_to_orf_id.tsv" ))
 
 cneo_uniprot_annot_cleaned <- cneo_uniprot_annot %>% 
   mutate( gene_names = str_split( Gene.names, " ")  ) %>%

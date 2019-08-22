@@ -57,6 +57,10 @@ enriched_genes_soms_file <- file.path( results_dir, "Self_Organising_Maps/EdgeR_
 amb_lf_specific_genes_file <- file.path( results_dir, 
                                          "Compare_Fold_Change/all_genes_specific_to_AL.tab")
 
+chosen_by_dee_for_validation_file <- file.path( data_dir, 
+                                           "Validation", 
+                                           "chosen_by_Dee_for_validations.csv")
+
 ```
 
 ## Read in the files 
@@ -81,6 +85,8 @@ amb_lf_specific_genes <- vroom::vroom( amb_lf_specific_genes_file, delim="\t" ) 
                          dplyr::select( genes ) %>%
                          dplyr::rename( orf_id = "genes") %>%
                          mutate( is_AMB_LF_specific = 1)
+
+chosen_by_dee_for_validation <- vroom::vroom( chosen_by_dee_for_validation_file)
 
 
 ```
@@ -136,7 +142,9 @@ selected_by_go_terms_soms <- enriched_go_terms_soms %>%
   arrange( desc( abs( logFC.AMB_LF)))
 
 
-vroom::vroom_write(selected_by_go_terms_soms, path=file.path(validation_results_dir, "selected_by_go_terms_soms.tsv" ))
+vroom::vroom_write(selected_by_go_terms_soms, 
+                   path=file.path(validation_results_dir, 
+                                  "selected_by_go_terms_soms.tsv" ))
 
 
 selected_by_go_terms_soms %>%
@@ -168,14 +176,69 @@ vroom::vroom_write(genes_double_fold_change_wrt_AMB_only,
 
 ```{r}
 
+
+selected_by_go_terms <- enriched_go_terms_soms %>%
+  filter( pvalue < 0.05) %>%
+  inner_join( selected_go_terms, by= "term" ) %>%
+  filter( treatment != "compare_A_specific.down" ) %>%
+  inner_join( enriched_genes_soms, by = c("ontology", "annotation_list_id", 
+                                          "query_list_id", "organism")) %>%
+  dplyr::select( -one_of(c("gene_names", "uniprot_acc",
+                           "broad_gene_name", "uniprot_gene_name",
+                           "fungidb_gene_name", "blast2go_annotation",
+                           "is_tf", "is_kinases", "is_virulence_gene",
+                           "order_peaktime", "scer_orthologs",
+                           "scer_ortholog_descriptions"
+                           )))  %>%
+  dplyr::rename( orf_id = "gene_id") %>%
+  inner_join ( madhani_ko_table, by= "orf_id"  ) %>%
+  dplyr::distinct( orf_id, `Plate Number`, Well, term) %>%
+  dplyr::group_by( orf_id, `Plate Number`, Well) %>%
+  dplyr::summarise( term = paste( term, collapse = ", ")) %>%
+  ungroup  %>%
+  inner_join( de_genes_al, by= "orf_id" ) %>%
+  left_join( de_genes_amb_only, by= "orf_id") %>%  
+  mutate( compare_logFC =  logFC.AMB_LF - logFC.AMB_only ) %>%
+  left_join( amb_lf_specific_genes, by="orf_id")  %>%
+  left_join(gene_annotations_table, by= "orf_id" ) %>%
+  arrange( desc( abs( logFC.AMB_LF)))
+
+
+selected_by_go_terms_not_in_soms <- selected_by_go_terms %>%
+  anti_join( selected_by_go_terms_soms %>% distinct(orf_id), by="orf_id"  ) %>%
+  filter( term != "ribosome biogenesis") %>%
+  filter( is_AMB_LF_specific == 1 |
+            abs(compare_logFC) >= 1)
+
+vroom::vroom_write(selected_by_go_terms_not_in_soms, 
+                   path=file.path(validation_results_dir, 
+                                  "selected_by_go_terms_not_in_soms.tsv" ))
+
+```
+
+```{r}
+
+chosen_by_dee_for_validation_full <- de_genes_al %>%
+  left_join( de_genes_amb_only, by=c("orf_id")) %>%
+  mutate( compare_logFC =  logFC.AMB_LF - logFC.AMB_only ) %>%
+  inner_join ( madhani_ko_table, by= "orf_id"  ) %>%
+  left_join(gene_annotations_table, by= "orf_id" )  %>%
+  inner_join( chosen_by_dee_for_validation, by ="orf_id") %>%
+  arrange(Category)
+
+
+vroom::vroom_write(chosen_by_dee_for_validation_full, 
+                   path=file.path(validation_results_dir, 
+                                  "chosen_by_dee_for_validation_full.tsv" ))
+
 ```
 
 
-
-
-
-
-
+```{r}
+vroom::vroom_write( amb_lf_specific_genes,   
+              path=file.path( validation_results_dir, 
+                              "amb_lf_specific_genes.tsv" ))
+```
 
 
 
